@@ -1,5 +1,6 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Queries.Condition;
+using ElasticSearchLite.NetCore.Queries.Models;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,7 +8,7 @@ namespace ElasticSearchLite.NetCore.Queries
 {
     public class SearchQuery : AbstractQuery
     {
-        internal List<IElasticField> Fields { get; } = new List<IElasticField>();
+        internal List<ElasticField> Fields { get; } = new List<ElasticField>();
 
         protected SearchQuery(IElasticPoco poco) : base(poco) { }
 
@@ -31,7 +32,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="incluededFields"></param>
         /// <returns></returns>
-        public SearchQuery<T> Include(params IElasticField[] incluededFields)
+        public SearchQuery<T> Include(params ElasticField[] incluededFields)
         {
             CheckParameters(incluededFields);
             var include = incluededFields.Where(inc => !Fields.Select(f => f.Name).Contains(inc.Name));
@@ -44,7 +45,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="excludeFields"></param>
         /// <returns></returns>
-        public SearchQuery<T> Exclude(params IElasticField[] excludeFields)
+        public SearchQuery<T> Exclude(params ElasticField[] excludeFields)
         {
             CheckParameters(excludeFields);
             var exclude = excludeFields.Where(ex => !Fields.Select(f => f.Name).Contains(ex.Name));

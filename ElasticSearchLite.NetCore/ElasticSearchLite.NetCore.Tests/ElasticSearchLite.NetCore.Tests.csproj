@@ -10,4 +10,8 @@
     <PackageReference Include="NUnit3TestAdapter" Version="3.7.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ElasticSearchLite.NetCore\ElasticSearchLite.NetCore.csproj" />
+  </ItemGroup>
+
 </Project>

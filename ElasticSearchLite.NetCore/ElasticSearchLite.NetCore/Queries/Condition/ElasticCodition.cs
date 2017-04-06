@@ -1,10 +1,10 @@
-﻿using ElasticSearchLite.NetCore.Interfaces;
+﻿using ElasticSearchLite.NetCore.Queries.Models;
 
 namespace ElasticSearchLite.NetCore.Queries.Condition
 {
     public class ElasticCodition
     {
-        public IElasticField Field { get; set; }
+        public ElasticField Field { get; set; }
         public string Value { get; set; }
     }
 }

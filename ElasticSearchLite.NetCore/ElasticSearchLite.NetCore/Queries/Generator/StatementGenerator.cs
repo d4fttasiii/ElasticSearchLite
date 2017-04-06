@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using ElasticSearchLite.NetCore.Queries.Models;
 
 namespace ElasticSearchLite.NetCore.Queries.Generator
 {
@@ -38,7 +39,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             return statement.ToString();
         }
 
-        private string GenerateSources(List<IElasticField> fields)
+        private string GenerateSources(List<ElasticField> fields)
         {
             if (fields.Any())
             {
