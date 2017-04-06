@@ -24,14 +24,18 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
         private string GenerateSearchQuery(SearchQuery searchQuery)
         {
-            var statement = new StringBuilder("POST _search {");
+            var statement = new StringBuilder($"POST {searchQuery.IndexName}/{searchQuery.TypeName}/_search {{");
             statement.Append(GenerateSources(searchQuery.Fields));
+
             return statement.ToString();
         }
 
         private string GenerateDeleteQuery(DeleteQuery deleteQuery)
         {
-            throw new NotImplementedException();
+            var statement = new StringBuilder($"POST {deleteQuery.IndexName}/{deleteQuery.TypeName}/_delete_by_query {{");
+            statement.Append(GenerateQuery(deleteQuery));
+
+            return statement.ToString();
         }
 
         private string GenerateSources(List<IElasticField> fields)
@@ -46,24 +50,29 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             return @"""_source"": true";
         }
 
-        private string GenerateQuery(SearchQuery searchQuery)
+        private string GenerateQuery(AbstractQuery query)
         {
-            if (searchQuery.IsMatchAll)
+            if (query.IsMatchAll)
             {
                 return string.Empty;
             }
 
-            if (searchQuery.MatchCondition != null)
+            if (query.MatchCondition != null)
             {
-                return $@", ""query"": {{ {GenerateMatch(searchQuery.MatchCondition)} }}";
+                return $@", ""query"": {{ {GenerateMatch(query.MatchCondition)} }}";
             }
 
-            if (searchQuery.TermCondition != null)
+            if (query.TermCondition != null)
             {
-                return $@", ""query"": {{ {GenerateTerm(searchQuery.TermCondition)} }}";
+                return $@", ""query"": {{ {GenerateTerm(query.TermCondition)} }}";
             }
 
-            return $@"""query"": {{ {GenerateMultiMatch(searchQuery.MatchConditions)} }}";
+            if(query.RangeCondition != null)
+            {
+                return $@", ""query"": {{ {GenerateRange(query.RangeCondition)} }}";
+            }
+
+            return string.Empty;
         }
 
         private string GenerateMatch(ElasticCodition condition)
@@ -75,11 +84,10 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         {
             return $@"""term"": {{ ""{condition.Field.Name}"" : ""{condition.Value}"" }}";
         }
-        
-        private string GenerateMultiMatch(List<ElasticCodition> conditions)
+
+        private string GenerateRange(ElasticRangeCondition condition)
         {
-            // TODO: Multi match
-            return "";
+            return $@"""range"": {{""{condition.Field.Name}"": {{""{condition.Operation.Name}"" : ""{condition.Value}"" }} }}";
         }
     }
 }

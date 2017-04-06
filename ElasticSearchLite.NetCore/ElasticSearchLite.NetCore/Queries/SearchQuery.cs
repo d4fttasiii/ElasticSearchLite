@@ -1,40 +1,36 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Queries.Condition;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
-    public class SearchQuery : IQuery
+    public class SearchQuery : AbstractQuery
     {
-        internal string IndexName { get; set; }
-        internal bool IsMatchAll { get; set; }
-        internal List<IElasticField> Fields { get; }
-        internal ElasticCodition MatchCondition { get; set; }
-        internal List<ElasticCodition> MatchConditions { get; }
-        internal ElasticCodition TermCondition { get; set; }
+        internal List<IElasticField> Fields { get; } = new List<IElasticField>();
 
-        protected SearchQuery()
+        protected SearchQuery(IElasticPoco poco) : base(poco) { }
+
+        protected SearchQuery(string indexName, string typeName) : base(indexName, typeName) { }
+
+        protected override void ClearAllConditions()
         {
-            Fields = new List<IElasticField>();
-            MatchConditions = new List<ElasticCodition>();
+            TermCondition = null;
+            RangeCondition = null;
+            MatchCondition = null;
         }
     }
-
     public class SearchQuery<T> : SearchQuery where T : IElasticPoco
     {
-        public SearchQuery() : base() { }
+        public SearchQuery(IElasticPoco poco) : base(poco) { }
 
-        public SearchQuery<T> Index(string indexName)
-        {
-            if (string.IsNullOrEmpty(indexName)) { throw new ArgumentException(nameof(indexName)); }
+        public SearchQuery(string indexName, string typeName) : base(indexName, typeName) { }
 
-            IndexName = indexName;
-
-            return this;
-        }
-
+        /// <summary>
+        /// Include certain fields to a query
+        /// </summary>
+        /// <param name="incluededFields"></param>
+        /// <returns></returns>
         public SearchQuery<T> Include(params IElasticField[] incluededFields)
         {
             CheckParameters(incluededFields);
@@ -43,7 +39,11 @@ namespace ElasticSearchLite.NetCore.Queries
 
             return this;
         }
-
+        /// <summary>
+        /// Exclude certain fields from a query
+        /// </summary>
+        /// <param name="excludeFields"></param>
+        /// <returns></returns>
         public SearchQuery<T> Exclude(params IElasticField[] excludeFields)
         {
             CheckParameters(excludeFields);
@@ -53,11 +53,15 @@ namespace ElasticSearchLite.NetCore.Queries
 
             return this;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="matchAll"></param>
+        /// <returns></returns>
         public SearchQuery<T> MatchAll(bool matchAll)
         {
             IsMatchAll = matchAll;
-            ClearAllFilters();
+            ClearAllConditions();
 
             return this;
         }
@@ -68,18 +72,8 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <returns></returns>
         public SearchQuery<T> Match(ElasticCodition condition)
         {
-            CheckParameter(condition);
-            ClearAllFilters();
-            MatchCondition = condition;
-
-            return this;
-        }
-
-        public SearchQuery<T> MultiMatch(params ElasticCodition[] conditions)
-        {
-            CheckParameters(conditions);
-            ClearAllFilters();
-            MatchConditions.AddRange(conditions);
+            ClearAllConditions();
+            MatchCondition = CheckParameter(condition);
 
             return this;
         }
@@ -90,29 +84,22 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <returns></returns>
         public SearchQuery<T> Term(ElasticCodition condition)
         {
-            CheckParameter(condition);
-            ClearAllFilters();
-            TermCondition = condition;
+            ClearAllConditions();
+            TermCondition = CheckParameter(condition);
 
             return this;
         }
-
-        private void CheckParameters<PT>(PT[] parameters)
+        /// <summary>
+        /// Returns document for a range
+        /// </summary>
+        /// <param name=""></param>
+        /// <returns></returns>
+        public SearchQuery<T> Range(ElasticRangeCondition condition)
         {
-            if (parameters == null) { throw new ArgumentNullException(nameof(parameters)); }
-            if (!parameters.Any()) { throw new ArgumentException(nameof(parameters)); }
-        }
+            ClearAllConditions();
+            RangeCondition = CheckParameter(condition);
 
-        private void CheckParameter<PT>(PT parameter)
-        {
-            if (parameter == null) { throw new ArgumentNullException(nameof(parameter)); }
-        }
-
-        private void ClearAllFilters()
-        {
-            TermCondition = null;
-            MatchCondition = null;
-            MatchConditions.Clear();
+            return this;
         }
     }
 }
