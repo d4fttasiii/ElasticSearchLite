@@ -11,14 +11,14 @@ namespace ElasticSearchLite.NetCore.Queries
         internal string IndexName { get; set; }
         internal bool IsMatchAll { get; set; }
         internal List<IElasticField> Fields { get; }
-        internal List<ElasticCodition> Matches { get; }
-        internal List<ElasticCodition> Terms { get; }
+        internal ElasticCodition MatchCondition { get; set; }
+        internal List<ElasticCodition> MatchConditions { get; }
+        internal ElasticCodition TermCondition { get; set; }
 
         protected SearchQuery()
         {
             Fields = new List<IElasticField>();
-            Matches = new List<ElasticCodition>();
-            Terms = new List<ElasticCodition>();
+            MatchConditions = new List<ElasticCodition>();
         }
     }
 
@@ -38,7 +38,6 @@ namespace ElasticSearchLite.NetCore.Queries
         public SearchQuery<T> Include(params IElasticField[] incluededFields)
         {
             CheckParameters(incluededFields);
-
             var include = incluededFields.Where(inc => !Fields.Select(f => f.Name).Contains(inc.Name));
             Fields.AddRange(include);
 
@@ -48,7 +47,6 @@ namespace ElasticSearchLite.NetCore.Queries
         public SearchQuery<T> Exclude(params IElasticField[] excludeFields)
         {
             CheckParameters(excludeFields);
-
             var exclude = excludeFields.Where(ex => !Fields.Select(f => f.Name).Contains(ex.Name));
             Fields.Clear();
             Fields.AddRange(exclude);
@@ -59,24 +57,42 @@ namespace ElasticSearchLite.NetCore.Queries
         public SearchQuery<T> MatchAll(bool matchAll)
         {
             IsMatchAll = matchAll;
+            ClearAllFilters();
+
+            return this;
+        }
+        /// <summary>
+        /// Match Query
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <returns></returns>
+        public SearchQuery<T> Match(ElasticCodition condition)
+        {
+            CheckParameter(condition);
+            ClearAllFilters();
+            MatchCondition = condition;
 
             return this;
         }
 
-        public SearchQuery<T> Match(params ElasticCodition[] conditions)
+        public SearchQuery<T> MultiMatch(params ElasticCodition[] conditions)
         {
             CheckParameters(conditions);
-
-            Matches.AddRange(conditions);
+            ClearAllFilters();
+            MatchConditions.AddRange(conditions);
 
             return this;
         }
-
-        public SearchQuery<T> Term(params ElasticCodition[] conditions)
+        /// <summary>
+        /// Term Query finds documents that contain the exact term specified in the inverted index.
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <returns></returns>
+        public SearchQuery<T> Term(ElasticCodition condition)
         {
-            CheckParameters(conditions);
-
-            Terms.AddRange(conditions);
+            CheckParameter(condition);
+            ClearAllFilters();
+            TermCondition = condition;
 
             return this;
         }
@@ -85,6 +101,18 @@ namespace ElasticSearchLite.NetCore.Queries
         {
             if (parameters == null) { throw new ArgumentNullException(nameof(parameters)); }
             if (!parameters.Any()) { throw new ArgumentException(nameof(parameters)); }
+        }
+
+        private void CheckParameter<PT>(PT parameter)
+        {
+            if (parameter == null) { throw new ArgumentNullException(nameof(parameter)); }
+        }
+
+        private void ClearAllFilters()
+        {
+            TermCondition = null;
+            MatchCondition = null;
+            MatchConditions.Clear();
         }
     }
 }
