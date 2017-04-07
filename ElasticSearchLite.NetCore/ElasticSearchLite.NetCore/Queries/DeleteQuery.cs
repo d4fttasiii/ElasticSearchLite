@@ -3,7 +3,7 @@ using ElasticSearchLite.NetCore.Queries.Condition;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
-    public class DeleteQuery : AbstractQuery
+    public abstract class DeleteQuery : AbstractQuery
     {
         protected DeleteQuery(IElasticPoco poco) : base(poco) { }
 
@@ -18,9 +18,19 @@ namespace ElasticSearchLite.NetCore.Queries
     }
     public class DeleteQuery<T> : DeleteQuery where T : IElasticPoco
     {
-        public DeleteQuery(IElasticPoco poco) : base(poco) { }
+        protected DeleteQuery(IElasticPoco poco) : base(poco) { }
 
-        public DeleteQuery(string indexName, string typeName) : base(indexName, typeName) { }
+        protected DeleteQuery(string indexName, string typeName) : base(indexName, typeName) { }
+
+        public static DeleteQuery<T> Create(string indexName, string typeName)
+        {
+            return new DeleteQuery<T>(indexName, typeName);
+        }
+
+        public static DeleteQuery<T> Create(IElasticPoco poco)
+        {
+            return new DeleteQuery<T>(poco);
+        }
 
         /// <summary>
         /// If set to true it matches all documents

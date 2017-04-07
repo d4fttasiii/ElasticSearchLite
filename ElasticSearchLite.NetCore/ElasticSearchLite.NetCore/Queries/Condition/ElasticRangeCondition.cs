@@ -1,4 +1,6 @@
-﻿namespace ElasticSearchLite.NetCore.Queries.Condition
+﻿using ElasticSearchLite.NetCore.Queries.Models;
+
+namespace ElasticSearchLite.NetCore.Queries.Condition
 {
     public class ElasticRangeCondition
     {

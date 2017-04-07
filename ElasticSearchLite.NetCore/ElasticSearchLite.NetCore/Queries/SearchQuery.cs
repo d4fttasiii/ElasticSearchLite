@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
-    public class SearchQuery : AbstractQuery
+    public abstract class SearchQuery : AbstractQuery
     {
         internal List<ElasticField> Fields { get; } = new List<ElasticField>();
 
@@ -23,10 +23,12 @@ namespace ElasticSearchLite.NetCore.Queries
     }
     public class SearchQuery<T> : SearchQuery where T : IElasticPoco
     {
-        public SearchQuery(IElasticPoco poco) : base(poco) { }
+        protected SearchQuery(string indexName, string typeName) : base(indexName, typeName) { }
 
-        public SearchQuery(string indexName, string typeName) : base(indexName, typeName) { }
-
+        public static SearchQuery<T> Create(string indexName, string typeName)
+        {
+            return new SearchQuery<T>(indexName, typeName);
+        }
         /// <summary>
         /// Include certain fields to a query
         /// </summary>
