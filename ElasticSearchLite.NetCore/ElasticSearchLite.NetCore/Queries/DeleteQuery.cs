@@ -27,7 +27,7 @@ namespace ElasticSearchLite.NetCore.Queries
             return new DeleteQuery<T>(indexName, typeName);
         }
 
-        public static DeleteQuery<T> Create(IElasticPoco poco)
+        public static DeleteQuery<T> Create(T poco)
         {
             return new DeleteQuery<T>(poco);
         }

@@ -5,9 +5,6 @@ using ElasticSearchLite.NetCore.Queries.Generator;
 using ElasticSearchLite.NetCore.Queries.Models;
 using ElasticSearchLite.NetCore.Tests.Pocos;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ElasticSearchLite.NetCore.Tests
 {
