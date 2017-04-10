@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using ElasticSearchLite.NetCore.Queries.Models;
+using System.Reflection;
+using Newtonsoft.Json;
 
 namespace ElasticSearchLite.NetCore.Queries.Generator
 {
@@ -18,6 +20,10 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     return GenerateSearchQuery(searchQuery);
                 case DeleteQuery deleteQuery:
                     return GenerateDeleteQuery(deleteQuery);
+                case InsertQuery insertQuery:
+                    return GenerateInsertQuery(insertQuery);
+                case UpdateQuery updateQuery:
+                    return GenerateUpdateQuery(updateQuery);
                 default:
                     throw new Exception("Unknown query type");
             }
@@ -37,6 +43,26 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             statement.Append(GenerateQuery(deleteQuery));
 
             return statement.ToString();
+        }
+
+        private string GenerateInsertQuery(InsertQuery insertQuery)
+        {
+            var statement = new StringBuilder($"PUT {insertQuery.IndexName}/{insertQuery.TypeName} {{");
+            var properties = insertQuery.Poco.GetType().GetProperties();
+            var propertiesAsJson = properties.Select(p => $@"""{p.Name}"": ""{p.GetValue(insertQuery.Poco)}""");
+
+            // JsonConvert.SerializeObject(insertQuery.Poco);
+            statement.Append(string.Join(",", propertiesAsJson));
+            statement.Append($"}}");
+
+            return statement.Append($"}}").ToString();
+        }
+
+        private string GenerateUpdateQuery(UpdateQuery updateQuery)
+        {
+            var statement = new StringBuilder($"POST {updateQuery.IndexName}/{updateQuery.TypeName}/_update_by_query {{");
+
+            return statement.Append($"}}").ToString();
         }
 
         private string GenerateSources(List<ElasticField> fields)
@@ -68,7 +94,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                 return $@", ""query"": {{ {GenerateTerm(query.TermCondition)} }}";
             }
 
-            if(query.RangeCondition != null)
+            if (query.RangeCondition != null)
             {
                 return $@", ""query"": {{ {GenerateRange(query.RangeCondition)} }}";
             }
