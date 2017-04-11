@@ -1,12 +1,10 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
-using ElasticSearchLite.NetCore.Queries.Condition;
+using ElasticSearchLite.NetCore.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using ElasticSearchLite.NetCore.Queries.Models;
 using System.Reflection;
-using Newtonsoft.Json;
 
 namespace ElasticSearchLite.NetCore.Queries.Generator
 {

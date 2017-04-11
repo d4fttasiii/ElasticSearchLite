@@ -1,7 +1,4 @@
-﻿using System;
-using ElasticSearchLite.NetCore.Queries.Models;
-
-namespace ElasticSearchLite.NetCore.Queries.Condition
+﻿namespace ElasticSearchLite.NetCore.Models
 {
     public class ElasticCodition
     {

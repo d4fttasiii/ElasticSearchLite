@@ -1,5 +1,5 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
-using ElasticSearchLite.NetCore.Queries.Condition;
+using ElasticSearchLite.NetCore.Models;
 
 namespace ElasticSearchLite.NetCore.Queries
 {

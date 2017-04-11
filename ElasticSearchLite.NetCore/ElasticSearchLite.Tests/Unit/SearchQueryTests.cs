@@ -1,23 +1,23 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ElasticSearchLite.NetCore.Queries.Generator;
-using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Queries;
+using ElasticSearchLite.NetCore.Models;
 using ElasticSearchLite.Tests.Poco;
-using ElasticSearchLite.NetCore.Queries.Models;
-using ElasticSearchLite.NetCore.Queries.Condition;
 
 namespace ElasticSearchLite.Tests.Unit
 {
     [TestClass]
-    public class SearchQueryTests
+    [TestCategory("Unit")]
+    public class SearchQueryTests : AbstractQueryTest
     {
-        IStatementGenerator Generator { get; } = new StatementGenerator();
-
         [TestMethod]
         public void SearchQueryGeneration()
         {
             // Arrange
             var query = SearchQuery<MyPoco>.Create("mypocoindex", "mypoco");
+            var statementObject = new { _source = true };
+
+            // Act and Assert
+            TestQuery(statementObject, query);
         }
 
         [TestMethod]
@@ -26,6 +26,17 @@ namespace ElasticSearchLite.Tests.Unit
             // Arrange
             var query = SearchQuery<MyPoco>.Create("mypocoindex", "mypoco")
                 .Term("TestText", "ABCDEFG");
+            var statementObject = new
+            {
+                _source = true,
+                query = new
+                {
+                    term = new { TestText = "ABCDEFG" }
+                }
+            };
+
+            // Act and Assert
+            TestQuery(statementObject, query);
         }
 
         [TestMethod]
@@ -34,15 +45,18 @@ namespace ElasticSearchLite.Tests.Unit
             // Arrange
             var query = SearchQuery<MyPoco>.Create("mypocoindex", "mypoco")
                 .Match("TestText", "ABCDEFG");
-        }
+            var statementObject = new
+            {
+                _source = true,
+                query = new
+                {
+                    match = new { TestText = "ABCDEFG" }
+                }
+            };
 
-        //[TestMethod]
-        //public void SearchQueryGeneration_Matches()
-        //{
-        //    // Arrange
-        //    var query = SearchQuery<MyPoco>.Create("mypocoindex", "mypoco")
-        //        .Matches("TestText", "ABCDEFG");
-        //}
+            // Act and Assert
+            TestQuery(statementObject, query);
+        }
 
         [TestMethod]
         public void SearchQueryGeneration_Range()
@@ -50,6 +64,23 @@ namespace ElasticSearchLite.Tests.Unit
             // Arrange
             var query = SearchQuery<MyPoco>.Create("mypocoindex", "mypoco")
                 .Range(ElasticFields.Id.Name, RangeOperations.Gt, 1);
+            var statementObject = new
+            {
+                _source = true,
+                query = new
+                {
+                    range = new
+                    {
+                        _id = new
+                        {
+                            gt = 1
+                        }
+                    }
+                }
+            };
+
+            // Act and Assert
+            TestQuery(statementObject, query);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
-using ElasticSearchLite.NetCore.Queries.Condition;
-using ElasticSearchLite.NetCore.Queries.Models;
+using ElasticSearchLite.NetCore.Models;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -69,21 +68,10 @@ namespace ElasticSearchLite.NetCore.Queries
             return this;
         }
         /// <summary>
-         /// Match Query
-         /// </summary>
-         /// <param name="condition"></param>
-         /// <returns></returns>
-        public SearchQuery<T> Match(ElasticCodition condition)
-        {
-            ClearAllConditions();
-            MatchCondition = CheckParameter(condition);
-
-            return this;
-        }
-        /// <summary>
         /// Match Query
         /// </summary>
-        /// <param name="condition"></param>
+        /// <param name="field">Field name</param>
+        /// <param name="value">Value matching the field</param>
         /// <returns></returns>
         public SearchQuery<T> Match(string field, object value)
         {
@@ -96,9 +84,22 @@ namespace ElasticSearchLite.NetCore.Queries
             return Match(condition);
         }
         /// <summary>
-        /// Term Query finds documents that contain the exact term specified in the inverted index.
+        /// Match Query
         /// </summary>
         /// <param name="condition"></param>
+        /// <returns></returns>
+        public SearchQuery<T> Match(ElasticCodition condition)
+        {
+            ClearAllConditions();
+            MatchCondition = CheckParameter(condition);
+
+            return this;
+        }
+        /// <summary>
+        /// Term Query finds documents that contain the exact term specified in the inverted index.
+        /// </summary>
+        /// <param name="field">Field name</param>
+        /// <param name="value">Value which should equal the field content</param>
         /// <returns></returns>
         public SearchQuery<T> Term(string field, object value)
         {
@@ -125,7 +126,9 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <summary>
         /// Returns document for a range
         /// </summary>
-        /// <param name=""></param>
+        /// <param name="field">Field name</param>
+        /// <param name="op">Range operator</param>
+        /// <param name="value"></param>
         /// <returns></returns>
         public SearchQuery<T> Range(string field, RangeOperations op, object value)
         {
@@ -135,7 +138,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 Operation = op,
                 Value = value
             };
-            
+
             return Range(condition);
         }
         /// <summary>

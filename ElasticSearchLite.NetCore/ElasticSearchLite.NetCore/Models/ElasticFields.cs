@@ -1,4 +1,4 @@
-﻿namespace ElasticSearchLite.NetCore.Queries.Models
+﻿namespace ElasticSearchLite.NetCore.Models
 {
     public sealed class ElasticFields
     {

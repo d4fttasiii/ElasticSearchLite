@@ -5,9 +5,7 @@ using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.NetCore.Queries.Generator;
 using ElasticSearchLite.NetCore.Interfaces;
 using System.Linq;
-using ElasticSearchLite.NetCore.Queries.Models;
-using System.IO;
-using Newtonsoft.Json;
+using ElasticSearchLite.NetCore.Models;
 using Newtonsoft.Json.Linq;
 
 namespace ElasticSearchLite.NetCore

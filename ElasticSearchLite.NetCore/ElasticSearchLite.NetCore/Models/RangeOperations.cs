@@ -1,4 +1,4 @@
-﻿namespace ElasticSearchLite.NetCore.Queries.Condition
+﻿namespace ElasticSearchLite.NetCore.Models
 {
     public sealed class RangeOperations
     {
