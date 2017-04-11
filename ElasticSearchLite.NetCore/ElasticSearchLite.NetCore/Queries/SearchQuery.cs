@@ -69,16 +69,46 @@ namespace ElasticSearchLite.NetCore.Queries
             return this;
         }
         /// <summary>
-        /// Match Query
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <returns></returns>
+         /// Match Query
+         /// </summary>
+         /// <param name="condition"></param>
+         /// <returns></returns>
         public SearchQuery<T> Match(ElasticCodition condition)
         {
             ClearAllConditions();
             MatchCondition = CheckParameter(condition);
 
             return this;
+        }
+        /// <summary>
+        /// Match Query
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <returns></returns>
+        public SearchQuery<T> Match(string field, object value)
+        {
+            var condition = new ElasticCodition
+            {
+                Field = new ElasticField { Name = field },
+                Value = value
+            };
+
+            return Match(condition);
+        }
+        /// <summary>
+        /// Term Query finds documents that contain the exact term specified in the inverted index.
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <returns></returns>
+        public SearchQuery<T> Term(string field, object value)
+        {
+            var condition = new ElasticCodition
+            {
+                Field = new ElasticField { Name = field },
+                Value = value
+            };
+
+            return Term(condition);
         }
         /// <summary>
         /// Term Query finds documents that contain the exact term specified in the inverted index.
@@ -91,6 +121,22 @@ namespace ElasticSearchLite.NetCore.Queries
             TermCondition = CheckParameter(condition);
 
             return this;
+        }
+        /// <summary>
+        /// Returns document for a range
+        /// </summary>
+        /// <param name=""></param>
+        /// <returns></returns>
+        public SearchQuery<T> Range(string field, RangeOperations op, object value)
+        {
+            var condition = new ElasticRangeCondition
+            {
+                Field = new ElasticField { Name = field },
+                Operation = op,
+                Value = value
+            };
+            
+            return Range(condition);
         }
         /// <summary>
         /// Returns document for a range

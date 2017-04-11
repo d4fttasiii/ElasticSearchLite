@@ -2,12 +2,12 @@
 {
     public sealed class RangeOperations
     {
-        public static readonly RangeOperations Gt = new RangeOperations("gt");
-        public static readonly RangeOperations Lt = new RangeOperations("lt");
-        public static readonly RangeOperations Gte = new RangeOperations("gte");
-        public static readonly RangeOperations Lte = new RangeOperations("lte");
+        public static RangeOperations Gt { get; } = new RangeOperations("gt");
+        public static RangeOperations Lt { get; } = new RangeOperations("lt");
+        public static RangeOperations Gte { get; } = new RangeOperations("gte");
+        public static RangeOperations Lte { get; } = new RangeOperations("lte");
 
-        public readonly string Name;
+        public string Name { get; }
 
         private RangeOperations(string name)
         {

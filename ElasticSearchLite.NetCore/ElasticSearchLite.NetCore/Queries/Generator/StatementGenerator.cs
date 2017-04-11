@@ -31,10 +31,11 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
         private string GenerateSearchQuery(SearchQuery searchQuery)
         {
-            var statement = new StringBuilder($"POST {searchQuery.IndexName}/{searchQuery.TypeName}/_search {{");
+            var statement = new StringBuilder("{");
             statement.Append(GenerateSources(searchQuery.Fields));
+            statement.Append(GenerateQuery(searchQuery));
 
-            return statement.ToString();
+            return statement.Append("}").ToString();
         }
 
         private string GenerateDeleteQuery(DeleteQuery deleteQuery)
@@ -53,7 +54,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             // JsonConvert.SerializeObject(insertQuery.Poco);
             statement.Append(string.Join(",", propertiesAsJson));
-            statement.Append($"}}");
+            statement.Append("}");
 
             return statement.Append($"}}").ToString();
         }
@@ -62,7 +63,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         {
             var statement = new StringBuilder($"POST {updateQuery.IndexName}/{updateQuery.TypeName}/_update_by_query {{");
 
-            return statement.Append($"}}").ToString();
+            return statement.Append("}").ToString();
         }
 
         private string GenerateSources(List<ElasticField> fields)

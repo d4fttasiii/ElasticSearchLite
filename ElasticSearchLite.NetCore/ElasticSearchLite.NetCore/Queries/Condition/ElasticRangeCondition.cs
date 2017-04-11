@@ -6,6 +6,6 @@ namespace ElasticSearchLite.NetCore.Queries.Condition
     {
         public ElasticField Field { get; set; }
         public RangeOperations Operation { get; set; }
-        public string Value { get; set; }
+        public object Value { get; set; }
     }
 }

@@ -1,16 +1,14 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
-using System;
 
-namespace ElasticSearchLite.NetCore.Tests.Pocos
+namespace ElasticSearchLite.Tests.Poco
 {
-    public class TestPoco : IElasticPoco
+    public class MyPoco : IElasticPoco
     {
         public string Id { get; set; }
         public string Type { get; set; }
         public string Index { get; set; }
         public double Score { get; set; }
-
-        public string TestField1 { get; set; }
-        public DateTime TestField2 { get; set; }
+        public string TestText { get; set; }
+        public int TestInteger { get; set; }
     }
 }

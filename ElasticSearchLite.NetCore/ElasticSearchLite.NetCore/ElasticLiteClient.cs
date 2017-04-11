@@ -3,37 +3,80 @@ using System.Collections.Generic;
 using Elasticsearch.Net;
 using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.NetCore.Queries.Generator;
+using ElasticSearchLite.NetCore.Interfaces;
+using System.Linq;
+using ElasticSearchLite.NetCore.Queries.Models;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
-namespace ElasticSearchLite.NetCore.Interfaces
+namespace ElasticSearchLite.NetCore
 {
     public class ElasticLiteClient : IDisposable
     {
         private bool disposedValue = false;
-        private IStatementGenerator Generator { get; }
+        private IStatementGenerator Generator { get; } = new StatementGenerator();
         public ElasticLowLevelClient Client { get; private set; }
 
-        public ElasticLiteClient(string uri)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="uris"></param>
+        public ElasticLiteClient(params string[] uris)
         {
-            if (string.IsNullOrEmpty(uri))
+            if (uris == null)
             {
-                throw new ArgumentNullException(nameof(uri));
+                throw new ArgumentNullException(nameof(uris));
             }
-
-            Client = new ElasticLowLevelClient(new ConnectionConfiguration(new Uri(uri)));
-            Generator = new StatementGenerator();
+            var uriObjects = uris.Select(u => new Uri(u));
+            BuildUpLowLevelConnection(uriObjects);
         }
 
-        public IEnumerable<T> ExecuteSearch<T>(SearchQuery<T> query) where T : IElasticPoco
+        public ElasticLiteClient(params Uri[] uris)
+        {
+            if (uris == null)
+            {
+                throw new ArgumentNullException(nameof(uris));
+            }
+            BuildUpLowLevelConnection(uris);
+        }
+
+        private void BuildUpLowLevelConnection(IEnumerable<Uri> uris)
+        {
+            if (!uris.Any())
+            {
+                return;
+            }
+
+            var connectionPool = new StickyConnectionPool(uris);
+            var settings = new ConnectionConfiguration(connectionPool);
+
+            Client = new ElasticLowLevelClient(settings);
+        }
+
+        public IEnumerable<TPoco> ExecuteSearch<TPoco>(SearchQuery<TPoco> query) where TPoco : IElasticPoco
         {
             var statement = Generator.Generate(query);
-            var response = Client.Search<IEnumerable<T>>(new PostData<object>(statement));
+            var response = Client.Search<string>(query.IndexName, query.TypeName, statement);
 
             if (response.Success)
             {
-                return response.Body;
+                var data = JObject.Parse(response.Body);
+                var hits = new List<TPoco>();
+                foreach (var x in data[ElasticFields.Hits.Name][ElasticFields.Hits.Name])
+                {
+                    var document = x[ElasticFields.Source.Name].ToObject<TPoco>();
+                    document.Id = x[ElasticFields.Id.Name].ToString();
+                    document.Index = x[ElasticFields.Index.Name].ToString();
+                    document.Type = x[ElasticFields.Type.Name].ToString();
+                    document.Score = x[ElasticFields.Score.Name].ToObject<double>();
+                    hits.Add(document);
+                }
+
+                return hits;
             }
 
-            throw response.OriginalException;
+            throw new Exception(response.DebugInformation);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -44,7 +87,7 @@ namespace ElasticSearchLite.NetCore.Interfaces
                 {
                     // TODO: dispose managed state (managed objects).
                 }
-                
+
                 Client = null;
                 disposedValue = true;
             }

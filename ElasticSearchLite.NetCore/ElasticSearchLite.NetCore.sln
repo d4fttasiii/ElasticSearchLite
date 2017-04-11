@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.10
+VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElasticSearchLite.NetCore", "ElasticSearchLite.NetCore\ElasticSearchLite.NetCore.csproj", "{5DCDF3E9-770B-4AE2-B4E0-42282413E40F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticSearchLite.NetCore.Tests", "ElasticSearchLite.NetCore.Tests\ElasticSearchLite.NetCore.Tests.csproj", "{ED5D72F4-54B4-4819-BAC9-6C38B231DA98}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticSearchLite.Tests", "ElasticSearchLite.Tests\ElasticSearchLite.Tests.csproj", "{1F630A8C-6B76-4687-BB4F-2596B4041F87}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{5DCDF3E9-770B-4AE2-B4E0-42282413E40F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5DCDF3E9-770B-4AE2-B4E0-42282413E40F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5DCDF3E9-770B-4AE2-B4E0-42282413E40F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ED5D72F4-54B4-4819-BAC9-6C38B231DA98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ED5D72F4-54B4-4819-BAC9-6C38B231DA98}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ED5D72F4-54B4-4819-BAC9-6C38B231DA98}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ED5D72F4-54B4-4819-BAC9-6C38B231DA98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F630A8C-6B76-4687-BB4F-2596B4041F87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F630A8C-6B76-4687-BB4F-2596B4041F87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F630A8C-6B76-4687-BB4F-2596B4041F87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F630A8C-6B76-4687-BB4F-2596B4041F87}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
