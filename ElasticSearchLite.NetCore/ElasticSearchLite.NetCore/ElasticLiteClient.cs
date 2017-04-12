@@ -17,9 +17,9 @@ namespace ElasticSearchLite.NetCore
         public ElasticLowLevelClient Client { get; private set; }
 
         /// <summary>
-        /// 
+        /// Creates ElasticSearchLite Client which uses the low level elastic client  
         /// </summary>
-        /// <param name="uris"></param>
+        /// <param name="uris">Connection URIs as string</param>
         public ElasticLiteClient(params string[] uris)
         {
             if (uris == null)
@@ -30,6 +30,10 @@ namespace ElasticSearchLite.NetCore
             BuildUpLowLevelConnection(uriObjects);
         }
 
+        /// <summary>
+        /// Creates ElasticSearchLite Client which uses the low level elastic client  
+        /// </summary>
+        /// <param name="uris">Connection URIs</param>
         public ElasticLiteClient(params Uri[] uris)
         {
             if (uris == null)
@@ -47,7 +51,7 @@ namespace ElasticSearchLite.NetCore
             }
 
             var connectionPool = new StickyConnectionPool(uris);
-            var settings = new ConnectionConfiguration(connectionPool);
+            var settings = new ConnectionConfiguration(connectionPool).ThrowExceptions();
 
             Client = new ElasticLowLevelClient(settings);
         }
@@ -74,7 +78,46 @@ namespace ElasticSearchLite.NetCore
                 return hits;
             }
 
-            throw new Exception(response.DebugInformation);
+            throw response.OriginalException;
+        }
+
+        public void ExecuteInsert<TPoco>(InsertQuery<TPoco> query) where TPoco : IElasticPoco
+        {
+            var statement = Generator.Generate(query);
+            var response = Client.IndexPut<string>(query.IndexName, query.TypeName, statement);
+
+            if (response.Success)
+            {
+                var data = JObject.Parse(response.Body);
+                query.Poco.Id = data[ElasticFields.Id.Name].ToString();
+            }
+
+            throw response.OriginalException;
+        }
+
+        public void ExecuteUpdate<TPoco>(UpdateQuery<TPoco> query) where TPoco : IElasticPoco
+        {
+            var statement = Generator.Generate(query);
+            var response = Client.UpdateByQuery<string>(query.IndexName, statement);
+
+            if (response.Success)
+            {
+                var data = JObject.Parse(response.Body);
+                query.Poco.Id = data[ElasticFields.Id.Name].ToString();
+            }
+
+            throw response.OriginalException;
+        }
+
+        public void ExecuteDelete<TPoco>(DeleteQuery<TPoco> query) where TPoco : IElasticPoco
+        {
+            var statement = Generator.Generate(query);
+            var response = Client.DeleteByQuery<string>(query.IndexName, statement);
+
+            if (response.Success)
+            {
+                var data = JObject.Parse(response.Body);
+            }
         }
 
         protected virtual void Dispose(bool disposing)

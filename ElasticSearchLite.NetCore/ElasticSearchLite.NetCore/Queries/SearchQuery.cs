@@ -56,18 +56,6 @@ namespace ElasticSearchLite.NetCore.Queries
             return this;
         }
         /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="matchAll"></param>
-        /// <returns></returns>
-        public SearchQuery<T> MatchAll(bool matchAll)
-        {
-            IsMatchAll = matchAll;
-            ClearAllConditions();
-
-            return this;
-        }
-        /// <summary>
         /// Match Query
         /// </summary>
         /// <param name="field">Field name</param>

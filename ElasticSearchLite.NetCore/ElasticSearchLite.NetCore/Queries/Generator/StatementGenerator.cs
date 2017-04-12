@@ -38,7 +38,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
         private string GenerateDeleteQuery(DeleteQuery deleteQuery)
         {
-            var statement = new StringBuilder($"POST {deleteQuery.IndexName}/{deleteQuery.TypeName}/_delete_by_query {{");
+            var statement = new StringBuilder("{");
             statement.Append(GenerateQuery(deleteQuery));
 
             return statement.ToString();
@@ -46,11 +46,10 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
         private string GenerateInsertQuery(InsertQuery insertQuery)
         {
-            var statement = new StringBuilder($"PUT {insertQuery.IndexName}/{insertQuery.TypeName} {{");
+            var statement = new StringBuilder("{");
             var properties = insertQuery.Poco.GetType().GetProperties();
             var propertiesAsJson = properties.Select(p => $@"""{p.Name}"": ""{p.GetValue(insertQuery.Poco)}""");
-
-            // JsonConvert.SerializeObject(insertQuery.Poco);
+            
             statement.Append(string.Join(",", propertiesAsJson));
             statement.Append("}");
 
@@ -59,7 +58,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
         private string GenerateUpdateQuery(UpdateQuery updateQuery)
         {
-            var statement = new StringBuilder($"POST {updateQuery.IndexName}/{updateQuery.TypeName}/_update_by_query {{");
+            var statement = new StringBuilder("{");
 
             return statement.Append("}").ToString();
         }
@@ -78,11 +77,6 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
         private string GenerateQuery(AbstractQuery query)
         {
-            if (query.IsMatchAll)
-            {
-                return string.Empty;
-            }
-
             if (query.MatchCondition != null)
             {
                 return $@", ""query"": {{ {GenerateMatch(query.MatchCondition)} }}";

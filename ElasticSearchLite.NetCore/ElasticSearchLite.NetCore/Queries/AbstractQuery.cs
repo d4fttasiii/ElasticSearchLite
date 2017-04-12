@@ -10,7 +10,6 @@ namespace ElasticSearchLite.NetCore.Queries
         internal ElasticCodition TermCondition { get; set; }
         internal ElasticCodition MatchCondition { get; set; }
         internal ElasticRangeCondition RangeCondition { get; set; }
-        internal bool IsMatchAll { get; set; }
         internal IElasticPoco Poco { get; set; }
         internal string IndexName { get; set; }
         internal string TypeName { get; set; }

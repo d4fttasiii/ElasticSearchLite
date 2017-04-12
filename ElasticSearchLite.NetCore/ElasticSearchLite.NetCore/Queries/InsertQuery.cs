@@ -16,7 +16,7 @@ namespace ElasticSearchLite.NetCore.Queries
 
     public class InsertQuery<T> : InsertQuery where T : IElasticPoco
     {
-        protected InsertQuery(IElasticPoco poco) : base(poco) { }
+        protected InsertQuery(T poco) : base(poco) { }
 
         public static InsertQuery<T> Create(T poco)
         {

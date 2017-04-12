@@ -31,19 +31,6 @@ namespace ElasticSearchLite.NetCore.Queries
         {
             return new DeleteQuery<T>(poco);
         }
-
-        /// <summary>
-        /// If set to true it matches all documents
-        /// </summary>
-        /// <param name="matchAll"></param>
-        /// <returns></returns>
-        public DeleteQuery<T> MatchAll(bool matchAll)
-        {
-            IsMatchAll = matchAll;
-            ClearAllConditions();
-
-            return this;
-        }
         /// <summary>
         /// Deletes documents matching a given condition
         /// </summary>
