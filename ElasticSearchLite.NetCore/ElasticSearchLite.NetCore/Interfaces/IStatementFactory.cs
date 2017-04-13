@@ -1,6 +1,6 @@
 ﻿namespace ElasticSearchLite.NetCore.Interfaces
 {
-    public interface IStatementGenerator
+    public interface IStatementFactory
     {
         string Generate(IQuery query);
     }

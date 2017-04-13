@@ -7,7 +7,7 @@ namespace ElasticSearchLite.Tests.Unit
 {
     public abstract class AbstractQueryTest
     {
-        IStatementGenerator Generator { get; } = new StatementGenerator();
+        IStatementFactory Generator { get; } = new StatementFactory();
 
         protected void TestQuery<T>(T statementObject, IQuery query)
         {

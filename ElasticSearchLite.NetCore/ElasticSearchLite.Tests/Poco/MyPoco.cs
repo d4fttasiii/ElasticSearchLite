@@ -1,4 +1,5 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
+using System;
 
 namespace ElasticSearchLite.Tests.Poco
 {
@@ -10,5 +11,9 @@ namespace ElasticSearchLite.Tests.Poco
         public double Score { get; set; }
         public string TestText { get; set; }
         public int TestInteger { get; set; }
+        public double TestDouble { get; set; }
+        public DateTime TestDateTime { get; set; }
+        public bool TestBool { get; set; }
+        public string[] TestStringArray { get; set; }
     }
 }

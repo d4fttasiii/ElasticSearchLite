@@ -18,7 +18,7 @@ namespace ElasticSearchLite.NetCore.Queries
     {
         protected UpdateQuery(IElasticPoco poco) : base(poco) { }
 
-        public UpdateQuery<T> Create(T poco)
+        public static UpdateQuery<T> Create(T poco)
         {
             return new UpdateQuery<T>(poco);
         }

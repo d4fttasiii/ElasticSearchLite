@@ -13,7 +13,7 @@ namespace ElasticSearchLite.NetCore
     public class ElasticLiteClient : IDisposable
     {
         private bool disposedValue = false;
-        private IStatementGenerator Generator { get; } = new StatementGenerator();
+        private IStatementFactory Generator { get; } = new StatementFactory();
         public ElasticLowLevelClient Client { get; private set; }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace ElasticSearchLite.NetCore
             }
 
             var connectionPool = new StickyConnectionPool(uris);
-            var settings = new ConnectionConfiguration(connectionPool).ThrowExceptions();
+            var settings = new ConnectionConfiguration(connectionPool).ThrowExceptions().DisableDirectStreaming();
 
             Client = new ElasticLowLevelClient(settings);
         }
@@ -81,29 +81,29 @@ namespace ElasticSearchLite.NetCore
             throw response.OriginalException;
         }
 
-        public void ExecuteInsert<TPoco>(InsertQuery<TPoco> query) where TPoco : IElasticPoco
+        public void ExecuteIndex<TPoco>(IndexQuery<TPoco> query) where TPoco : IElasticPoco
         {
             var statement = Generator.Generate(query);
-            var response = Client.IndexPut<string>(query.IndexName, query.TypeName, statement);
+            var response = Client.Index<string>(query.IndexName, query.TypeName, statement);
 
             if (response.Success)
             {
                 var data = JObject.Parse(response.Body);
                 query.Poco.Id = data[ElasticFields.Id.Name].ToString();
+                return;
             }
 
             throw response.OriginalException;
         }
 
-        public void ExecuteUpdate<TPoco>(UpdateQuery<TPoco> query) where TPoco : IElasticPoco
+        public bool ExecuteUpdate<TPoco>(UpdateQuery<TPoco> query) where TPoco : IElasticPoco
         {
             var statement = Generator.Generate(query);
-            var response = Client.UpdateByQuery<string>(query.IndexName, statement);
+            var response = Client.Update<string>(query.IndexName, query.TypeName, query.Poco.Id, statement);
 
             if (response.Success)
             {
-                var data = JObject.Parse(response.Body);
-                query.Poco.Id = data[ElasticFields.Id.Name].ToString();
+                return true;
             }
 
             throw response.OriginalException;
@@ -118,6 +118,13 @@ namespace ElasticSearchLite.NetCore
             {
                 var data = JObject.Parse(response.Body);
             }
+        }
+
+        public bool ExecuteDrop<TPoco>(DropQuery<TPoco> query) where TPoco : IElasticPoco
+        {
+            var response = Client.IndicesDelete<string>(query.IndexName);
+
+            return response.Success;
         }
 
         protected virtual void Dispose(bool disposing)
