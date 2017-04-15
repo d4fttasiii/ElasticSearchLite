@@ -1,7 +1,9 @@
-﻿namespace ElasticSearchLite.NetCore.Interfaces
+﻿using ElasticSearchLite.NetCore.Queries;
+
+namespace ElasticSearchLite.NetCore.Interfaces
 {
     public interface IStatementFactory
     {
-        string Generate(IQuery query);
+        string Generate(AbstractQuery query);
     }
 }

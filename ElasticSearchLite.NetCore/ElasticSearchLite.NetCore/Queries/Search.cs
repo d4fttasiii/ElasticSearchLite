@@ -5,13 +5,13 @@ using System.Linq;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
-    public abstract class SearchQuery : AbstractQuery
+    public abstract class Search : AbstractQuery
     {
         internal List<ElasticField> Fields { get; } = new List<ElasticField>();
 
-        protected SearchQuery(IElasticPoco poco) : base(poco) { }
+        protected Search(IElasticPoco poco) : base(poco) { }
 
-        protected SearchQuery(string indexName, string typeName) : base(indexName, typeName) { }
+        protected Search(string indexName, string typeName) : base(indexName, typeName) { }
 
         protected override void ClearAllConditions()
         {
@@ -20,20 +20,26 @@ namespace ElasticSearchLite.NetCore.Queries
             MatchCondition = null;
         }
     }
-    public class SearchQuery<T> : SearchQuery where T : IElasticPoco
+    public class Search<T> : Search where T : IElasticPoco
     {
-        protected SearchQuery(string indexName, string typeName) : base(indexName, typeName) { }
+        protected Search(string indexName, string typeName) : base(indexName, typeName) { }
 
-        public static SearchQuery<T> Create(string indexName, string typeName)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="indexName"></param>
+        /// <param name="typeName"></param>
+        /// <returns></returns>
+        public static Search<T> In(string indexName, string typeName)
         {
-            return new SearchQuery<T>(indexName, typeName);
+            return new Search<T>(indexName, typeName);
         }
         /// <summary>
         /// Include certain fields to a query
         /// </summary>
         /// <param name="incluededFields"></param>
         /// <returns></returns>
-        public SearchQuery<T> Include(params ElasticField[] incluededFields)
+        public Search<T> Include(params ElasticField[] incluededFields)
         {
             CheckParameters(incluededFields);
             var include = incluededFields.Where(inc => !Fields.Select(f => f.Name).Contains(inc.Name));
@@ -46,7 +52,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="excludeFields"></param>
         /// <returns></returns>
-        public SearchQuery<T> Exclude(params ElasticField[] excludeFields)
+        public Search<T> Exclude(params ElasticField[] excludeFields)
         {
             CheckParameters(excludeFields);
             var exclude = excludeFields.Where(ex => !Fields.Select(f => f.Name).Contains(ex.Name));
@@ -61,7 +67,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="field">Field name</param>
         /// <param name="value">Value matching the field</param>
         /// <returns></returns>
-        public SearchQuery<T> Match(string field, object value)
+        public Search<T> Match(string field, object value)
         {
             var condition = new ElasticCodition
             {
@@ -76,7 +82,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public SearchQuery<T> Match(ElasticCodition condition)
+        public Search<T> Match(ElasticCodition condition)
         {
             ClearAllConditions();
             MatchCondition = CheckParameter(condition);
@@ -89,7 +95,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="field">Field name</param>
         /// <param name="value">Value which should equal the field content</param>
         /// <returns></returns>
-        public SearchQuery<T> Term(string field, object value)
+        public Search<T> Term(string field, object value)
         {
             var condition = new ElasticCodition
             {
@@ -104,7 +110,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public SearchQuery<T> Term(ElasticCodition condition)
+        public Search<T> Term(ElasticCodition condition)
         {
             ClearAllConditions();
             TermCondition = CheckParameter(condition);
@@ -118,7 +124,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="op">Range operator</param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public SearchQuery<T> Range(string field, RangeOperations op, object value)
+        public Search<T> Range(string field, ElasticRangeOperations op, object value)
         {
             var condition = new ElasticRangeCondition
             {
@@ -134,7 +140,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name=""></param>
         /// <returns></returns>
-        public SearchQuery<T> Range(ElasticRangeCondition condition)
+        public Search<T> Range(ElasticRangeCondition condition)
         {
             ClearAllConditions();
             RangeCondition = CheckParameter(condition);

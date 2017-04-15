@@ -14,7 +14,7 @@ namespace ElasticSearchLite.NetCore
     {
         private bool disposedValue = false;
         private IStatementFactory Generator { get; } = new StatementFactory();
-        public ElasticLowLevelClient Client { get; private set; }
+        public ElasticLowLevelClient LowLevelClient { get; private set; }
 
         /// <summary>
         /// Creates ElasticSearchLite Client which uses the low level elastic client  
@@ -53,16 +53,27 @@ namespace ElasticSearchLite.NetCore
             var connectionPool = new StickyConnectionPool(uris);
             var settings = new ConnectionConfiguration(connectionPool).ThrowExceptions().DisableDirectStreaming();
 
-            Client = new ElasticLowLevelClient(settings);
+            LowLevelClient = new ElasticLowLevelClient(settings);
         }
-
-        public IEnumerable<TPoco> ExecuteSearch<TPoco>(SearchQuery<TPoco> query) where TPoco : IElasticPoco
+        /// <summary>
+        /// Executes a SearchQuery using the Search API and returns a list of generic pocos.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/_the_search_api.html
+        /// </summary>
+        /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
+        /// <param name="query">SearchQuery object.</param>
+        /// <returns>IEnumerable<TPoco></returns>
+        public IEnumerable<TPoco> ExecuteSearch<TPoco>(Search<TPoco> query) where TPoco : IElasticPoco
         {
-            var statement = Generator.Generate(query);
-            var response = Client.Search<string>(query.IndexName, query.TypeName, statement);
-
-            if (response.Success)
+            try
             {
+                var statement = Generator.Generate(query);
+                var response = LowLevelClient.Search<string>(query.IndexName, query.TypeName, statement);
+
+                if (!response.Success)
+                {
+                    throw response.OriginalException ?? new Exception($"Unsuccussful Elastic Request: {response.DebugInformation}");
+                }
+
                 var data = JObject.Parse(response.Body);
                 var hits = new List<TPoco>();
                 foreach (var x in data[ElasticFields.Hits.Name][ElasticFields.Hits.Name])
@@ -77,54 +88,122 @@ namespace ElasticSearchLite.NetCore
 
                 return hits;
             }
-
-            throw response.OriginalException;
-        }
-
-        public void ExecuteIndex<TPoco>(IndexQuery<TPoco> query) where TPoco : IElasticPoco
-        {
-            var statement = Generator.Generate(query);
-            var response = Client.Index<string>(query.IndexName, query.TypeName, statement);
-
-            if (response.Success)
+            catch (Exception ex)
             {
+                throw ex;
+            }
+        }
+        /// <summary>
+        /// Executes an IndexQuery using the Index API which creates a new document in the index.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/docs-index_.html
+        /// </summary>
+        /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
+        /// <param name="query">IndexQuery object</param>
+        public void ExecuteIndex<TPoco>(Index<TPoco> query) where TPoco : IElasticPoco
+        {
+            try
+            {
+                var statement = Generator.Generate(query);
+
+                var response = !string.IsNullOrEmpty(query.Poco.Id) ?
+                    LowLevelClient.Index<string>(query.IndexName, query.TypeName, query.Poco.Id, statement) :
+                    LowLevelClient.Index<string>(query.IndexName, query.TypeName, statement);
+
+                if (!response.Success)
+                {
+                    throw response.OriginalException ?? new Exception($"Unsuccussful Elastic Request: {response.DebugInformation}");
+                }
+
                 var data = JObject.Parse(response.Body);
                 query.Poco.Id = data[ElasticFields.Id.Name].ToString();
-                return;
             }
-
-            throw response.OriginalException;
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+           
         }
+        /// <summary>
+        /// Executes an UpdateQuery using the Update API and updates a document identified by the Id.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/docs-update.html
+        /// </summary>
+        /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
+        /// <param name="query">UpdateQuery object</param>
+        public void ExecuteUpdate<TPoco>(Update<TPoco> query) where TPoco : IElasticPoco
+        {
+            try
+            {
+                var statement = Generator.Generate(query);
+                var response = LowLevelClient.Update<string>(query.IndexName, query.TypeName, query.Poco.Id, statement);
 
-        public bool ExecuteUpdate<TPoco>(UpdateQuery<TPoco> query) where TPoco : IElasticPoco
+                if (!response.Success)
+                {
+                    throw response.OriginalException ?? new Exception($"Unsuccussful Elastic Request: {response.DebugInformation}");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+           
+        }
+        /// <summary>
+        /// Executes a DeleteQuery using the Delete API and removes a document from the associated index.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/docs-delete.html
+        /// </summary>
+        /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
+        /// <param name="query">DeleteQuery object</param>
+        /// <returns>Returnes the number of effected documents.</returns>
+        public int ExecuteDelete<TPoco>(Delete<TPoco> query) where TPoco : IElasticPoco
         {
             var statement = Generator.Generate(query);
-            var response = Client.Update<string>(query.IndexName, query.TypeName, query.Poco.Id, statement);
 
-            if (response.Success)
+            try
             {
-                return true;
-            }
+                var response = !string.IsNullOrEmpty(query?.Poco.Id) ?
+                    LowLevelClient.Delete<string>(query.IndexName, query.TypeName, query.Poco.Id) :
+                    LowLevelClient.DeleteByQuery<string>(query.IndexName, statement);
 
-            throw response.OriginalException;
-        }
+                if (!response.Success)
+                {
+                    throw response.OriginalException ?? new Exception($"Unsuccussful Elastic Request: {response.DebugInformation}");
+                }
 
-        public void ExecuteDelete<TPoco>(DeleteQuery<TPoco> query) where TPoco : IElasticPoco
-        {
-            var statement = Generator.Generate(query);
-            var response = Client.DeleteByQuery<string>(query.IndexName, statement);
+                if (response.HttpMethod == HttpMethod.DELETE)
+                {
+                    return 1;
+                }
 
-            if (response.Success)
-            {
                 var data = JObject.Parse(response.Body);
+
+                return data[ElasticFields.Total.Name].ToObject<int>();                
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
-
-        public bool ExecuteDrop<TPoco>(DropQuery<TPoco> query) where TPoco : IElasticPoco
+        /// <summary>
+        /// Executes the drop index using the Delete Index API and deletes the index.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/indices-delete-index.html
+        /// </summary>
+        /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
+        /// <param name="query">DropQuery object</param>
+        public void ExecuteDrop(Drop query)
         {
-            var response = Client.IndicesDelete<string>(query.IndexName);
+            try
+            {
+                var response = LowLevelClient.IndicesDelete<string>(query.IndexName);
 
-            return response.Success;
+                if (!response.Success)
+                {
+                    throw response.OriginalException ?? new Exception($"Unsuccussful Elastic Request: {response.DebugInformation}");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }            
         }
 
         protected virtual void Dispose(bool disposing)
@@ -136,7 +215,7 @@ namespace ElasticSearchLite.NetCore
                     // TODO: dispose managed state (managed objects).
                 }
 
-                Client = null;
+                LowLevelClient = null;
                 disposedValue = true;
             }
         }

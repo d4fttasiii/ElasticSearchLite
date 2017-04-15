@@ -7,18 +7,18 @@ namespace ElasticSearchLite.NetCore.Queries
 {
     public abstract class AbstractQuery : IQuery
     {
+        public string IndexName { get; }
+        public string TypeName { get; }
         internal ElasticCodition TermCondition { get; set; }
         internal ElasticCodition MatchCondition { get; set; }
         internal ElasticRangeCondition RangeCondition { get; set; }
         internal IElasticPoco Poco { get; set; }
-        internal string IndexName { get; set; }
-        internal string TypeName { get; set; }
 
         protected AbstractQuery(IElasticPoco poco)
         {
             Poco = poco ?? throw new ArgumentNullException(nameof(poco));
-            IndexName = poco.Index;
-            TypeName = poco.Type;
+            IndexName = poco.Index ?? throw new ArgumentNullException(nameof(poco.Index));
+            TypeName = poco.Type ?? throw new ArgumentNullException(nameof(poco.Type));
         }
 
         protected AbstractQuery(string indexName, string typeName)

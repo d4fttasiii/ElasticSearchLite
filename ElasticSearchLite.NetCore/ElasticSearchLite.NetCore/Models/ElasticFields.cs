@@ -8,6 +8,7 @@
         public static ElasticFields Score { get; } = new ElasticFields("_score");
         public static ElasticFields Source { get; } = new ElasticFields("_source");
         public static ElasticFields Hits { get; } = new ElasticFields("hits");
+        public static ElasticFields Total { get; } = new ElasticFields("total");
 
         public string Name { get; }
 

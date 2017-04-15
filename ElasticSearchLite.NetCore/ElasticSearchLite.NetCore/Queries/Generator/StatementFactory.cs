@@ -2,7 +2,6 @@
 using ElasticSearchLite.NetCore.Models;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using System.Reflection;
 using System.Globalization;
@@ -14,24 +13,24 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         private static List<string> ExcludedProperties { get; } = new List<string> { "Index", "Id", "Type", "Score" };
         private IEnumerable<PropertyInfo> UpdatetableProperties(IElasticPoco poco) => poco.GetType().GetProperties().Where(p => !ExcludedProperties.Contains(p.Name));
 
-        public string Generate(IQuery query)
+        public string Generate(AbstractQuery query)
         {
             switch (query)
             {
-                case SearchQuery searchQuery:
+                case Search searchQuery:
                     return GenerateSearchQuery(searchQuery);
-                case DeleteQuery deleteQuery:
+                case Delete deleteQuery:
                     return GenerateDeleteQuery(deleteQuery);
-                case IndexQuery indexQuery:
+                case Index indexQuery:
                     return GenerateInsertQuery(indexQuery);
-                case UpdateQuery updateQuery:
+                case Update updateQuery:
                     return GenerateUpdateQuery(updateQuery);
                 default:
                     throw new Exception("Unknown query type");
             }
         }
 
-        private string GenerateSearchQuery(SearchQuery searchQuery)
+        private string GenerateSearchQuery(Search searchQuery)
         {
             var statementParts = new List<string>
             {
@@ -42,19 +41,19 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             return $"{{ {string.Join(",", statementParts)} }}";
         }
 
-        private string GenerateDeleteQuery(DeleteQuery deleteQuery)
+        private string GenerateDeleteQuery(Delete deleteQuery)
         {
             return $"{{ {GenerateQuery(deleteQuery)} }}";
         }
 
-        private string GenerateInsertQuery(IndexQuery indexQuery)
+        private string GenerateInsertQuery(Index indexQuery)
         {
             var properties = UpdatetableProperties(indexQuery.Poco);
 
             return $"{{ {GenerateFieldMapping(properties, indexQuery.Poco)} }}";
         }
 
-        private string GenerateUpdateQuery(UpdateQuery updateQuery)
+        private string GenerateUpdateQuery(Update updateQuery)
         {
             var properties = UpdatetableProperties(updateQuery.Poco);
 

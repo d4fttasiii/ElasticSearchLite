@@ -2,6 +2,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.NetCore.Models;
 using ElasticSearchLite.Tests.Poco;
+using System;
+using FakeItEasy;
 
 namespace ElasticSearchLite.Tests.Unit
 {
@@ -10,21 +12,22 @@ namespace ElasticSearchLite.Tests.Unit
     public class SearchQueryTests : AbstractQueryTest
     {
         [TestMethod]
-        public void SearchQueryGeneration()
+        public void SearchQuery_ExceptionTest_Index()
         {
-            // Arrange
-            var query = SearchQuery<MyPoco>.Create("mypocoindex", "mypoco");
-            var statementObject = new { _source = true };
-
-            // Act and Assert
-            TestQuery(statementObject, query);
+            TestExceptions(typeof(ArgumentNullException), () => Search<MyPoco>.In(null, A.Dummy<string>()), "Index name is null");
         }
 
         [TestMethod]
-        public void SearchQueryGeneration_Term()
+        public void SearchQuery_ExceptionTest_Type()
+        {
+            TestExceptions(typeof(ArgumentNullException), () => Search<MyPoco>.In(A.Dummy<string>(), null), "Type name null");
+        }
+
+        [TestMethod]
+        public void SearchQuery_Generation_Term()
         {
             // Arrange
-            var query = SearchQuery<MyPoco>.Create("mypocoindex", "mypoco")
+            var query = Search<MyPoco>.In("mypocoindex", "mypoco")
                 .Term("TestText", "ABCDEFG");
             var statementObject = new
             {
@@ -40,10 +43,10 @@ namespace ElasticSearchLite.Tests.Unit
         }
 
         [TestMethod]
-        public void SearchQueryGeneration_Match()
+        public void SearchQuery_Generation_Match()
         {
             // Arrange
-            var query = SearchQuery<MyPoco>.Create("mypocoindex", "mypoco")
+            var query = Search<MyPoco>.In("mypocoindex", "mypoco")
                 .Match("TestText", "ABCDEFG");
             var statementObject = new
             {
@@ -59,11 +62,11 @@ namespace ElasticSearchLite.Tests.Unit
         }
 
         [TestMethod]
-        public void SearchQueryGeneration_Range()
+        public void SearchQuery_Generation_Range()
         {
             // Arrange
-            var query = SearchQuery<MyPoco>.Create("mypocoindex", "mypoco")
-                .Range(ElasticFields.Id.Name, RangeOperations.Gt, 1);
+            var query = Search<MyPoco>.In("mypocoindex", "mypoco")
+                .Range(ElasticFields.Id.Name, ElasticRangeOperations.Gt, 1);
             var statementObject = new
             {
                 _source = true,

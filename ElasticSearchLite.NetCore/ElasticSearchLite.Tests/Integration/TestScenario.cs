@@ -30,12 +30,12 @@ namespace ElasticSearchLite.Tests.Integration
         [TestMethod]
         public void TestScenario_Index_Search_Update_Verify_Delete()
         {
-            var indexQuery = IndexQuery<MyPoco>.Create(poco);
+            var indexQuery = Index<MyPoco>.Document(poco);
             Client.ExecuteIndex(indexQuery);
 
             Thread.Sleep(2000);
 
-            var searchQuery = SearchQuery<MyPoco>.Create(indexName, typeName).Term(ElasticFields.Id.Name, poco.Id);
+            var searchQuery = Search<MyPoco>.In(indexName, typeName).Term(ElasticFields.Id.Name, poco.Id);
             var document = Client.ExecuteSearch(searchQuery).SingleOrDefault();
 
             Assert.AreEqual(poco.Id, document.Id);
@@ -48,21 +48,21 @@ namespace ElasticSearchLite.Tests.Integration
             Assert.AreEqual(string.Join("", poco.TestStringArray), string.Join("", document.TestStringArray));
 
             poco.TestText = "ChangedText";
-            Client.ExecuteUpdate(UpdateQuery<MyPoco>.Create(poco));
+            Client.ExecuteUpdate(Update<MyPoco>.Document(poco));
 
             Thread.Sleep(2000);
 
             document = Client.ExecuteSearch(searchQuery).FirstOrDefault();
             Assert.AreEqual(poco.TestText, document.TestText);
 
-            var deleteQuery = DeleteQuery<MyPoco>.Create(poco).Term(ElasticFields.Id.Name, poco.Id);
+            var deleteQuery = Delete<MyPoco>.Document(poco).Term(ElasticFields.Id.Name, poco.Id);
             Client.ExecuteDelete(deleteQuery);
         }
 
         [TestCleanup]
         public void CleanUp()
         {
-            Client.ExecuteDrop(DropQuery<MyPoco>.Create(poco));
+            Client.ExecuteDrop(Drop.Index(poco.Index));
         }
     }
 }
