@@ -1,6 +1,6 @@
 ﻿namespace ElasticSearchLite.NetCore.Interfaces
 {
-    internal interface IQuery
+    public interface IQuery
     {
         string IndexName { get; }
     }
