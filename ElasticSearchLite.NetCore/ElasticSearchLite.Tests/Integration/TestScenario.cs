@@ -59,6 +59,17 @@ namespace ElasticSearchLite.Tests.Integration
             Client.ExecuteDelete(deleteQuery);
         }
 
+        [TestMethod]
+        public void TestScenario_Bulk_Index_Delete()
+        {
+            poco.Id = "1337";
+
+            Client.ExecuteBulk(Bulk<MyPoco>
+                .Create("mypocoindex")
+                .Index(poco)
+                .Delete(poco));
+        }
+
         [TestCleanup]
         public void CleanUp()
         {

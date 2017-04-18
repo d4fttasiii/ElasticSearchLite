@@ -67,14 +67,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             foreach ((ElasticMethods method, var poco) in bulkQuery.PocosAndMethods)
             {
-                statement.AppendLine($@"{{ 
-                ""{method.Name}"": 
-                    {{ 
-                        ""{ElasticFields.Id.Name}"": ""{poco.Id}"", 
-                        ""{ElasticFields.Index.Name}"": ""{poco.Index}"", 
-                        ""{ElasticFields.Type.Name}"": ""{poco.Type}"" 
-                    }}
-                }}");
+                statement.AppendLine($@"{{ ""{method.Name}"": {{ ""{ElasticFields.Id.Name}"": ""{poco.Id}"", ""{ElasticFields.Index.Name}"": ""{poco.Index}"", ""{ElasticFields.Type.Name}"": ""{poco.Type}"" }} }}");
 
                 switch (method.Name)
                 {
@@ -110,7 +103,9 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
         private string GenerateFieldMapping(IEnumerable<PropertyInfo> properties, IElasticPoco poco)
         {
-            var propertiesAsJson = properties.Select(p => $@"""{p.Name}"": {EscapeValue(p.GetValue(poco))}");
+            var propertiesAsJson = properties
+                .Where(p => p.GetValue(poco) != null)
+                .Select(p => $@"""{p.Name}"": {EscapeValue(p.GetValue(poco))}");
 
             return string.Join(",", propertiesAsJson);
         }
@@ -152,11 +147,6 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
         private string EscapeValue(object value)
         {
-            if (value == null)
-            {
-                return @"""""";
-            }
-
             if (value.GetType().IsArray)
             {
                 var values = (value as object[]).Select(v => EscapeValue(v));

@@ -205,6 +205,38 @@ namespace ElasticSearchLite.NetCore
                 throw ex;
             }            
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
+        /// <param name="bulkQuery"></param>
+        /// <returns></returns>
+        public (int indexed, int deleted, int updated) ExecuteBulk<TPoco>(Bulk<TPoco> bulkQuery) where TPoco : IElasticPoco
+        {
+            try
+            {
+                var statement = Generator.Generate(bulkQuery);
+                var response = LowLevelClient.Bulk<string>(bulkQuery.IndexName, statement);
+
+                if (!response.Success)
+                {
+                    throw response.OriginalException ?? new Exception($"Unsuccussful Elastic Request: {response.DebugInformation}");
+                }
+
+                var data = JObject.Parse(response.Body);
+
+                return (
+                    data[ElasticFields.Items.Name][ElasticFields.Indexed.Name].ToObject<int>(),
+                    data[ElasticFields.Items.Name][ElasticFields.Deleted.Name].ToObject<int>(),
+                    data[ElasticFields.Items.Name][ElasticFields.Updated.Name].ToObject<int>()
+                );
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+        }
 
         protected virtual void Dispose(bool disposing)
         {

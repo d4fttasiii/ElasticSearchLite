@@ -10,7 +10,7 @@ namespace ElasticSearchLite.Tests.Unit
 {
     public abstract class AbstractQueryTest
     {
-        IStatementFactory Generator { get; } = new StatementFactory();
+        protected IStatementFactory Generator { get; } = new StatementFactory();
 
         protected MyPoco poco = new MyPoco();
 
