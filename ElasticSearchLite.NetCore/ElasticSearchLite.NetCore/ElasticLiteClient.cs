@@ -71,7 +71,7 @@ namespace ElasticSearchLite.NetCore
 
                 if (!response.Success)
                 {
-                    throw response.OriginalException ?? new Exception($"Unsuccussful Elastic Request: {response.DebugInformation}");
+                    throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
                 }
 
                 var data = JObject.Parse(response.Body);
@@ -111,7 +111,7 @@ namespace ElasticSearchLite.NetCore
 
                 if (!response.Success)
                 {
-                    throw response.OriginalException ?? new Exception($"Unsuccussful Elastic Request: {response.DebugInformation}");
+                    throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
                 }
 
                 var data = JObject.Parse(response.Body);
@@ -138,7 +138,7 @@ namespace ElasticSearchLite.NetCore
 
                 if (!response.Success)
                 {
-                    throw response.OriginalException ?? new Exception($"Unsuccussful Elastic Request: {response.DebugInformation}");
+                    throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
                 }
             }
             catch (Exception ex)
@@ -166,7 +166,7 @@ namespace ElasticSearchLite.NetCore
 
                 if (!response.Success)
                 {
-                    throw response.OriginalException ?? new Exception($"Unsuccussful Elastic Request: {response.DebugInformation}");
+                    throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
                 }
 
                 if (response.HttpMethod == HttpMethod.DELETE)
@@ -197,7 +197,7 @@ namespace ElasticSearchLite.NetCore
 
                 if (!response.Success)
                 {
-                    throw response.OriginalException ?? new Exception($"Unsuccussful Elastic Request: {response.DebugInformation}");
+                    throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
                 }
             }
             catch (Exception ex)
@@ -211,7 +211,7 @@ namespace ElasticSearchLite.NetCore
         /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="bulkQuery"></param>
         /// <returns></returns>
-        public (int indexed, int deleted, int updated) ExecuteBulk<TPoco>(Bulk<TPoco> bulkQuery) where TPoco : IElasticPoco
+        public void ExecuteBulk<TPoco>(Bulk<TPoco> bulkQuery) where TPoco : IElasticPoco
         {
             try
             {
@@ -220,16 +220,8 @@ namespace ElasticSearchLite.NetCore
 
                 if (!response.Success)
                 {
-                    throw response.OriginalException ?? new Exception($"Unsuccussful Elastic Request: {response.DebugInformation}");
+                    throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
                 }
-
-                var data = JObject.Parse(response.Body);
-
-                return (
-                    data[ElasticFields.Items.Name][ElasticFields.Indexed.Name].ToObject<int>(),
-                    data[ElasticFields.Items.Name][ElasticFields.Deleted.Name].ToObject<int>(),
-                    data[ElasticFields.Items.Name][ElasticFields.Updated.Name].ToObject<int>()
-                );
             }
             catch (Exception ex)
             {
