@@ -8,6 +8,7 @@ namespace ElasticSearchLite.NetCore.Queries
     public abstract class Search : AbstractQuery
     {
         internal List<ElasticField> Fields { get; } = new List<ElasticField>();
+        internal long QueryLimit { get; set; }
 
         protected Search(IElasticPoco poco) : base(poco) { }
 
@@ -20,7 +21,7 @@ namespace ElasticSearchLite.NetCore.Queries
             MatchCondition = null;
         }
     }
-    public class Search<T> : Search where T : IElasticPoco
+    public class Search<T> : Search, IExecutableSearch<T>, IFilteringSearch<T> where T : IElasticPoco
     {
         protected Search(string indexName, string typeName) : base(indexName, typeName) { }
 
@@ -67,7 +68,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="field">Field name</param>
         /// <param name="value">Value matching the field</param>
         /// <returns></returns>
-        public Search<T> Match(string field, object value)
+        public IFilteringSearch<T> Match(string field, object value)
         {
             var condition = new ElasticCodition
             {
@@ -82,7 +83,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public Search<T> Match(ElasticCodition condition)
+        public IFilteringSearch<T> Match(ElasticCodition condition)
         {
             ClearAllConditions();
             MatchCondition = CheckParameter(condition);
@@ -95,7 +96,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="field">Field name</param>
         /// <param name="value">Value which should equal the field content</param>
         /// <returns></returns>
-        public Search<T> Term(string field, object value)
+        public IFilteringSearch<T> Term(string field, object value)
         {
             var condition = new ElasticCodition
             {
@@ -110,7 +111,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public Search<T> Term(ElasticCodition condition)
+        public IFilteringSearch<T> Term(ElasticCodition condition)
         {
             ClearAllConditions();
             TermCondition = CheckParameter(condition);
@@ -124,7 +125,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="op">Range operator</param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public Search<T> Range(string field, ElasticRangeOperations op, object value)
+        public IFilteringSearch<T> Range(string field, ElasticRangeOperations op, object value)
         {
             var condition = new ElasticRangeCondition
             {
@@ -140,11 +141,21 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name=""></param>
         /// <returns></returns>
-        public Search<T> Range(ElasticRangeCondition condition)
+        public IFilteringSearch<T> Range(ElasticRangeCondition condition)
         {
             ClearAllConditions();
             RangeCondition = CheckParameter(condition);
 
+            return this;
+        }
+        /// <summary>
+        /// Limit the number of results for a request.
+        /// </summary>
+        /// <param name="limit"></param>
+        /// <returns></returns>
+        public IExecutableSearch<T> Limit(long limit)
+        {
+            QueryLimit = limit;
             return this;
         }
     }

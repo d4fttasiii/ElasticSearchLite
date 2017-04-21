@@ -29,7 +29,7 @@ namespace ElasticSearchLite.Tests.Unit
             };
         }
 
-        protected void TestQuery<T>(T statementObject, AbstractQuery query)
+        protected void TestQuery<T>(T statementObject, IQuery query)
         {
             // Act
             var queryStatement = Generator.Generate(query);

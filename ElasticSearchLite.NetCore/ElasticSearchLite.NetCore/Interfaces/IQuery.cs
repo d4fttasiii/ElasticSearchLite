@@ -2,6 +2,5 @@
 {
     public interface IQuery
     {
-        string IndexName { get; }
     }
 }

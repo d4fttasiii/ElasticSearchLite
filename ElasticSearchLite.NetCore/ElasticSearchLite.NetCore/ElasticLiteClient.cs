@@ -62,10 +62,11 @@ namespace ElasticSearchLite.NetCore
         /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="query">SearchQuery object.</param>
         /// <returns>IEnumerable<TPoco></returns>
-        public IEnumerable<TPoco> ExecuteSearch<TPoco>(Search<TPoco> query) where TPoco : IElasticPoco
+        public IEnumerable<TPoco> ExecuteSearch<TPoco>(IExecutableSearch<TPoco> executableSearchQuery) where TPoco : IElasticPoco
         {
             try
             {
+                var query = executableSearchQuery as Search<TPoco>;
                 var statement = Generator.Generate(query);
                 var response = LowLevelClient.Search<string>(query.IndexName, query.TypeName, statement);
 

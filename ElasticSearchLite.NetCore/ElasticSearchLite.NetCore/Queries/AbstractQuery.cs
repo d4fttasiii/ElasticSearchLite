@@ -7,8 +7,8 @@ namespace ElasticSearchLite.NetCore.Queries
 {
     public abstract class AbstractQuery : IQuery
     {
-        public string IndexName { get; }
-        public string TypeName { get; }
+        internal string IndexName { get; }
+        internal string TypeName { get; }
         internal ElasticCodition TermCondition { get; set; }
         internal ElasticCodition MatchCondition { get; set; }
         internal ElasticRangeCondition RangeCondition { get; set; }
