@@ -5,6 +5,7 @@ using System;
 namespace ElasticSearchLite.Tests.Unit
 {
     [TestClass]
+    [TestCategory("Unit")]
     public class DropQueryTests : AbstractQueryTest
     {
         [TestMethod]

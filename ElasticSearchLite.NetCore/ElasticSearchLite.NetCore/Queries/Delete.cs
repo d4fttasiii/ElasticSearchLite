@@ -4,20 +4,7 @@ using System;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
-    public abstract class Delete : AbstractQuery
-    {
-        protected Delete(IElasticPoco poco) : base(poco) { }
-
-        protected Delete(string indexName, string typeName) : base(indexName, typeName) { }
-
-        protected override void ClearAllConditions()
-        {
-            TermCondition = null;
-            MatchCondition = null;
-            RangeCondition = null;
-        }
-    }
-    public class Delete<T> : Delete where T : IElasticPoco
+    public class Delete : AbstractQuery, IDeleteExecutable
     {
         protected Delete(IElasticPoco poco) : base(poco)
         {
@@ -35,9 +22,9 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="indexName"></param>
         /// <param name="typeName"></param>
         /// <returns></returns>
-        public static Delete<T> From(string indexName, string typeName)
+        public static Delete From(string indexName, string typeName)
         {
-            return new Delete<T>(indexName, typeName);
+            return new Delete(indexName, typeName);
         }
         /// <summary>
         /// Creates a DeleteQuery instance which will delete a certain document associated with the given POCO.
@@ -46,16 +33,16 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="poco">A valid Poco should have and Index, Type and Id</param>
         /// <returns>Return an executeable DeleteQuery</returns>
-        public static Delete<T> Document(T poco)
+        public static IDeleteExecutable Document<TPoco>(TPoco poco) where TPoco : IElasticPoco
         {
-            return new Delete<T>(poco);
+            return new Delete(poco);
         }
         /// <summary>
         /// 
         /// </summary>
         /// <param name="condition"></param>
         /// <returns>Returns the updated DeleteQuery object.</returns>
-        public Delete<T> Match(string field, object value)
+        public IDeleteExecutable Match(string field, object value)
         {
             var condition = new ElasticCodition
             {
@@ -70,9 +57,8 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="condition"></param>
         /// <returns>Returns the updated DeleteQuery object.</returns>
-        public Delete<T> Match(ElasticCodition condition)
+        public IDeleteExecutable Match(ElasticCodition condition)
         {
-            ClearAllConditions();
             MatchCondition = CheckParameter(condition);
 
             return this;
@@ -83,7 +69,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="field"></param>
         /// <param name="value"></param>
         /// <returns>Returns the updated DeleteQuery object.</returns>
-        public Delete<T> Term(string field, object value)
+        public IDeleteExecutable Term(string field, object value)
         {
             var condition = new ElasticCodition
             {
@@ -98,9 +84,8 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="condition"></param>
         /// <returns>Returns the updated DeleteQuery object.</returns>
-        public Delete<T> Term(ElasticCodition condition)
+        public IDeleteExecutable Term(ElasticCodition condition)
         {
-            ClearAllConditions();
             TermCondition = CheckParameter(condition);
 
             return this;
@@ -110,7 +95,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="condition"></param>
         /// <returns>Returns the updated DeleteQuery object.</returns>
-        public Delete<T> Range(string field, ElasticRangeOperations operation, object value)
+        public IDeleteExecutable Range(string field, ElasticRangeOperations operation, object value)
         {
             var rangeCondition = new ElasticRangeCondition
             {
@@ -126,9 +111,8 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="condition"></param>
         /// <returns>Returns the updated DeleteQuery object.</returns>
-        public Delete<T> Range(ElasticRangeCondition condition)
+        public IDeleteExecutable Range(ElasticRangeCondition condition)
         {
-            ClearAllConditions();
             RangeCondition = CheckParameter(condition);
 
             return this;

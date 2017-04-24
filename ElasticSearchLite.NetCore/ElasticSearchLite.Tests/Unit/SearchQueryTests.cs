@@ -28,14 +28,18 @@ namespace ElasticSearchLite.Tests.Unit
         {
             // Arrange
             var query = Search<MyPoco>.In("mypocoindex", "mypoco")
-                .Term("TestText", "ABCDEFG");
+                .Term("TestText", "ABCDEFG")
+                .Take(15)
+                .Skip(15);
             var statementObject = new
             {
                 _source = true,
                 query = new
                 {
                     term = new { TestText = "ABCDEFG" }
-                }
+                },
+                size = 15,
+                from = 15
             };
 
             // Act and Assert
@@ -47,14 +51,18 @@ namespace ElasticSearchLite.Tests.Unit
         {
             // Arrange
             var query = Search<MyPoco>.In("mypocoindex", "mypoco")
-                .Match("TestText", "ABCDEFG");
+                .Match("TestText", "ABCDEFG")
+                .Skip(10)
+                .Take(10);
             var statementObject = new
             {
                 _source = true,
                 query = new
                 {
                     match = new { TestText = "ABCDEFG" }
-                }
+                },
+                size = 10,
+                from = 10
             };
 
             // Act and Assert
@@ -79,7 +87,9 @@ namespace ElasticSearchLite.Tests.Unit
                             gt = 1
                         }
                     }
-                }
+                },
+                size = 25,
+                from = 0
             };
 
             // Act and Assert

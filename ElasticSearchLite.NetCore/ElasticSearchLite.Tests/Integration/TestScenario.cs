@@ -30,7 +30,7 @@ namespace ElasticSearchLite.Tests.Integration
         [TestMethod]
         public void TestScenario_Index_Search_Update_Verify_Delete()
         {
-            var indexQuery = Index<MyPoco>.Document(poco);
+            var indexQuery = Index.Document(poco);
             Client.ExecuteIndex(indexQuery);
 
             Thread.Sleep(2000);
@@ -48,14 +48,14 @@ namespace ElasticSearchLite.Tests.Integration
             Assert.AreEqual(string.Join("", poco.TestStringArray), string.Join("", document.TestStringArray));
 
             poco.TestText = "ChangedText";
-            Client.ExecuteUpdate(Update<MyPoco>.Document(poco));
+            Client.ExecuteUpdate(Update.Document(poco));
 
             Thread.Sleep(2000);
 
             document = Client.ExecuteSearch(searchQuery).FirstOrDefault();
             Assert.AreEqual(poco.TestText, document.TestText);
 
-            var deleteQuery = Delete<MyPoco>.Document(poco).Term(ElasticFields.Id.Name, poco.Id);
+            var deleteQuery = Delete.Document(poco);
             Client.ExecuteDelete(deleteQuery);
         }
 

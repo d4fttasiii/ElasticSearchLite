@@ -11,9 +11,6 @@
         public static ElasticFields Hits { get; } = new ElasticFields("hits");
         public static ElasticFields Total { get; } = new ElasticFields("total");
         public static ElasticFields Items { get; } = new ElasticFields("items");
-        public static ElasticFields Indexed { get; } = new ElasticFields("index");
-        public static ElasticFields Updated { get; } = new ElasticFields("update");
-        public static ElasticFields Deleted { get; } = new ElasticFields("delete");
         public static ElasticFields Successful { get; } = new ElasticFields("successful");
 
         public string Name { get; }

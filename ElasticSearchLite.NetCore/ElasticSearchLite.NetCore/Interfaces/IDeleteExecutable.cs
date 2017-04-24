@@ -1,4 +1,4 @@
 ﻿namespace ElasticSearchLite.NetCore.Interfaces
 {
-    public interface IQuery { }
+    public interface IDeleteExecutable : IQuery { }
 }

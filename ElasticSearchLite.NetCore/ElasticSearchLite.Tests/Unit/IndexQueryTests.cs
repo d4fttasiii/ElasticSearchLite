@@ -1,5 +1,6 @@
 ﻿using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.Tests.Poco;
+using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
@@ -12,7 +13,7 @@ namespace ElasticSearchLite.Tests.Unit
         [TestMethod]
         public void IndexQuery_ExceptionTest_Poco()
         {
-            TestExceptions(typeof(ArgumentNullException), () => Index<MyPoco>.Document(null), "Poco is null");
+            TestExceptions(typeof(ArgumentNullException), () => Index.Document(A.Fake<MyPoco>()), "Poco is null");
         }
 
         [TestMethod]
@@ -20,7 +21,7 @@ namespace ElasticSearchLite.Tests.Unit
         {
             InitPoco();
             poco.Index = null;
-            TestExceptions(typeof(ArgumentNullException), () => Index<MyPoco>.Document(poco), "Poco index is null");
+            TestExceptions(typeof(ArgumentNullException), () => Index.Document(poco), "Poco index is null");
         }
 
         [TestMethod]
@@ -28,7 +29,7 @@ namespace ElasticSearchLite.Tests.Unit
         {
             InitPoco();
             poco.Type = null;
-            TestExceptions(typeof(ArgumentNullException), () => Index<MyPoco>.Document(poco), "Poco type is null");
+            TestExceptions(typeof(ArgumentNullException), () => Index.Document(poco), "Poco type is null");
         }
 
         [TestMethod]
@@ -36,7 +37,7 @@ namespace ElasticSearchLite.Tests.Unit
         {
             // Arrange
             InitPoco();
-            var query = Index<MyPoco>.Document(poco);
+            var query = Index.Document(poco);
             var statementObject = new
             {
                 TestInteger = 12345,

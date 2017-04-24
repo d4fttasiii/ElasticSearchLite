@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Queries.Generator;
-using ElasticSearchLite.NetCore.Queries;
 using FluentAssertions;
 using System;
 using ElasticSearchLite.Tests.Poco;

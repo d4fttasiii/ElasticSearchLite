@@ -8,25 +8,20 @@ namespace ElasticSearchLite.NetCore.Queries
     public abstract class Search : AbstractQuery
     {
         internal List<ElasticField> Fields { get; } = new List<ElasticField>();
-        internal long QueryLimit { get; set; }
+        internal int Size { get; set; } = 25;
+        internal int From { get; set; } = 0;
 
         protected Search(IElasticPoco poco) : base(poco) { }
 
         protected Search(string indexName, string typeName) : base(indexName, typeName) { }
-
-        protected override void ClearAllConditions()
-        {
-            TermCondition = null;
-            RangeCondition = null;
-            MatchCondition = null;
-        }
     }
-    public class Search<T> : Search, IExecutableSearch<T>, IFilteringSearch<T> where T : IElasticPoco
+
+    public class Search<T> : Search, ISearchExecutable<T> where T : IElasticPoco
     {
         protected Search(string indexName, string typeName) : base(indexName, typeName) { }
 
         /// <summary>
-        /// 
+        /// Prepares a Search request which will be executed on the given index and type.
         /// </summary>
         /// <param name="indexName"></param>
         /// <param name="typeName"></param>
@@ -68,7 +63,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="field">Field name</param>
         /// <param name="value">Value matching the field</param>
         /// <returns></returns>
-        public IFilteringSearch<T> Match(string field, object value)
+        public ISearchExecutable<T> Match(string field, object value)
         {
             var condition = new ElasticCodition
             {
@@ -83,7 +78,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public IFilteringSearch<T> Match(ElasticCodition condition)
+        public ISearchExecutable<T> Match(ElasticCodition condition)
         {
             ClearAllConditions();
             MatchCondition = CheckParameter(condition);
@@ -96,7 +91,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="field">Field name</param>
         /// <param name="value">Value which should equal the field content</param>
         /// <returns></returns>
-        public IFilteringSearch<T> Term(string field, object value)
+        public ISearchExecutable<T> Term(string field, object value)
         {
             var condition = new ElasticCodition
             {
@@ -111,7 +106,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public IFilteringSearch<T> Term(ElasticCodition condition)
+        public ISearchExecutable<T> Term(ElasticCodition condition)
         {
             ClearAllConditions();
             TermCondition = CheckParameter(condition);
@@ -125,7 +120,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="op">Range operator</param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public IFilteringSearch<T> Range(string field, ElasticRangeOperations op, object value)
+        public ISearchExecutable<T> Range(string field, ElasticRangeOperations op, object value)
         {
             var condition = new ElasticRangeCondition
             {
@@ -141,7 +136,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name=""></param>
         /// <returns></returns>
-        public IFilteringSearch<T> Range(ElasticRangeCondition condition)
+        public ISearchExecutable<T> Range(ElasticRangeCondition condition)
         {
             ClearAllConditions();
             RangeCondition = CheckParameter(condition);
@@ -149,13 +144,23 @@ namespace ElasticSearchLite.NetCore.Queries
             return this;
         }
         /// <summary>
-        /// Limit the number of results for a request.
+        /// Limits the size of the document result set.
         /// </summary>
-        /// <param name="limit"></param>
+        /// <param name="take"></param>
         /// <returns></returns>
-        public IExecutableSearch<T> Limit(long limit)
+        public ISearchExecutable<T> Take(int take)
         {
-            QueryLimit = limit;
+            Size = take;
+            return this;
+        }
+        /// <summary>
+        /// Skips a certain number of results.
+        /// </summary>
+        /// <param name="skip">Number of documents to skip (Offset).</param>
+        /// <returns></returns>
+        public ISearchExecutable<T> Skip(int skip)
+        {
+            From = skip;
             return this;
         }
     }

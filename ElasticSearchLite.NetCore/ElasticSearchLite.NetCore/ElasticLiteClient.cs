@@ -62,7 +62,7 @@ namespace ElasticSearchLite.NetCore
         /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="query">SearchQuery object.</param>
         /// <returns>IEnumerable<TPoco></returns>
-        public IEnumerable<TPoco> ExecuteSearch<TPoco>(IExecutableSearch<TPoco> executableSearchQuery) where TPoco : IElasticPoco
+        public IEnumerable<TPoco> ExecuteSearch<TPoco>(ISearchExecutable<TPoco> executableSearchQuery) where TPoco : IElasticPoco
         {
             try
             {
@@ -98,9 +98,8 @@ namespace ElasticSearchLite.NetCore
         /// Executes an IndexQuery using the Index API which creates a new document in the index.
         /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/docs-index_.html
         /// </summary>
-        /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="query">IndexQuery object</param>
-        public void ExecuteIndex<TPoco>(Index<TPoco> query) where TPoco : IElasticPoco
+        public void ExecuteIndex(Index query)
         {
             try
             {
@@ -130,7 +129,7 @@ namespace ElasticSearchLite.NetCore
         /// </summary>
         /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="query">UpdateQuery object</param>
-        public void ExecuteUpdate<TPoco>(Update<TPoco> query) where TPoco : IElasticPoco
+        public void ExecuteUpdate(Update query)
         {
             try
             {
@@ -155,12 +154,17 @@ namespace ElasticSearchLite.NetCore
         /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="query">DeleteQuery object</param>
         /// <returns>Returnes the number of effected documents.</returns>
-        public int ExecuteDelete<TPoco>(Delete<TPoco> query) where TPoco : IElasticPoco
+        public int ExecuteDelete(IDeleteExecutable deleteQuery)
         {
-            var statement = Generator.Generate(query);
+            var query = deleteQuery as Delete;
+            if (query == null)
+            {
+                throw new Exception("Invalid delete request!");
+            }
 
             try
             {
+                var statement = Generator.Generate(query);
                 var response = !string.IsNullOrEmpty(query?.Poco.Id) ?
                     LowLevelClient.Delete<string>(query.IndexName, query.TypeName, query.Poco.Id) :
                     LowLevelClient.DeleteByQuery<string>(query.IndexName, statement);

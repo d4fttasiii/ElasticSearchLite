@@ -38,7 +38,9 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             var statementParts = new List<string>
             {
                 GenerateSources(searchQuery.Fields),
-                GenerateQuery(searchQuery)
+                GenerateQuery(searchQuery),
+                GenerateSize(searchQuery.Size),
+                GenerateFrom(searchQuery.From)
             };
 
             return $"{{ {string.Join(",", statementParts)} }}";
@@ -143,6 +145,16 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         private string GenerateRange(ElasticRangeCondition condition)
         {
             return $@"""range"": {{""{condition.Field.Name}"": {{""{condition.Operation.Name}"" : ""{condition.Value}"" }} }}";
+        }
+
+        private string GenerateSize(int size)
+        {
+            return $@"""size"": {size}";
+        }
+
+        private string GenerateFrom(int from)
+        {
+            return $@"""from"": {from}";
         }
 
         private string EscapeValue(object value)
