@@ -35,7 +35,7 @@ namespace ElasticSearchLite.Tests.Integration
 
             Thread.Sleep(2000);
 
-            var searchQuery = Search<MyPoco>.In(indexName, typeName).Term(ElasticFields.Id.Name, poco.Id);
+            var searchQuery = Search.In(indexName).ThatReturns<MyPoco>().Term(ElasticFields.Id.Name, poco.Id);
             var document = Client.ExecuteSearch(searchQuery).SingleOrDefault();
 
             Assert.AreEqual(poco.Id, document.Id);

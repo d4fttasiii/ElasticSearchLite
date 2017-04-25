@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace ElasticSearchLite.NetCore.Models
+{
+    public class ElasticSortOrders
+    {
+        public static ElasticSortOrders Descending { get; } = new ElasticSortOrders("desc");
+        public static ElasticSortOrders Ascending { get; } = new ElasticSortOrders("asc");
+
+        public string Name { get; }
+
+        private ElasticSortOrders(string name)
+        {
+            Name = name;
+        }
+    }
+}

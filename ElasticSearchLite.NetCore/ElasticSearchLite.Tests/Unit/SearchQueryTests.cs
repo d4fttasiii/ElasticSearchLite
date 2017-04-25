@@ -14,20 +14,21 @@ namespace ElasticSearchLite.Tests.Unit
         [TestMethod]
         public void SearchQuery_ExceptionTest_Index()
         {
-            TestExceptions(typeof(ArgumentNullException), () => Search<MyPoco>.In(null, A.Dummy<string>()), "Index name is null");
+            TestExceptions(typeof(ArgumentNullException), () => Search.In(null), "Index name is null");
         }
 
         [TestMethod]
         public void SearchQuery_ExceptionTest_Type()
         {
-            TestExceptions(typeof(ArgumentNullException), () => Search<MyPoco>.In(A.Dummy<string>(), null), "Type name null");
+            TestExceptions(typeof(ArgumentNullException), () => Search.In(A.Dummy<string>()), "Type name null");
         }
 
         [TestMethod]
         public void SearchQuery_Generation_Term()
         {
             // Arrange
-            var query = Search<MyPoco>.In("mypocoindex", "mypoco")
+            var query = Search.In("mypocoindex")
+                .ThatReturns<MyPoco>()
                 .Term("TestText", "ABCDEFG")
                 .Take(15)
                 .Skip(15);
@@ -50,10 +51,11 @@ namespace ElasticSearchLite.Tests.Unit
         public void SearchQuery_Generation_Match()
         {
             // Arrange
-            var query = Search<MyPoco>.In("mypocoindex", "mypoco")
+            var query = Search.In("mypocoindex")
+                .ThatReturns<MyPoco>()
                 .Match("TestText", "ABCDEFG")
-                .Skip(10)
-                .Take(10);
+                .Take(10)
+                .Skip(10);
             var statementObject = new
             {
                 _source = true,
@@ -73,7 +75,8 @@ namespace ElasticSearchLite.Tests.Unit
         public void SearchQuery_Generation_Range()
         {
             // Arrange
-            var query = Search<MyPoco>.In("mypocoindex", "mypoco")
+            var query = Search.In("mypocoindex")
+                .ThatReturns<MyPoco>()
                 .Range(ElasticFields.Id.Name, ElasticRangeOperations.Gt, 1);
             var statementObject = new
             {

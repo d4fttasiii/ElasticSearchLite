@@ -44,7 +44,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <returns>Returns the updated DeleteQuery object.</returns>
         public IDeleteExecutable Match(string field, object value)
         {
-            var condition = new ElasticCodition
+            var condition = new ElasticTermCodition
             {
                 Field = new ElasticField { Name = field },
                 Value = value
@@ -57,7 +57,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="condition"></param>
         /// <returns>Returns the updated DeleteQuery object.</returns>
-        public IDeleteExecutable Match(ElasticCodition condition)
+        public IDeleteExecutable Match(ElasticTermCodition condition)
         {
             MatchCondition = CheckParameter(condition);
 
@@ -71,7 +71,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <returns>Returns the updated DeleteQuery object.</returns>
         public IDeleteExecutable Term(string field, object value)
         {
-            var condition = new ElasticCodition
+            var condition = new ElasticTermCodition
             {
                 Field = new ElasticField { Name = field },
                 Value = value
@@ -84,7 +84,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="condition"></param>
         /// <returns>Returns the updated DeleteQuery object.</returns>
-        public IDeleteExecutable Term(ElasticCodition condition)
+        public IDeleteExecutable Term(ElasticTermCodition condition)
         {
             TermCondition = CheckParameter(condition);
 

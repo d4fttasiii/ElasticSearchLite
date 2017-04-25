@@ -132,12 +132,12 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             return string.Empty;
         }
 
-        private string GenerateMatch(ElasticCodition condition)
+        private string GenerateMatch(ElasticTermCodition condition)
         {
             return $@"""match"": {{ ""{condition.Field.Name}"" : ""{condition.Value}"" }}";
         }
 
-        private string GenerateTerm(ElasticCodition condition)
+        private string GenerateTerm(ElasticTermCodition condition)
         {
             return $@"""term"": {{ ""{condition.Field.Name}"" : ""{condition.Value}"" }}";
         }
