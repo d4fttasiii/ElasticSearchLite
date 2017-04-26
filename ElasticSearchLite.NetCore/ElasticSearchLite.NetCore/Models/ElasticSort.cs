@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ElasticSearchLite.NetCore.Models
+﻿namespace ElasticSearchLite.NetCore.Models
 {
     public class ElasticSort
     {

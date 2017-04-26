@@ -7,6 +7,8 @@ using ElasticSearchLite.NetCore.Interfaces;
 using System.Linq;
 using ElasticSearchLite.NetCore.Models;
 using Newtonsoft.Json.Linq;
+using static ElasticSearchLite.NetCore.Queries.Search;
+using ElasticSearchLite.NetCore.Interfaces.Search;
 
 namespace ElasticSearchLite.NetCore
 {
@@ -62,13 +64,13 @@ namespace ElasticSearchLite.NetCore
         /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="query">SearchQuery object.</param>
         /// <returns>IEnumerable<TPoco></returns>
-        public IEnumerable<TPoco> ExecuteSearch<TPoco>(ISearchExecutable<TPoco> executableSearchQuery) where TPoco : IElasticPoco
+        public IEnumerable<TPoco> ExecuteSearch<TPoco>(IExecutableSearchQuery<TPoco> searchQuery) where TPoco : IElasticPoco
         {
             try
             {
-                var query = executableSearchQuery as Search<TPoco>;
+                var query = searchQuery as SearchQuery<TPoco>;
                 var statement = Generator.Generate(query);
-                var response = LowLevelClient.Search<string>(query.IndexName, query.TypeName, statement);
+                var response = LowLevelClient.Search<string>(query.IndexName, statement);
 
                 if (!response.Success)
                 {
@@ -211,12 +213,12 @@ namespace ElasticSearchLite.NetCore
             }            
         }
         /// <summary>
-        /// 
+        /// Executes the bulk using the Bulk API
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
         /// </summary>
-        /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="bulkQuery"></param>
         /// <returns></returns>
-        public void ExecuteBulk<TPoco>(Bulk<TPoco> bulkQuery) where TPoco : IElasticPoco
+        public void ExecuteBulk(Bulk bulkQuery)
         {
             try
             {

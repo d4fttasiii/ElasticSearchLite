@@ -32,17 +32,18 @@ public class MyPoco : IElasticPoco
 
 **Search Example**
 
-After creating a new ElasticLiteClient object, you can build up your Search object which requires an index and a type name to use the Search API from ElasticSearch. After this the search can be specified with different methods like: Term, Match, Range, Include, Exclude.
+After creating a new ElasticLiteClient object, you can build up your Search object which requires an index to use the Search API from ElasticSearch. After this the search can be specified with different methods like: Term, Match, Range, Sort, Take, Skip.
 
 ```csharp
 var client = new ElasticLiteClient("http://myserver:9200");
-var query = Search<MyPoco>
-    .In("mypocoindex", "mypoco")
+var pocosFound = Search
+    .In("mypocoindex")
+	.ThatReturns<MyPoco>()
     .Term("TestText", "ABCDEFG")
-	.Skip(5)
-	.Take(5);
-
-var document = client.ExecuteSearch(query);
+	.Sort("TestDateTime", ElasticSortOrders.Descending)
+	.Take(20)
+	.Skip(20)
+	.ExecuteUsing(client);
 ```
 
 **Index Example**
@@ -56,9 +57,9 @@ var poco = new MyPoco {
     Type = "mypoco", 
     TestText = "ElasticSearch is awesome!" 
 };
-var query = Index.Document(poco);
-	
-client.ExecuteIndex(query);
+
+Index.Document(poco)
+	.ExecuteUsing(client);
 ```
 
 **Update Example**
@@ -67,10 +68,11 @@ Update can be used to persist POCO changes to ElasticSearch as in seen in this e
 
 ```csharp
 var client = new ElasticLiteClient("http://myserver:9200");
+
 poco.LastChanged = DateTime.UtcNow;
-var query = Update.Document(poco);
-	
-client.ExecuteUpdate(query);
+
+Update.Document(poco)
+	.ExecuteUsing(client);
 ```
 
 **Delete POCO Example**
@@ -79,9 +81,9 @@ Delete will remove one existing document from ElasticSearch when it's constructe
 
 ```csharp
 var client = new ElasticLiteClient("http://myserver:9200");
-var query = Delete.Document(poco);
-	
-client.ExecuteDelete(query);
+
+var deleteDocuments = Delete.Document(poco)
+	.ExecuteUsing(client);
 ```
 
 **Delete Query Example**
@@ -90,8 +92,8 @@ Delete can also be used as a query to remove multiple documents from ElasticSear
 
 ```csharp
 var client = new ElasticLiteClient("http://myserver:9200");
-var query = Delete.From("mypocoindex", "mypoco")
-    .Term("TestText", "ABCDEFG");
-	
-client.ExecuteDelete(query);
+
+var deleteDocuments = Delete.From("mypocoindex", "mypoco")
+    .Term("TestText", "ABCDEFG")
+	.ExecuteUsing(client);
 ```

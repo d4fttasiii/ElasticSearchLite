@@ -21,6 +21,13 @@ namespace ElasticSearchLite.NetCore.Queries
             TypeName = poco.Type ?? throw new ArgumentNullException(nameof(poco.Type));
         }
 
+        protected AbstractQuery(string indexName)
+        {
+            if (string.IsNullOrEmpty(indexName)) { throw new ArgumentNullException(nameof(indexName)); }
+
+            IndexName = indexName;
+        }
+
         protected AbstractQuery(string indexName, string typeName)
         {
             if (string.IsNullOrEmpty(indexName)) { throw new ArgumentNullException(nameof(indexName)); }

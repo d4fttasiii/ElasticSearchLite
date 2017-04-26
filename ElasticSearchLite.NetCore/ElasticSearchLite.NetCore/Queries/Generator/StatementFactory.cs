@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Globalization;
 using System.Text;
+using static ElasticSearchLite.NetCore.Queries.Search;
 
 namespace ElasticSearchLite.NetCore.Queries.Generator
 {
@@ -18,7 +19,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         {
             switch (query)
             {
-                case Search searchQuery:
+                case SearchQuery searchQuery:
                     return GenerateSearchQuery(searchQuery);
                 case Delete deleteQuery:
                     return GenerateDeleteQuery(deleteQuery);
@@ -33,11 +34,10 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             }
         }
 
-        private string GenerateSearchQuery(Search searchQuery)
+        private string GenerateSearchQuery(SearchQuery searchQuery)
         {
             var statementParts = new List<string>
             {
-                GenerateSources(searchQuery.Fields),
                 GenerateQuery(searchQuery),
                 GenerateSize(searchQuery.Size),
                 GenerateFrom(searchQuery.From)

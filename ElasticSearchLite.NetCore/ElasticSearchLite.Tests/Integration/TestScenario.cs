@@ -2,6 +2,7 @@
 using ElasticSearchLite.NetCore.Models;
 using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.Tests.Poco;
+using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
@@ -30,33 +31,41 @@ namespace ElasticSearchLite.Tests.Integration
         [TestMethod]
         public void TestScenario_Index_Search_Update_Verify_Delete()
         {
-            var indexQuery = Index.Document(poco);
-            Client.ExecuteIndex(indexQuery);
+            Index.Document(poco)
+                .ExecuteUsing(Client);
 
             Thread.Sleep(2000);
 
-            var searchQuery = Search.In(indexName).ThatReturns<MyPoco>().Term(ElasticFields.Id.Name, poco.Id);
-            var document = Client.ExecuteSearch(searchQuery).SingleOrDefault();
+            var document = Search
+                .In(indexName)
+                .ThatReturns<MyPoco>()
+                .Term(ElasticFields.Id.Name, poco.Id)
+                .ExecuteUsing(Client)
+                .Single();
 
-            Assert.AreEqual(poco.Id, document.Id);
-            Assert.AreEqual(poco.Index, document.Index);
-            Assert.AreEqual(poco.Type, document.Type);
-            Assert.AreEqual(poco.TestBool, document.TestBool);
-            Assert.AreEqual(poco.TestDouble, document.TestDouble);
-            Assert.AreEqual(poco.TestInteger, document.TestInteger);
-            Assert.AreEqual(poco.TestText, document.TestText);
-            Assert.AreEqual(string.Join("", poco.TestStringArray), string.Join("", document.TestStringArray));
+            poco.Id.ShouldBeEquivalentTo(document.Id);
+            poco.Index.ShouldBeEquivalentTo(document.Index);
+            poco.Type.ShouldBeEquivalentTo(document.Type);
+            poco.TestBool.ShouldBeEquivalentTo(document.TestBool);
+            poco.TestDouble.ShouldBeEquivalentTo(document.TestDouble);
+            poco.TestInteger.ShouldBeEquivalentTo(document.TestInteger);
+            poco.TestText.ShouldBeEquivalentTo(document.TestText);
+            string.Join("", poco.TestStringArray).ShouldBeEquivalentTo(string.Join("", document.TestStringArray));
 
             poco.TestText = "ChangedText";
-            Client.ExecuteUpdate(Update.Document(poco));
+            Update.Document(poco).ExecuteUsing(Client);
 
             Thread.Sleep(2000);
 
-            document = Client.ExecuteSearch(searchQuery).FirstOrDefault();
-            Assert.AreEqual(poco.TestText, document.TestText);
+            Search.In(indexName)
+                .ThatReturns<MyPoco>()
+                .Term(ElasticFields.Id.Name, poco.Id)
+                .ExecuteUsing(Client)
+                .Single()
+                .TestText
+                .ShouldBeEquivalentTo(poco.TestText);
 
-            var deleteQuery = Delete.Document(poco);
-            Client.ExecuteDelete(deleteQuery);
+            Delete.Document(poco).ExecuteUsing(Client);
         }
 
         [TestMethod]

@@ -14,13 +14,7 @@ namespace ElasticSearchLite.Tests.Unit
         [TestMethod]
         public void SearchQuery_ExceptionTest_Index()
         {
-            TestExceptions(typeof(ArgumentNullException), () => Search.In(null), "Index name is null");
-        }
-
-        [TestMethod]
-        public void SearchQuery_ExceptionTest_Type()
-        {
-            TestExceptions(typeof(ArgumentNullException), () => Search.In(A.Dummy<string>()), "Type name null");
+            TestExceptions(typeof(ArgumentException), () => Search.In(null), "Index name is null");
         }
 
         [TestMethod]
@@ -34,7 +28,6 @@ namespace ElasticSearchLite.Tests.Unit
                 .Skip(15);
             var statementObject = new
             {
-                _source = true,
                 query = new
                 {
                     term = new { TestText = "ABCDEFG" }
@@ -58,7 +51,6 @@ namespace ElasticSearchLite.Tests.Unit
                 .Skip(10);
             var statementObject = new
             {
-                _source = true,
                 query = new
                 {
                     match = new { TestText = "ABCDEFG" }
@@ -80,7 +72,6 @@ namespace ElasticSearchLite.Tests.Unit
                 .Range(ElasticFields.Id.Name, ElasticRangeOperations.Gt, 1);
             var statementObject = new
             {
-                _source = true,
                 query = new
                 {
                     range = new
