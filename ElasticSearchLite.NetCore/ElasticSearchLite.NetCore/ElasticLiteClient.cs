@@ -9,6 +9,7 @@ using ElasticSearchLite.NetCore.Models;
 using Newtonsoft.Json.Linq;
 using static ElasticSearchLite.NetCore.Queries.Search;
 using ElasticSearchLite.NetCore.Interfaces.Search;
+using static ElasticSearchLite.NetCore.Queries.Delete;
 
 namespace ElasticSearchLite.NetCore
 {
@@ -64,7 +65,8 @@ namespace ElasticSearchLite.NetCore
         /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="query">SearchQuery object.</param>
         /// <returns>IEnumerable<TPoco></returns>
-        public IEnumerable<TPoco> ExecuteSearch<TPoco>(IExecutableSearchQuery<TPoco> searchQuery) where TPoco : IElasticPoco
+        public IEnumerable<TPoco> ExecuteSearch<TPoco>(IExecutableSearchQuery<TPoco> searchQuery) 
+            where TPoco : IElasticPoco
         {
             try
             {
@@ -156,9 +158,10 @@ namespace ElasticSearchLite.NetCore
         /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="query">DeleteQuery object</param>
         /// <returns>Returnes the number of effected documents.</returns>
-        public int ExecuteDelete(IDeleteExecutable deleteQuery)
+        public int ExecuteDelete<TPoco>(IDeleteExecutable<TPoco> deleteQuery)
+            where TPoco: IElasticPoco
         {
-            var query = deleteQuery as Delete;
+            var query = deleteQuery as DeleteQuery<TPoco>;
             if (query == null)
             {
                 throw new Exception("Invalid delete request!");

@@ -44,21 +44,18 @@ namespace ElasticSearchLite.Tests.Unit
         [TestMethod]
         public void DeleteQuery_ExceptionTest_Index()
         {
-            TestExceptions(typeof(ArgumentNullException), () => Delete.From(null, A.Dummy<string>()), "Index name is null");
-        }
-
-        [TestMethod]
-        public void DeleteQuery_ExceptionTest_Type()
-        {
-            TestExceptions(typeof(ArgumentNullException), () => Delete.From(A.Dummy<string>(), null), "Type name null");
+            TestExceptions(typeof(ArgumentNullException), () => Delete.From(null), "Index name is null");
         }
 
         [TestMethod]
         public void DeleteQuery_Generation_Term()
         {
             InitPoco();
-            var query = Delete.From("mypocoindex", "mypoco")
-                .Term("_id", "123");
+            var query = Delete
+                .From("mypocoindex")
+                .Documents<MyPoco>()
+                .Term(p => p.Id, "123");
+
             var queryObject = new
             {
                 query = new
@@ -77,8 +74,10 @@ namespace ElasticSearchLite.Tests.Unit
         public void DeleteQuery_Generation_Match()
         {
             InitPoco();
-            var query = Delete.From("mypocoindex", "mypoco")
-                .Match("_id", "123");
+            var query = Delete
+                .From("mypocoindex")
+                .Documents<MyPoco>()
+                .Match(p => p.Id, "123");
             var queryObject = new
             {
                 query = new
@@ -97,8 +96,10 @@ namespace ElasticSearchLite.Tests.Unit
         public void DeleteQuery_Generation_Range()
         {
             InitPoco();
-            var query = Delete.From("mypocoindex", "mypoco")
-                .Range("_id", ElasticRangeOperations.Gte, "123");
+            var query = Delete
+                .From("mypocoindex")
+                .Documents<MyPoco>()
+                .Range(p => p.Id, ElasticRangeOperations.Gte, "123");
             var queryObject = new
             {
                 query = new

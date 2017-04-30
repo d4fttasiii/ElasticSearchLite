@@ -1,121 +1,130 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Models;
 using System;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
-    public class Delete : AbstractQuery, IDeleteExecutable
+
+    public class Delete
     {
-        protected Delete(IElasticPoco poco) : base(poco)
+        private string IndexName { get; }
+
+        private Delete(string indexName)
         {
-            if (string.IsNullOrEmpty(poco.Id))
-            {
-                throw new ArgumentNullException(nameof(poco.Id));
-            }
+            if (string.IsNullOrEmpty(indexName)) { throw new ArgumentNullException(nameof(IndexName)); }
+
+            IndexName = indexName;
         }
-        protected Delete(string indexName, string typeName) : base(indexName, typeName) { }
         /// <summary>
         /// Creates a DeleteQuery instance which can be specified with Term, Match, Range methods.
         /// This DeleteQuery will be executed using the Delete by Query API
         /// https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete-by-query.html
         /// </summary>
         /// <param name="indexName"></param>
-        /// <param name="typeName"></param>
         /// <returns></returns>
-        public static Delete From(string indexName, string typeName)
-        {
-            return new Delete(indexName, typeName);
-        }
+        public static Delete From(string indexName) => new Delete(indexName);
         /// <summary>
-        /// Creates a DeleteQuery instance which will delete a certain document associated with the given POCO.
-        /// This DeleteQuery will be executed using the Delete API
-        /// https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete.html
+        /// This DeleteQuery will be executed using the Delete API and remove one document where the 
+        /// Id is the given poco's Id.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/docs-delete.html
         /// </summary>
-        /// <param name="poco">A valid Poco should have and Index, Type and Id</param>
-        /// <returns>Return an executeable DeleteQuery</returns>
-        public static IDeleteExecutable Document<TPoco>(TPoco poco) where TPoco : IElasticPoco
-        {
-            return new Delete(poco);
-        }
+        /// <typeparam name="TPoco"></typeparam>
+        /// <param name="poco"></param>
+        /// <returns></returns>
+        public static IDeleteExecutable<TPoco> Document<TPoco>(TPoco poco)
+            where TPoco : IElasticPoco => new DeleteQuery<TPoco>(poco);
         /// <summary>
-        /// 
+        /// Sets the poco type used in the query builiding process.
         /// </summary>
-        /// <param name="condition"></param>
-        /// <returns>Returns the updated DeleteQuery object.</returns>
-        public IDeleteExecutable Match(string field, object value)
+        /// <typeparam name="TPoco"></typeparam>
+        /// <returns></returns>
+        public DeleteQuery<TPoco> Documents<TPoco>()
+            where TPoco : IElasticPoco => new DeleteQuery<TPoco>(IndexName);
+
+        public abstract class DeleteQuery : AbstractQuery
         {
-            var condition = new ElasticTermCodition
+            internal DeleteQuery(IElasticPoco poco) : base(poco)
             {
-                Field = new ElasticField { Name = field },
-                Value = value
-            };
-
-            return Match(condition);
+                if (string.IsNullOrEmpty(poco.Id))
+                {
+                    throw new ArgumentNullException(nameof(poco.Id));
+                }
+            }
+            internal DeleteQuery(string indexName) : base(indexName) { }
         }
-        /// <summary>
-        /// Deletes documents matching a given condition
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <returns>Returns the updated DeleteQuery object.</returns>
-        public IDeleteExecutable Match(ElasticTermCodition condition)
-        {
-            MatchCondition = CheckParameter(condition);
 
-            return this;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="field"></param>
-        /// <param name="value"></param>
-        /// <returns>Returns the updated DeleteQuery object.</returns>
-        public IDeleteExecutable Term(string field, object value)
+        public sealed class DeleteQuery<TPoco> : DeleteQuery, IDeleteExecutable<TPoco>
+        where TPoco : IElasticPoco
         {
-            var condition = new ElasticTermCodition
+            internal DeleteQuery(IElasticPoco poco) : base(poco) { }
+            internal DeleteQuery(string indexName) : base(indexName) { }
+            /// <summary>
+            /// Creates a DeleteQuery instance which will delete a certain document associated with the given POCO.
+            /// This DeleteQuery will be executed using the Delete API
+            /// https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete.html
+            /// </summary>
+            /// <param name="poco">A valid Poco should have and Index, Type and Id</param>
+            /// <returns>Return an executeable DeleteQuery</returns>
+            public IDeleteExecutable<TPoco> Document(TPoco poco) => new DeleteQuery<TPoco>(poco);
+            /// <summary>
+            /// Deletes a document for a match condition
+            /// </summary>
+            /// <param name="condition"></param>
+            /// <returns>Returns the updated DeleteQuery object.</returns>
+            public IDeleteExecutable<TPoco> Match(Expression<Func<TPoco, object>> propertyExpression, object value)
             {
-                Field = new ElasticField { Name = field },
-                Value = value
-            };
+                var propertyInfo = ((MemberExpression)propertyExpression.Body).Member as PropertyInfo;
+                var condition = new ElasticMatchCodition
+                {
+                    Field = new ElasticField { Name = propertyInfo.Name },
+                    Value = value
+                };
+                MatchCondition = condition;
 
-            return Term(condition);
-        }
-        /// <summary>
-        /// Term Query finds documents that contain the exact term specified in the inverted index and deletes them.
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <returns>Returns the updated DeleteQuery object.</returns>
-        public IDeleteExecutable Term(ElasticTermCodition condition)
-        {
-            TermCondition = CheckParameter(condition);
-
-            return this;
-        }
-        /// <summary>
-        /// Deletes documents which are in a certain range
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <returns>Returns the updated DeleteQuery object.</returns>
-        public IDeleteExecutable Range(string field, ElasticRangeOperations operation, object value)
-        {
-            var rangeCondition = new ElasticRangeCondition
+                return this;
+            }
+            /// <summary>
+            /// Deletes document for a term condition
+            /// </summary>
+            /// <param name="propertyExpression"></param>
+            /// <param name="value"></param>
+            /// <returns>Returns the updated DeleteQuery object.</returns>
+            public IDeleteExecutable<TPoco> Term(Expression<Func<TPoco, object>> propertyExpression, object value)
             {
-                Field = new ElasticField { Name = field },
-                Operation = operation,
-                Value = value
-            };
+                var propertyInfo = ((MemberExpression)propertyExpression.Body).Member as PropertyInfo;
+                var condition = new ElasticTermCodition
+                {
+                    Field = new ElasticField { Name = propertyInfo.Name },
+                    Value = value
+                };
+                TermCondition = condition;
 
-            return Range(rangeCondition);
-        }
-        /// <summary>
-        /// Deletes documents which are in a certain range
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <returns>Returns the updated DeleteQuery object.</returns>
-        public IDeleteExecutable Range(ElasticRangeCondition condition)
-        {
-            RangeCondition = CheckParameter(condition);
+                return this;
+            }
+            /// <summary>
+            /// Deletes documents which are in a certain range
+            /// </summary>
+            /// <param name="propertyExpression"></param>
+            /// <param name="operation"></param>
+            /// <param name="value"></param>
+            /// <returns>Returns the updated DeleteQuery object.</returns>
+            public IDeleteExecutable<TPoco> Range(Expression<Func<TPoco, object>> propertyExpression, ElasticRangeOperations operation, object value)
+            {
+                var propertyInfo = ((MemberExpression)propertyExpression.Body).Member as PropertyInfo;
+                var rangeCondition = new ElasticRangeCondition
+                {
+                    Field = new ElasticField { Name = propertyInfo.Name },
+                    Operation = operation,
+                    Value = value
+                };
+                RangeCondition = rangeCondition;
 
-            return this;
+                return this;
+            }
         }
+
     }
+
 }

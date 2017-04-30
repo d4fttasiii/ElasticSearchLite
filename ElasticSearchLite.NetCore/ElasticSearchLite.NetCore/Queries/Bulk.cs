@@ -21,12 +21,20 @@ namespace ElasticSearchLite.NetCore.Queries
     public class Bulk<T> : Bulk where T : IElasticPoco
     {
         protected Bulk(string indexName) : base(indexName) { }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="indexName"></param>
+        /// <returns></returns>
         public static Bulk<T> Create(string indexName)
         {
             return new Bulk<T>(indexName);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pocos"></param>
+        /// <returns></returns>
         public Bulk<T> Index(params T[] pocos)
         {
             CheckPocos(pocos);
@@ -34,7 +42,11 @@ namespace ElasticSearchLite.NetCore.Queries
 
             return this;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pocos"></param>
+        /// <returns></returns>
         public Bulk<T> Update(params T[] pocos)
         {
             CheckPocos(pocos);
@@ -42,7 +54,11 @@ namespace ElasticSearchLite.NetCore.Queries
 
             return this;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pocos"></param>
+        /// <returns></returns>
         public Bulk<T> Delete(params T[] pocos)
         {
             CheckPocos(pocos);

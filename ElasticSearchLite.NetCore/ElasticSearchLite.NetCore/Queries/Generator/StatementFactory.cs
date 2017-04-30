@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Globalization;
 using System.Text;
 using static ElasticSearchLite.NetCore.Queries.Search;
+using static ElasticSearchLite.NetCore.Queries.Delete;
 
 namespace ElasticSearchLite.NetCore.Queries.Generator
 {
@@ -21,7 +22,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             {
                 case SearchQuery searchQuery:
                     return GenerateSearchQuery(searchQuery);
-                case Delete deleteQuery:
+                case DeleteQuery deleteQuery:
                     return GenerateDeleteQuery(deleteQuery);
                 case Index indexQuery:
                     return GenerateInsertQuery(indexQuery);
@@ -46,7 +47,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             return $"{{ {string.Join(",", statementParts)} }}";
         }
 
-        private string GenerateDeleteQuery(Delete deleteQuery)
+        private string GenerateDeleteQuery(DeleteQuery deleteQuery)
         {
             return $"{{ {GenerateQuery(deleteQuery)} }}";
         }
@@ -78,22 +79,11 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                         break;
                     case "update":
                         statement.AppendLine(GenerateDocument(poco));
-                        break;                }
+                        break;
+                }
             }
 
             return statement.ToString();
-        }
-
-        private string GenerateSources(List<ElasticField> fields)
-        {
-            if (fields.Any())
-            {
-                var includedFields = string.Join(",", fields.Select(f => $"\"{f.Name}\""));
-
-                return $@"""_source"": {{ ""includes"": [{includedFields}] }}";
-            }
-
-            return @"""_source"": true";
         }
 
         private string GenerateDocument(IElasticPoco poco)
@@ -132,31 +122,6 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             return string.Empty;
         }
 
-        private string GenerateMatch(ElasticTermCodition condition)
-        {
-            return $@"""match"": {{ ""{condition.Field.Name}"" : ""{condition.Value}"" }}";
-        }
-
-        private string GenerateTerm(ElasticTermCodition condition)
-        {
-            return $@"""term"": {{ ""{condition.Field.Name}"" : ""{condition.Value}"" }}";
-        }
-
-        private string GenerateRange(ElasticRangeCondition condition)
-        {
-            return $@"""range"": {{""{condition.Field.Name}"": {{""{condition.Operation.Name}"" : ""{condition.Value}"" }} }}";
-        }
-
-        private string GenerateSize(int size)
-        {
-            return $@"""size"": {size}";
-        }
-
-        private string GenerateFrom(int from)
-        {
-            return $@"""from"": {from}";
-        }
-
         private string EscapeValue(object value)
         {
             if (value.GetType().IsArray)
@@ -191,5 +156,11 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     throw new Exception("Unknown type as POCO property");
             }
         }
+
+        private string GenerateMatch(ElasticTermCodition condition) => $@"""match"": {{ ""{condition.Field.Name}"" : ""{condition.Value}"" }}";
+        private string GenerateTerm(ElasticTermCodition condition) => $@"""term"": {{ ""{condition.Field.Name}"" : ""{condition.Value}"" }}";
+        private string GenerateRange(ElasticRangeCondition condition) => $@"""range"": {{""{condition.Field.Name}"": {{""{condition.Operation.Name}"" : ""{condition.Value}"" }} }}";
+        private string GenerateSize(int size) => $@"""size"": {size}";
+        private string GenerateFrom(int from) => $@"""from"": {from}";
     }
 }

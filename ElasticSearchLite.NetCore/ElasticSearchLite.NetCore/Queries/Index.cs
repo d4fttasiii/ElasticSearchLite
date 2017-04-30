@@ -10,9 +10,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="poco"></param>
         /// <returns></returns>
-        public static Index Document<T>(T poco) where T : IElasticPoco
-        {
-            return new Index(poco);
-        }
+        public static Index Document<T>(T poco) 
+            where T : IElasticPoco => new Index(poco);
     }
 }

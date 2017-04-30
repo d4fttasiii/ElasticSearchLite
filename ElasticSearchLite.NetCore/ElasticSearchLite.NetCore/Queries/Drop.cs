@@ -19,9 +19,6 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="indexName">Index's which should be removed.</param>
         /// <returns>DropQuery object.</returns>
-        public static Drop Index(string indexName)
-        {
-            return new Drop(indexName);
-        }
+        public static Drop Index(string indexName) => new Drop(indexName);
     }
 }

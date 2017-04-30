@@ -18,7 +18,8 @@ namespace ElasticSearchLite.NetCore
         /// </summary>
         /// <param name="delete"></param>
         /// <param name="client"></param>
-        public static int ExecuteUsing(this IDeleteExecutable delete, ElasticLiteClient client) => client.ExecuteDelete(delete);
+        public static int ExecuteUsing<TPoco>(this IDeleteExecutable<TPoco> delete, ElasticLiteClient client)
+            where TPoco : IElasticPoco => client.ExecuteDelete(delete);
         /// <summary>
         /// 
         /// </summary>
@@ -42,6 +43,7 @@ namespace ElasticSearchLite.NetCore
         /// </summary>
         /// <param name="search"></param>
         /// <param name="client"></param>
-        public static IEnumerable<TPoco> ExecuteUsing<TPoco>(this IExecutableSearchQuery<TPoco> search, ElasticLiteClient client) where TPoco : IElasticPoco => client.ExecuteSearch(search);
+        public static IEnumerable<TPoco> ExecuteUsing<TPoco>(this IExecutableSearchQuery<TPoco> search, ElasticLiteClient client)
+            where TPoco : IElasticPoco => client.ExecuteSearch(search);
     }
 }

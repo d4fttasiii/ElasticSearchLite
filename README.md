@@ -38,8 +38,8 @@ After creating a new ElasticLiteClient object, you can build up your Search obje
 var client = new ElasticLiteClient("http://myserver:9200");
 var pocosFound = Search
     .In("mypocoindex")
-    .ThatReturns<MyPoco>()
-    .Term("TestText", "ABCDEFG")
+    .Return<MyPoco>()
+    .Term(p => p.TestText, "ABCDEFG")
     .Sort("TestDateTime", ElasticSortOrders.Descending)
     .Take(20)
     .Skip(20)
@@ -52,7 +52,8 @@ The add a document to ElasticSearch using a POCO object, the POCO will require t
 
 ```csharp
 var client = new ElasticLiteClient("http://myserver:9200");
-var poco = new MyPoco { 
+var poco = new MyPoco 
+{ 
     Index = "mypocoindex", 
     Type = "mypoco", 
     TestText = "ElasticSearch is awesome!" 
@@ -68,10 +69,10 @@ Update can be used to persist POCO changes to ElasticSearch as in seen in this e
 
 ```csharp
 var client = new ElasticLiteClient("http://myserver:9200");
-
 poco.LastChanged = DateTime.UtcNow;
 
-Update.Document(poco)
+Update
+    .Document(poco)
     .ExecuteUsing(client);
 ```
 
@@ -82,7 +83,8 @@ Delete will remove one existing document from ElasticSearch when it's constructe
 ```csharp
 var client = new ElasticLiteClient("http://myserver:9200");
 
-var deleteDocuments = Delete.Document(poco)
+var deleteDocuments = Delete
+    .Document(poco)
     .ExecuteUsing(client);
 ```
 
@@ -94,7 +96,8 @@ Delete can also be used as a query to remove multiple documents from ElasticSear
 var client = new ElasticLiteClient("http://myserver:9200");
 
 var deleteDocuments = Delete
-    .From("mypocoindex", "mypoco")
-    .Term("TestText", "ABCDEFG")
+    .From("mypocoindex")
+	.Documents<MyPoco>()
+    .Term(p => p.TestText, "ABCDEFG")
     .ExecuteUsing(client);
 ```

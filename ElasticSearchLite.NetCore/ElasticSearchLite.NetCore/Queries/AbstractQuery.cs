@@ -48,12 +48,5 @@ namespace ElasticSearchLite.NetCore.Queries
             if (parameters == null) { throw new ArgumentNullException(nameof(parameters)); }
             if (!parameters.Any()) { throw new ArgumentException(nameof(parameters)); }
         }
-
-        protected virtual void ClearAllConditions()
-        {
-            MatchCondition = null;
-            RangeCondition = null;
-            TermCondition = null;
-        }
     }
 }

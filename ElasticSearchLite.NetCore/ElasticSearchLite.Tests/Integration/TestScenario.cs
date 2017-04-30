@@ -1,5 +1,4 @@
 ﻿using ElasticSearchLite.NetCore;
-using ElasticSearchLite.NetCore.Models;
 using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.Tests.Poco;
 using FluentAssertions;
@@ -38,8 +37,8 @@ namespace ElasticSearchLite.Tests.Integration
 
             var document = Search
                 .In(indexName)
-                .ThatReturns<MyPoco>()
-                .Term(ElasticFields.Id.Name, poco.Id)
+                .Return<MyPoco>()
+                .Term(p => p.Id, poco.Id)
                 .ExecuteUsing(Client)
                 .Single();
 
@@ -58,8 +57,8 @@ namespace ElasticSearchLite.Tests.Integration
             Thread.Sleep(2000);
 
             Search.In(indexName)
-                .ThatReturns<MyPoco>()
-                .Term(ElasticFields.Id.Name, poco.Id)
+                .Return<MyPoco>()
+                .Term(p => p.Id, poco.Id)
                 .ExecuteUsing(Client)
                 .Single()
                 .TestText

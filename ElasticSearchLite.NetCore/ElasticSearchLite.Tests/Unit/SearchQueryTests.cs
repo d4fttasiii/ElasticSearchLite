@@ -3,7 +3,6 @@ using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.NetCore.Models;
 using ElasticSearchLite.Tests.Poco;
 using System;
-using FakeItEasy;
 
 namespace ElasticSearchLite.Tests.Unit
 {
@@ -22,8 +21,8 @@ namespace ElasticSearchLite.Tests.Unit
         {
             // Arrange
             var query = Search.In("mypocoindex")
-                .ThatReturns<MyPoco>()
-                .Term("TestText", "ABCDEFG")
+                .Return<MyPoco>()
+                .Term(p => p.TestText, "ABCDEFG")
                 .Take(15)
                 .Skip(15);
             var statementObject = new
@@ -45,8 +44,8 @@ namespace ElasticSearchLite.Tests.Unit
         {
             // Arrange
             var query = Search.In("mypocoindex")
-                .ThatReturns<MyPoco>()
-                .Match("TestText", "ABCDEFG")
+                .Return<MyPoco>()
+                .Match(p => p.TestText, "ABCDEFG")
                 .Take(10)
                 .Skip(10);
             var statementObject = new
@@ -68,8 +67,8 @@ namespace ElasticSearchLite.Tests.Unit
         {
             // Arrange
             var query = Search.In("mypocoindex")
-                .ThatReturns<MyPoco>()
-                .Range(ElasticFields.Id.Name, ElasticRangeOperations.Gt, 1);
+                .Return<MyPoco>()
+                .Range(p => p.Id, ElasticRangeOperations.Gt, 1);
             var statementObject = new
             {
                 query = new

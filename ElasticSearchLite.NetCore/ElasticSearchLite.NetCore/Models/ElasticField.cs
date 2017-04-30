@@ -1,7 +1,20 @@
 ﻿namespace ElasticSearchLite.NetCore.Models
-{ 
+{
     public class ElasticField
     {
-        public string Name { get; set; }
+        private string _name;
+
+        public string Name
+        {
+            get
+            {
+                if (_name == "Id")
+                {
+                    return ElasticFields.Id.Name;
+                }
+                return _name;
+            }
+            set { _name = value; }
+        }
     }
 }
