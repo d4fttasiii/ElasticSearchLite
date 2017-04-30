@@ -40,7 +40,7 @@ var pocosFound = Search
     .In("mypocoindex")
     .Return<MyPoco>()
     .Term(p => p.TestText, "ABCDEFG")
-    .Sort("TestDateTime", ElasticSortOrders.Descending)
+    .Sort(p => p.TestDateTime, ElasticSortOrders.Descending)
     .Take(20)
     .Skip(20)
     .ExecuteUsing(client);
@@ -97,7 +97,7 @@ var client = new ElasticLiteClient("http://myserver:9200");
 
 var deleteDocuments = Delete
     .From("mypocoindex")
-	.Documents<MyPoco>()
+    .Documents<MyPoco>()
     .Term(p => p.TestText, "ABCDEFG")
     .ExecuteUsing(client);
 ```
