@@ -84,11 +84,5 @@ namespace ElasticSearchLite.Tests.Integration
                  .Delete(poco)
                  .ExecuteAsyncWith(Client);
         }
-
-        [TestCleanup]
-        public void CleanUp()
-        {
-            Client.ExecuteDrop(Drop.Index(poco.Index));
-        }
     }
 }
