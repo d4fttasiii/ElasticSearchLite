@@ -43,7 +43,7 @@ var pocosFound = Search
     .Sort(p => p.TestDateTime, ElasticSortOrders.Descending)
     .Take(20)
     .Skip(20)
-    .ExecuteUsing(client);
+    .ExecuteWith(client);
 ```
 
 **Index Example**
@@ -60,7 +60,7 @@ var poco = new MyPoco
 };
 
 Index.Document(poco)
-    .ExecuteUsing(client);
+    .ExecuteWith(client);
 ```
 
 **Update Example**
@@ -73,7 +73,7 @@ poco.LastChanged = DateTime.UtcNow;
 
 Update
     .Document(poco)
-    .ExecuteUsing(client);
+    .ExecuteWith(client);
 ```
 
 **Delete POCO Example**
@@ -85,7 +85,7 @@ var client = new ElasticLiteClient("http://myserver:9200");
 
 var deleteDocuments = Delete
     .Document(poco)
-    .ExecuteUsing(client);
+    .ExecuteWith(client);
 ```
 
 **Delete Query Example**
@@ -99,5 +99,5 @@ var deleteDocuments = Delete
     .From("mypocoindex")
     .Documents<MyPoco>()
     .Term(p => p.TestText, "ABCDEFG")
-    .ExecuteUsing(client);
+    .ExecuteWith(client);
 ```
