@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace ElasticSearchLite.Tests.Unit
 {
     [TestClass]
+    [TestCategory("Unit")]
     public class BulkQueryTests : AbstractQueryTest
     {
         [TestMethod]

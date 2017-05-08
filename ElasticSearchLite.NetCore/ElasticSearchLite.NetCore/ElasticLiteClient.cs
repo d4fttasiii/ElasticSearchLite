@@ -7,9 +7,10 @@ using ElasticSearchLite.NetCore.Interfaces;
 using System.Linq;
 using ElasticSearchLite.NetCore.Models;
 using Newtonsoft.Json.Linq;
-using static ElasticSearchLite.NetCore.Queries.Search;
 using ElasticSearchLite.NetCore.Interfaces.Search;
+using System.Threading.Tasks;
 using static ElasticSearchLite.NetCore.Queries.Delete;
+using static ElasticSearchLite.NetCore.Queries.Search;
 
 namespace ElasticSearchLite.NetCore
 {
@@ -63,40 +64,32 @@ namespace ElasticSearchLite.NetCore
         /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/_the_search_api.html
         /// </summary>
         /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
-        /// <param name="query">SearchQuery object.</param>
+        /// <param name="searchQuery">SearchQuery object.</param>
         /// <returns>IEnumerable<TPoco></returns>
-        public IEnumerable<TPoco> ExecuteSearch<TPoco>(IExecutableSearchQuery<TPoco> searchQuery) 
+        public IEnumerable<TPoco> ExecuteSearch<TPoco>(IExecutableSearchQuery<TPoco> searchQuery)
             where TPoco : IElasticPoco
         {
-            try
-            {
-                var query = searchQuery as SearchQuery<TPoco>;
-                var statement = Generator.Generate(query);
-                var response = LowLevelClient.Search<string>(query.IndexName, statement);
+            var query = searchQuery as SearchQuery<TPoco>;
+            var statement = Generator.Generate(query);
 
-                if (!response.Success)
-                {
-                    throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
-                }
+            return ProcessSeachResponse<TPoco>(LowLevelClient.Search<string>(query.IndexName, statement));
 
-                var data = JObject.Parse(response.Body);
-                var hits = new List<TPoco>();
-                foreach (var x in data[ElasticFields.Hits.Name][ElasticFields.Hits.Name])
-                {
-                    var document = x[ElasticFields.Source.Name].ToObject<TPoco>();
-                    document.Id = x[ElasticFields.Id.Name].ToString();
-                    document.Index = x[ElasticFields.Index.Name].ToString();
-                    document.Type = x[ElasticFields.Type.Name].ToString();
-                    document.Score = x[ElasticFields.Score.Name].ToObject<double>();
-                    hits.Add(document);
-                }
+        }
+        /// <summary>
+        /// Executes an asyncronus SearchQuery using the Search API and returns a list of generic pocos.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/_the_search_api.html
+        /// </summary>
+        /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
+        /// <param name="searchQuery">SearchQuery object.</param>
+        /// <returns>IEnumerable<TPoco></returns>
+        public async Task<IEnumerable<TPoco>> ExecuteSearchAsync<TPoco>(IExecutableSearchQuery<TPoco> searchQuery)
+             where TPoco : IElasticPoco
+        {
+            var query = searchQuery as SearchQuery<TPoco>;
+            var statement = Generator.Generate(query);
 
-                return hits;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            return ProcessSeachResponse<TPoco>(await LowLevelClient.SearchAsync<string>(query.IndexName, statement));
+
         }
         /// <summary>
         /// Executes an IndexQuery using the Index API which creates a new document in the index.
@@ -105,27 +98,29 @@ namespace ElasticSearchLite.NetCore
         /// <param name="query">IndexQuery object</param>
         public void ExecuteIndex(Index query)
         {
-            try
-            {
-                var statement = Generator.Generate(query);
+            var statement = Generator.Generate(query);
 
-                var response = !string.IsNullOrEmpty(query.Poco.Id) ?
-                    LowLevelClient.Index<string>(query.IndexName, query.TypeName, query.Poco.Id, statement) :
-                    LowLevelClient.Index<string>(query.IndexName, query.TypeName, statement);
+            var response = !string.IsNullOrEmpty(query.Poco.Id) ?
+                LowLevelClient.Index<string>(query.IndexName, query.TypeName, query.Poco.Id, statement) :
+                LowLevelClient.Index<string>(query.IndexName, query.TypeName, statement);
 
-                if (!response.Success)
-                {
-                    throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
-                }
+            ProcessIndexResponse(query, response);
 
-                var data = JObject.Parse(response.Body);
-                query.Poco.Id = data[ElasticFields.Id.Name].ToString();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-           
+        }
+        /// <summary>
+        /// Executes an asyncronus IndexQuery using the Index API which creates a new document in the index.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/docs-index_.html
+        /// </summary>
+        /// <param name="query">IndexQuery object</param>
+        public async Task ExecuteIndexAsync(Index query)
+        {
+            var statement = Generator.Generate(query);
+
+            var response = !string.IsNullOrEmpty(query.Poco.Id) ?
+                LowLevelClient.IndexAsync<string>(query.IndexName, query.TypeName, query.Poco.Id, statement) :
+                LowLevelClient.IndexAsync<string>(query.IndexName, query.TypeName, statement);
+
+            ProcessIndexResponse(query, await response);
         }
         /// <summary>
         /// Executes an UpdateQuery using the Update API and updates a document identified by the Id.
@@ -135,21 +130,29 @@ namespace ElasticSearchLite.NetCore
         /// <param name="query">UpdateQuery object</param>
         public void ExecuteUpdate(Update query)
         {
-            try
-            {
-                var statement = Generator.Generate(query);
-                var response = LowLevelClient.Update<string>(query.IndexName, query.TypeName, query.Poco.Id, statement);
+            var statement = Generator.Generate(query);
+            var response = LowLevelClient.Update<string>(query.IndexName, query.TypeName, query.Poco.Id, statement);
 
-                if (!response.Success)
-                {
-                    throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
-                }
-            }
-            catch (Exception ex)
+            if (!response.Success)
             {
-                throw ex;
+                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
             }
-           
+        }
+        /// <summary>
+        /// Executes an asyncronus UpdateQuery using the Update API and updates a document identified by the Id.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/docs-update.html
+        /// </summary>
+        /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
+        /// <param name="query">UpdateQuery object</param>
+        public async Task ExecuteUpdateAsync(Update query)
+        {
+            var statement = Generator.Generate(query);
+            var response = await LowLevelClient.UpdateAsync<string>(query.IndexName, query.TypeName, query.Poco.Id, statement);
+
+            if (!response.Success)
+            {
+                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+            }
         }
         /// <summary>
         /// Executes a DeleteQuery using the Delete API and removes a document from the associated index.
@@ -159,7 +162,7 @@ namespace ElasticSearchLite.NetCore
         /// <param name="query">DeleteQuery object</param>
         /// <returns>Returnes the number of effected documents.</returns>
         public int ExecuteDelete<TPoco>(IDeleteExecutable<TPoco> deleteQuery)
-            where TPoco: IElasticPoco
+            where TPoco : IElasticPoco
         {
             var query = deleteQuery as DeleteQuery<TPoco>;
             if (query == null)
@@ -167,77 +170,147 @@ namespace ElasticSearchLite.NetCore
                 throw new Exception("Invalid delete request!");
             }
 
-            try
-            {
-                var statement = Generator.Generate(query);
-                var response = !string.IsNullOrEmpty(query?.Poco.Id) ?
-                    LowLevelClient.Delete<string>(query.IndexName, query.TypeName, query.Poco.Id) :
-                    LowLevelClient.DeleteByQuery<string>(query.IndexName, statement);
+            var statement = Generator.Generate(query);
+            var response = !string.IsNullOrEmpty(query?.Poco.Id) ?
+                LowLevelClient.Delete<string>(query.IndexName, query.TypeName, query.Poco.Id) :
+                LowLevelClient.DeleteByQuery<string>(query.IndexName, statement);
 
-                if (!response.Success)
-                {
-                    throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
-                }
-
-                if (response.HttpMethod == HttpMethod.DELETE)
-                {
-                    return 1;
-                }
-
-                var data = JObject.Parse(response.Body);
-
-                return data[ElasticFields.Total.Name].ToObject<int>();                
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            return ProcessDeleteResponse(response);
         }
         /// <summary>
-        /// Executes the drop index using the Delete Index API and deletes the index.
+        /// Executes an asyncronus DeleteQuery using the Delete API and removes a document from the associated index.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/docs-delete.html
+        /// </summary>
+        /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
+        /// <param name="query">DeleteQuery object</param>
+        /// <returns>Returnes the number of effected documents.</returns>
+        public async Task<int> ExecuteDeleteAsync<TPoco>(IDeleteExecutable<TPoco> deleteQuery)
+            where TPoco : IElasticPoco
+        {
+            var query = deleteQuery as DeleteQuery<TPoco>;
+            if (query == null)
+            {
+                throw new Exception("Invalid delete request!");
+            }
+
+            var statement = Generator.Generate(query);
+            var response = !string.IsNullOrEmpty(query?.Poco.Id) ?
+                LowLevelClient.DeleteAsync<string>(query.IndexName, query.TypeName, query.Poco.Id) :
+                LowLevelClient.DeleteByQueryAsync<string>(query.IndexName, statement);
+
+            return ProcessDeleteResponse(await response);
+        }
+        /// <summary>
+        /// Drops an index using the Delete Index API.
         /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/indices-delete-index.html
         /// </summary>
         /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="query">DropQuery object</param>
         public void ExecuteDrop(Drop query)
         {
-            try
-            {
-                var response = LowLevelClient.IndicesDelete<string>(query.IndexName);
+            var response = LowLevelClient.IndicesDelete<string>(query.IndexName);
 
-                if (!response.Success)
-                {
-                    throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
-                }
-            }
-            catch (Exception ex)
+            if (!response.Success)
             {
-                throw ex;
-            }            
+                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+            }
         }
         /// <summary>
-        /// Executes the bulk using the Bulk API
+        /// Drops an index using by call the asyncronus Delete Index API.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/indices-delete-index.html
+        /// </summary>
+        /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
+        /// <param name="query">DropQuery object</param>
+        public async Task ExecuteDropAsync(Drop query)
+        {
+            var response = await LowLevelClient.IndicesDeleteAsync<string>(query.IndexName);
+
+            if (!response.Success)
+            {
+                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+            }
+        }
+        /// <summary>
+        /// Executes a bulk statement using the Bulk API
         /// https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
         /// </summary>
         /// <param name="bulkQuery"></param>
         /// <returns></returns>
         public void ExecuteBulk(Bulk bulkQuery)
         {
-            try
-            {
-                var statement = Generator.Generate(bulkQuery);
-                var response = LowLevelClient.Bulk<string>(bulkQuery.IndexName, statement);
+            var statement = Generator.Generate(bulkQuery);
+            var response = LowLevelClient.Bulk<string>(bulkQuery.IndexName, statement);
 
-                if (!response.Success)
-                {
-                    throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
-                }
-            }
-            catch (Exception ex)
+            if (!response.Success)
             {
-
-                throw ex;
+                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
             }
+        }
+        /// <summary>
+        /// Executes a bulk statement using the asyncronus Bulk API
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
+        /// </summary>
+        /// <param name="bulkQuery"></param>
+        /// <returns></returns>
+        public async Task ExecuteBulkAsync(Bulk bulkQuery)
+        {
+            var statement = Generator.Generate(bulkQuery);
+            var response = await LowLevelClient.BulkAsync<string>(bulkQuery.IndexName, statement);
+
+            if (!response.Success)
+            {
+                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+            }
+        }
+
+        private static IEnumerable<TPoco> ProcessSeachResponse<TPoco>(ElasticsearchResponse<string> response) where TPoco : IElasticPoco
+        {
+            if (!response.Success)
+            {
+                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+            }
+
+            var data = JObject.Parse(response.Body);
+            var hits = new List<TPoco>();
+            foreach (var x in data[ElasticFields.Hits.Name][ElasticFields.Hits.Name])
+            {
+                var document = x[ElasticFields.Source.Name].ToObject<TPoco>();
+                document.Id = x[ElasticFields.Id.Name].ToString();
+                document.Index = x[ElasticFields.Index.Name].ToString();
+                document.Type = x[ElasticFields.Type.Name].ToString();
+                document.Score = x[ElasticFields.Score.Name].ToObject<double>();
+                hits.Add(document);
+            }
+
+            return hits;
+        }
+
+        private static void ProcessIndexResponse(Index query, ElasticsearchResponse<string> response)
+        {
+            if (!response.Success)
+            {
+                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+            }
+
+            var data = JObject.Parse(response.Body);
+            query.Poco.Id = data[ElasticFields.Id.Name].ToString();
+        }
+
+        private static int ProcessDeleteResponse(ElasticsearchResponse<string> response)
+        {
+            if (!response.Success)
+            {
+                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+            }
+
+            if (response.HttpMethod == HttpMethod.DELETE)
+            {
+                return 1;
+            }
+
+            var data = JObject.Parse(response.Body);
+
+            return data[ElasticFields.Total.Name].ToObject<int>();
         }
 
         protected virtual void Dispose(bool disposing)

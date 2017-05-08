@@ -11,7 +11,7 @@ namespace ElasticSearchLite.Tests.Integration
 {
     [TestCategory("Integration")]
     [TestClass]
-    public class TestScenario
+    public class AsyncTestScenario
     {
         private static string indexName = "exampleindex";
         private static string typeName = "example";
@@ -29,18 +29,23 @@ namespace ElasticSearchLite.Tests.Integration
         };
 
         [TestMethod]
-        public void TestScenario_Index_Search_Update_Verify_Delete()
+        public void AsyncTestScenario_Index_Search_Update_Verify_Delete()
+        {
+            RunAsyncTestScenario_Index_Search_Update_Verify_Delete();
+        }
+
+        private async void RunAsyncTestScenario_Index_Search_Update_Verify_Delete()
         {
             Index.Document(poco)
                 .ExecuteWith(Client);
 
             Thread.Sleep(2000);
 
-            var document = Search
+            var document = (await Search
                 .In(indexName)
                 .Return<MyPoco>()
                 .Term(p => p.Id, poco.Id)
-                .ExecuteWith(Client)
+                .ExecuteAsyncWith(Client))
                 .Single();
 
             poco.Id.ShouldBeEquivalentTo(document.Id);
@@ -53,30 +58,31 @@ namespace ElasticSearchLite.Tests.Integration
             string.Join("", poco.TestStringArray).ShouldBeEquivalentTo(string.Join("", document.TestStringArray));
 
             poco.TestText = "ChangedText";
-            Update.Document(poco).ExecuteWith(Client);
+            Update.Document(poco).ExecuteAsyncWith(Client);
 
             Thread.Sleep(2000);
 
-            Search.In(indexName)
+            (await Search.In(indexName)
                 .Return<MyPoco>()
                 .Term(p => p.Id, poco.Id)
-                .ExecuteWith(Client)
+                .ExecuteAsyncWith(Client))
                 .Single()
                 .TestText
                 .ShouldBeEquivalentTo(poco.TestText);
 
-            Delete.Document(poco).ExecuteWith(Client).Should().BeGreaterThan(0);
+            (await Delete.Document(poco).ExecuteAsyncWith(Client)).Should().BeGreaterThan(0);
         }
 
         [TestMethod]
-        public void TestScenario_Bulk_Index_Delete()
+        public void AsyncTestScenario_Bulk_Index_Delete()
         {
             poco.Id = "1337";
 
-            Client.ExecuteBulk(Bulk<MyPoco>
-                .Create("mypocoindex")
-                .Index(poco)
-                .Delete(poco));
+            Bulk<MyPoco>
+                 .Create("mypocoindex")
+                 .Index(poco)
+                 .Delete(poco)
+                 .ExecuteAsyncWith(Client);
         }
 
         [TestCleanup]
