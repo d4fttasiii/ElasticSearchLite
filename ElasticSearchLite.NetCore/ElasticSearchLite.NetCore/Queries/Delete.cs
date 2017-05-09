@@ -79,7 +79,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 var condition = new ElasticMatchCodition
                 {
                     Field = new ElasticField { Name = propertyInfo.Name },
-                    Value = value
+                    Value = value ?? throw new ArgumentNullException(nameof(value))
                 };
                 MatchCondition = condition;
 
@@ -97,9 +97,9 @@ namespace ElasticSearchLite.NetCore.Queries
                 var condition = new ElasticTermCodition
                 {
                     Field = new ElasticField { Name = propertyInfo.Name },
-                    Value = value
+                    Value = value ?? throw new ArgumentNullException(nameof(value))
                 };
-                TermCondition = condition;
+                TermConditions.Add(condition);
 
                 return this;
             }
@@ -116,10 +116,10 @@ namespace ElasticSearchLite.NetCore.Queries
                 var rangeCondition = new ElasticRangeCondition
                 {
                     Field = new ElasticField { Name = propertyInfo.Name },
-                    Operation = operation,
-                    Value = value
+                    Operation = operation ?? throw new ArgumentNullException(nameof(operation)),
+                    Value = value ?? throw new ArgumentNullException(nameof(value))
                 };
-                RangeCondition = rangeCondition;
+                RangeConditions.Add(rangeCondition);
 
                 return this;
             }

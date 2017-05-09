@@ -60,9 +60,9 @@ namespace ElasticSearchLite.Tests.Unit
             {
                 query = new
                 {
-                    term = new
+                    terms = new
                     {
-                        _id = "123"
+                        _id = new[] { "123" }
                     }
                 }
             };

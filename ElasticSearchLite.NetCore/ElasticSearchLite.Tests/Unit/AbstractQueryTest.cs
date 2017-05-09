@@ -9,7 +9,7 @@ namespace ElasticSearchLite.Tests.Unit
 {
     public abstract class AbstractQueryTest
     {
-        protected IStatementFactory Generator { get; } = new StatementFactory();
+        protected IStatementFactory StatementFactory { get; } = new StatementFactory();
 
         protected MyPoco poco = new MyPoco();
 
@@ -31,7 +31,7 @@ namespace ElasticSearchLite.Tests.Unit
         protected void TestQuery<T>(T statementObject, IQuery query)
         {
             // Act
-            var queryStatement = Generator.Generate(query);
+            var queryStatement = StatementFactory.Generate(query);
 
             // Assert
             statementObject.ShouldBeEquivalentTo(JsonConvert.DeserializeAnonymousType(queryStatement, statementObject));

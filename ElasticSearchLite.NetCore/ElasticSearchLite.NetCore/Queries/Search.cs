@@ -3,6 +3,7 @@ using ElasticSearchLite.NetCore.Interfaces.Search;
 using ElasticSearchLite.NetCore.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -42,7 +43,6 @@ namespace ElasticSearchLite.NetCore.Queries
             protected internal List<ElasticSort> SortingFields { get; } = new List<ElasticSort>();
             protected internal int Size { get; set; } = 25;
             protected internal int From { get; set; } = 0;
-
             protected SearchQuery(string indexName) : base(indexName) { }
         }
 
@@ -50,11 +50,12 @@ namespace ElasticSearchLite.NetCore.Queries
             SearchQuery,
             ISearchQuery<TPoco>,
             IFilteredSearchQuery<TPoco>,
+            ITermFilteredSearchQuery<TPoco>,
+            IRangeFilteredSearchQuery<TPoco>,
             ISortedSearchQuery<TPoco>,
             ILimitedResultSearchQuery<TPoco>,
             IExecutableSearchQuery<TPoco> where TPoco : IElasticPoco
         {
-
             internal SearchQuery(string indexName) : base(indexName) { }
             /// <summary>
             /// Term Query finds documents that contain the exact term specified in the inverted index.
@@ -62,15 +63,15 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <param name="propertyExpression">Field name</param>
             /// <param name="value">Value which should equal the field content</param>
             /// <returns></returns>
-            public IFilteredSearchQuery<TPoco> Term(Expression<Func<TPoco, object>> propertyExpression, object value)
+            public ITermFilteredSearchQuery<TPoco> Term(Expression<Func<TPoco, object>> propertyExpression, object value)
             {
                 var propertyInfo = ((MemberExpression)propertyExpression.Body).Member as PropertyInfo;
                 var condition = new ElasticTermCodition
                 {
                     Field = new ElasticField { Name = propertyInfo.Name },
-                    Value = value
+                    Value = value ?? throw new ArgumentNullException(nameof(value))
                 };
-                TermCondition = condition;
+                TermConditions.Add(condition);
 
                 return this;
             }
@@ -86,7 +87,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 var condition = new ElasticMatchCodition
                 {
                     Field = new ElasticField { Name = propertyInfo.Name },
-                    Value = value
+                    Value = value ?? throw new ArgumentNullException(nameof(value))
                 };
                 MatchCondition = condition;
 
@@ -99,16 +100,16 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <param name="op">Range operator</param>
             /// <param name="value"></param>
             /// <returns></returns>
-            public IFilteredSearchQuery<TPoco> Range(Expression<Func<TPoco, object>> propertyExpression, ElasticRangeOperations op, object value)
+            public IRangeFilteredSearchQuery<TPoco> Range(Expression<Func<TPoco, object>> propertyExpression, ElasticRangeOperations rangeOperation, object value)
             {
                 var propertyInfo = ((MemberExpression)propertyExpression.Body).Member as PropertyInfo;
                 var condition = new ElasticRangeCondition
                 {
                     Field = new ElasticField { Name = propertyInfo.Name },
-                    Operation = op,
-                    Value = value
+                    Operation = rangeOperation ?? throw new ArgumentNullException(nameof(rangeOperation)),
+                    Value = value ?? throw new ArgumentNullException(nameof(value))
                 };
-                RangeCondition = condition;
+                RangeConditions.Add(condition);
 
                 return this;
             }
@@ -161,6 +162,40 @@ namespace ElasticSearchLite.NetCore.Queries
             {
                 if (skip < 0) { throw new ArgumentException($"The given value {nameof(skip)} should be at least 0 or higher!"); }
                 From = skip;
+
+                return this;
+            }
+            /// <summary>
+            /// Add another value to the term condition
+            /// </summary>
+            /// <param name="value"></param>
+            /// <returns></returns>
+            public ITermFilteredSearchQuery<TPoco> Or(object value)
+            {
+                var condition = TermConditions.LastOrDefault();
+                TermConditions.Add(new ElasticTermCodition
+                {
+                    Field = condition.Field,
+                    Value = value ?? throw new ArgumentNullException(nameof(value))
+                });
+
+                return this;
+            }
+            /// <summary>
+            /// Extends the range condition
+            /// </summary>
+            /// <param name="operation"></param>
+            /// <param name="value"></param>
+            /// <returns></returns>
+            public IRangeFilteredSearchQuery<TPoco> And(ElasticRangeOperations operation, object value)
+            {
+                var condition = RangeConditions.LastOrDefault();
+                RangeConditions.Add(new ElasticRangeCondition
+                {
+                    Field = condition.Field,
+                    Operation = operation ?? throw new ArgumentNullException(nameof(operation)),
+                    Value = value ?? throw new ArgumentNullException(nameof(value))
+                });
 
                 return this;
             }

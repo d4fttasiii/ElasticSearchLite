@@ -2,6 +2,7 @@
 using ElasticSearchLite.NetCore.Models;
 using System.Linq;
 using System;
+using System.Collections.Generic;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
@@ -9,9 +10,9 @@ namespace ElasticSearchLite.NetCore.Queries
     {
         internal string IndexName { get; }
         internal string TypeName { get; }
-        internal ElasticTermCodition TermCondition { get; set; }
-        internal ElasticTermCodition MatchCondition { get; set; }
-        internal ElasticRangeCondition RangeCondition { get; set; }
+        internal List<ElasticTermCodition> TermConditions { get; } = new List<ElasticTermCodition>();
+        internal ElasticMatchCodition MatchCondition { get; set; }
+        internal List<ElasticRangeCondition> RangeConditions { get; } = new List<ElasticRangeCondition>();
         internal IElasticPoco Poco { get; set; }
 
         protected AbstractQuery(IElasticPoco poco)

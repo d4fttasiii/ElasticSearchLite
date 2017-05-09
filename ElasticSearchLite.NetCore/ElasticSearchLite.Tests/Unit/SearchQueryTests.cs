@@ -23,13 +23,14 @@ namespace ElasticSearchLite.Tests.Unit
             var query = Search.In("mypocoindex")
                 .Return<MyPoco>()
                 .Term(p => p.TestText, "ABCDEFG")
+                    .Or("GFEDCBA")
                 .Take(15)
                 .Skip(15);
             var statementObject = new
             {
                 query = new
                 {
-                    term = new { TestText = "ABCDEFG" }
+                    terms = new { TestText = new[] { "ABCDEFG", "GFEDCBA" } }
                 },
                 size = 15,
                 from = 15
@@ -68,7 +69,9 @@ namespace ElasticSearchLite.Tests.Unit
             // Arrange
             var query = Search.In("mypocoindex")
                 .Return<MyPoco>()
-                .Range(p => p.Id, ElasticRangeOperations.Gt, 1);
+                .Range(p => p.Id, ElasticRangeOperations.Gt, 1)
+                    .And(ElasticRangeOperations.Lt, 10)
+                .Take(20);
             var statementObject = new
             {
                 query = new
@@ -77,11 +80,12 @@ namespace ElasticSearchLite.Tests.Unit
                     {
                         _id = new
                         {
-                            gt = 1
+                            gt = 1,
+                            lt = 10
                         }
                     }
                 },
-                size = 25,
+                size = 20,
                 from = 0
             };
 

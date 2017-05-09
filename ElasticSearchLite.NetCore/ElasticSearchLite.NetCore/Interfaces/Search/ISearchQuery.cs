@@ -12,7 +12,7 @@ namespace ElasticSearchLite.NetCore.Interfaces.Search
         /// <param name="propertyExpression">Field property</param>
         /// <param name="value">Value which should equal the field content</param>
         /// <returns></returns>
-        IFilteredSearchQuery<TPoco> Term(Expression<Func<TPoco, object>> propertyExpression, object value);
+        ITermFilteredSearchQuery<TPoco> Term(Expression<Func<TPoco, object>> propertyExpression, object value);
         /// <summary>
         /// Match Query
         /// </summary>
@@ -27,7 +27,7 @@ namespace ElasticSearchLite.NetCore.Interfaces.Search
         /// <param name="op">Range operator</param>
         /// <param name="value"></param>
         /// <returns></returns>
-        IFilteredSearchQuery<TPoco> Range(Expression<Func<TPoco, object>> propertyExpression, ElasticRangeOperations operation, object value);
+        IRangeFilteredSearchQuery<TPoco> Range(Expression<Func<TPoco, object>> propertyExpression, ElasticRangeOperations rangeOperation, object value);
         /// <summary>
         /// Orders the documents by this given field
         /// </summary>

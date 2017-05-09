@@ -109,14 +109,14 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                 return $@"""query"": {{ {GenerateMatch(query.MatchCondition)} }}";
             }
 
-            if (query.TermCondition != null)
+            if (query.TermConditions.Count > 0)
             {
-                return $@"""query"": {{ {GenerateTerm(query.TermCondition)} }}";
+                return $@"""query"": {{ {GenerateTerms(query.TermConditions)} }}";
             }
 
-            if (query.RangeCondition != null)
+            if (query.RangeConditions.Count > 0)
             {
-                return $@"""query"": {{ {GenerateRange(query.RangeCondition)} }}";
+                return $@"""query"": {{ {GenerateRange(query.RangeConditions)} }}";
             }
 
             return string.Empty;
@@ -157,9 +157,9 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             }
         }
 
-        private string GenerateMatch(ElasticTermCodition condition) => $@"""match"": {{ ""{condition.Field.Name}"" : ""{condition.Value}"" }}";
-        private string GenerateTerm(ElasticTermCodition condition) => $@"""term"": {{ ""{condition.Field.Name}"" : ""{condition.Value}"" }}";
-        private string GenerateRange(ElasticRangeCondition condition) => $@"""range"": {{""{condition.Field.Name}"": {{""{condition.Operation.Name}"" : ""{condition.Value}"" }} }}";
+        private string GenerateMatch(ElasticMatchCodition condition) => $@"""match"": {{ ""{condition.Field.Name}"" : {EscapeValue(condition.Value)} }}";
+        private string GenerateTerms(List<ElasticTermCodition> conditions) => $@"""terms"": {{ ""{conditions.First().Field.Name}"" : {EscapeValue(conditions.Select(c => c.Value).ToArray())} }}";
+        private string GenerateRange(List<ElasticRangeCondition> conditions) => $@"""range"": {{""{conditions.First().Field.Name}"": {{ {string.Join(",", conditions.Select(c => $@" ""{c.Operation.Name}"": {EscapeValue(c.Value)}"))} }} }}";
         private string GenerateSize(int size) => $@"""size"": {size}";
         private string GenerateFrom(int from) => $@"""from"": {from}";
     }
