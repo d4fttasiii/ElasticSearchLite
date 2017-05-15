@@ -28,6 +28,8 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     return GenerateInsertQuery(indexQuery);
                 case Update updateQuery:
                     return GenerateUpdateQuery(updateQuery);
+                case Upsert upsertQuery:
+                    return GenerateUpsertQuery(upsertQuery);
                 case Bulk bulkQuery:
                     return GenerateBulkQuery(bulkQuery);
                 default:
@@ -62,6 +64,11 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         private string GenerateUpdateQuery(Update updateQuery)
         {
             return GenerateDocument(updateQuery.Poco);
+        }
+
+        private string GenerateUpsertQuery(Upsert upsertQuery)
+        {
+            return "";
         }
 
         private string GenerateBulkQuery(Bulk bulkQuery)

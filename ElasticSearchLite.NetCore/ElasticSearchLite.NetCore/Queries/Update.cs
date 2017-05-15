@@ -9,7 +9,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <summary>
         /// Creates an update statement for the given poco
         /// It used the Update API 
-        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/docs-update.html
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/docs-update.html
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="poco"></param>

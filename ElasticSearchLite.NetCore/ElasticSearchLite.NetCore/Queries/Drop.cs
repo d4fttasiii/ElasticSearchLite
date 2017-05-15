@@ -15,7 +15,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <summary>
         /// Creates a new DropQuery instance which will remove a certain index from the ElasticSearch
         /// using the Delete Index API
-        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.3/indices-delete-index.html
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/indices-delete-index.html
         /// </summary>
         /// <param name="indexName">Index's which should be removed.</param>
         /// <returns>DropQuery object.</returns>
