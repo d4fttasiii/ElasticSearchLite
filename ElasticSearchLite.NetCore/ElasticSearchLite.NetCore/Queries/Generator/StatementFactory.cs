@@ -68,7 +68,13 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
         private string GenerateUpsertQuery(Upsert upsertQuery)
         {
-            return "";
+            var statementParts = new List<string>
+            {
+                GenerateDocument(upsertQuery.Poco),
+                $@"""doc_as_upsert"": true"
+            };
+
+            return $"{{ {string.Join(",", statementParts)} }}";
         }
 
         private string GenerateBulkQuery(Bulk bulkQuery)
