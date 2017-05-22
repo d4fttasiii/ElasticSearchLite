@@ -68,6 +68,18 @@ namespace ElasticSearchLite.Tests.Integration
                 poco.Position.Should().NotBeNull();
                 poco.Tag.Should().NotBeNull();
             }
+
+            var filteredPocos = Search.In(complexIndexName)
+                .Return<ComplexPoco>()
+                .Range(cp => cp.LastModified, ElasticRangeOperations.Gt, new DateTime(2017, 9, 15))
+                    .And(ElasticRangeOperations.Lte, new DateTime(2017, 9, 20))
+                .ExecuteWith(Client);
+
+            foreach (var poco in filteredPocos)
+            {
+                poco.LastModified.Should().BeAfter(new DateTime(2017, 9, 14));
+                poco.LastModified.Should().BeBefore(new DateTime(2017, 9, 21));
+            }
         }
 
         [TestCleanup]

@@ -195,19 +195,6 @@ namespace ElasticSearchLite.NetCore.Queries
 
                 return this;
             }
-
-            private string GetCorrectPropertyName<T>(Expression<Func<T, Object>> expression)
-            {
-                if (expression.Body is MemberExpression)
-                {
-                    return ((MemberExpression)expression.Body).Member.Name;
-                }
-                else
-                {
-                    var op = ((UnaryExpression)expression.Body).Operand;
-                    return ((MemberExpression)op).Member.Name;
-                }
-            }
         }
     }
 }
