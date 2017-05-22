@@ -3,6 +3,7 @@ using ElasticSearchLite.NetCore.Models;
 using System.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
@@ -48,6 +49,19 @@ namespace ElasticSearchLite.NetCore.Queries
         {
             if (parameters == null) { throw new ArgumentNullException(nameof(parameters)); }
             if (!parameters.Any()) { throw new ArgumentException(nameof(parameters)); }
+        }
+
+        protected string GetCorrectPropertyName<T>(Expression<Func<T, Object>> expression)
+        {
+            if (expression.Body is MemberExpression)
+            {
+                return ((MemberExpression)expression.Body).Member.Name;
+            }
+            else
+            {
+                var op = ((UnaryExpression)expression.Body).Operand;
+                return ((MemberExpression)op).Member.Name;
+            }
         }
     }
 }

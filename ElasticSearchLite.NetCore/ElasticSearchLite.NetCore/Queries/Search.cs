@@ -65,10 +65,9 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <returns></returns>
             public ITermFilteredSearchQuery<TPoco> Term(Expression<Func<TPoco, object>> propertyExpression, object value)
             {
-                var propertyInfo = ((MemberExpression)propertyExpression.Body).Member as PropertyInfo;
                 var condition = new ElasticTermCodition
                 {
-                    Field = new ElasticField { Name = propertyInfo.Name },
+                    Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
                     Value = value ?? throw new ArgumentNullException(nameof(value))
                 };
                 TermConditions.Add(condition);
@@ -83,10 +82,9 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <returns></returns>
             public IFilteredSearchQuery<TPoco> Match(Expression<Func<TPoco, object>> propertyExpression, object value)
             {
-                var propertyInfo = ((MemberExpression)propertyExpression.Body).Member as PropertyInfo;
                 var condition = new ElasticMatchCodition
                 {
-                    Field = new ElasticField { Name = propertyInfo.Name },
+                    Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
                     Value = value ?? throw new ArgumentNullException(nameof(value))
                 };
                 MatchCondition = condition;
@@ -102,10 +100,9 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <returns></returns>
             public IRangeFilteredSearchQuery<TPoco> Range(Expression<Func<TPoco, object>> propertyExpression, ElasticRangeOperations rangeOperation, object value)
             {
-                var propertyInfo = ((MemberExpression)propertyExpression.Body).Member as PropertyInfo;
                 var condition = new ElasticRangeCondition
                 {
-                    Field = new ElasticField { Name = propertyInfo.Name },
+                    Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
                     Operation = rangeOperation ?? throw new ArgumentNullException(nameof(rangeOperation)),
                     Value = value ?? throw new ArgumentNullException(nameof(value))
                 };
@@ -121,12 +118,11 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <returns></returns>
             public ISortedSearchQuery<TPoco> Sort(Expression<Func<TPoco, object>> propertyExpression, ElasticSortOrders sortOrder)
             {
-                var propertyInfo = ((MemberExpression)propertyExpression.Body).Member as PropertyInfo;
                 SortingFields.Add(new ElasticSort
                 {
                     Field = new ElasticField
                     {
-                        Name = propertyInfo.Name
+                        Name = GetCorrectPropertyName(propertyExpression)
                     },
                     Order = sortOrder
 
@@ -198,6 +194,19 @@ namespace ElasticSearchLite.NetCore.Queries
                 });
 
                 return this;
+            }
+
+            private string GetCorrectPropertyName<T>(Expression<Func<T, Object>> expression)
+            {
+                if (expression.Body is MemberExpression)
+                {
+                    return ((MemberExpression)expression.Body).Member.Name;
+                }
+                else
+                {
+                    var op = ((UnaryExpression)expression.Body).Operand;
+                    return ((MemberExpression)op).Member.Name;
+                }
             }
         }
     }

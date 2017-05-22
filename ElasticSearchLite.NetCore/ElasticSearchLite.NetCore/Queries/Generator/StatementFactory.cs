@@ -65,7 +65,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
         private string GenerateUpdateQuery(Update updateQuery)
         {
-            return GenerateDocument(updateQuery.Poco);
+            return $"{{ {GenerateDocument(updateQuery.Poco)} }}";
         }
 
         private string GenerateUpsertQuery(Upsert upsertQuery)
@@ -93,7 +93,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                         statement.AppendLine($"{{ {GenerateFieldMapping(UpdatetableProperties(poco), poco)} }}");
                         break;
                     case "update":
-                        statement.AppendLine(GenerateDocument(poco));
+                        statement.AppendLine($"{{ {GenerateDocument(poco)} }}");
                         break;
                 }
             }
@@ -105,7 +105,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         {
             var properties = UpdatetableProperties(poco);
 
-            return $@"{{ ""doc"": {{ {GenerateFieldMapping(properties, poco)} }} }}";
+            return $@"""doc"": {{ {GenerateFieldMapping(properties, poco)} }}";
         }
 
         private string GenerateFieldMapping(IEnumerable<PropertyInfo> properties, IElasticPoco poco)

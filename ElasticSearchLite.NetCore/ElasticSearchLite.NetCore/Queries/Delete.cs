@@ -75,10 +75,9 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <returns>Returns the updated DeleteQuery object.</returns>
             public IDeleteExecutable<TPoco> Match(Expression<Func<TPoco, object>> propertyExpression, object value)
             {
-                var propertyInfo = ((MemberExpression)propertyExpression.Body).Member as PropertyInfo;
                 var condition = new ElasticMatchCodition
                 {
-                    Field = new ElasticField { Name = propertyInfo.Name },
+                    Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
                     Value = value ?? throw new ArgumentNullException(nameof(value))
                 };
                 MatchCondition = condition;
@@ -93,10 +92,9 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <returns>Returns the updated DeleteQuery object.</returns>
             public IDeleteExecutable<TPoco> Term(Expression<Func<TPoco, object>> propertyExpression, object value)
             {
-                var propertyInfo = ((MemberExpression)propertyExpression.Body).Member as PropertyInfo;
                 var condition = new ElasticTermCodition
                 {
-                    Field = new ElasticField { Name = propertyInfo.Name },
+                    Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
                     Value = value ?? throw new ArgumentNullException(nameof(value))
                 };
                 TermConditions.Add(condition);
@@ -112,10 +110,9 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <returns>Returns the updated DeleteQuery object.</returns>
             public IDeleteExecutable<TPoco> Range(Expression<Func<TPoco, object>> propertyExpression, ElasticRangeOperations operation, object value)
             {
-                var propertyInfo = ((MemberExpression)propertyExpression.Body).Member as PropertyInfo;
                 var rangeCondition = new ElasticRangeCondition
                 {
-                    Field = new ElasticField { Name = propertyInfo.Name },
+                    Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
                     Operation = operation ?? throw new ArgumentNullException(nameof(operation)),
                     Value = value ?? throw new ArgumentNullException(nameof(value))
                 };

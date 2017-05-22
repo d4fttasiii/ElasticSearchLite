@@ -278,7 +278,7 @@ namespace ElasticSearchLite.NetCore
                 document.Id = x[ElasticFields.Id.Name].ToString();
                 document.Index = x[ElasticFields.Index.Name].ToString();
                 document.Type = x[ElasticFields.Type.Name].ToString();
-                document.Score = x[ElasticFields.Score.Name].ToObject<double>();
+                document.Score = x[ElasticFields.Score.Name].ToObject<double?>();
                 hits.Add(document);
             }
 

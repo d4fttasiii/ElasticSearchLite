@@ -8,7 +8,7 @@ namespace ElasticSearchLite.Tests.Pocos
         public string Id { get; set; }
         public string Type { get; set; }
         public string Index { get; set; }
-        public double Score { get; set; }
+        public double? Score { get; set; }
         public Tag Tag { get; set; }
         public Position Position { get; set; }
         public string Name { get; set; }

@@ -20,6 +20,6 @@
         /// <summary>
         /// A value between 0 and 1 which describes the document's relevance for a certain search.
         /// </summary>
-        double Score { get; set; }
+        double? Score { get; set; }
     }
 }

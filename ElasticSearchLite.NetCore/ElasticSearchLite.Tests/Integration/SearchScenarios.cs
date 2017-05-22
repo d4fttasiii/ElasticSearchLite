@@ -6,7 +6,7 @@ using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace ElasticSearchLite.Tests.Integration
 {
@@ -54,9 +54,12 @@ namespace ElasticSearchLite.Tests.Integration
 
             var complexPocosReturned = Search.In(complexIndexName)
                 .Return<ComplexPoco>()
+                .Sort(cp => cp.LastModified, ElasticSortOrders.Ascending)
                 .Take(100)
                 .Skip(0)
                 .ExecuteWith(Client);
+
+            complexPocosReturned.Count().ShouldBeEquivalentTo(Count);
 
             foreach (var poco in complexPocosReturned)
             {
