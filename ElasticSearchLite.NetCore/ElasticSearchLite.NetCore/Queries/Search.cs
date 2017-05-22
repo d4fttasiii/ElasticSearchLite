@@ -33,7 +33,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <typeparam name="TPoco"></typeparam>
         /// <returns></returns>
-        public SearchQuery<TPoco> Return<TPoco>() where TPoco : IElasticPoco
+        public ISearchQuery<TPoco> Return<TPoco>() where TPoco : IElasticPoco
         {
             return new SearchQuery<TPoco>(IndexName);
         }

@@ -2,6 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <AssemblyVersion>0.9.0.0</AssemblyVersion>
+    <FileVersion>0.9.0.0</FileVersion>
+    <PackageTags>Elastic, ElasticSearch</PackageTags>
+    <NeutralLanguage>en-GB</NeutralLanguage>
+    <PackageReleaseNotes>A simple .NET Core wrapper for ElasticSearch.Net</PackageReleaseNotes>
+    <Version>0.9.0</Version>
+    <PackageLicenseUrl>https://github.com/petertasner/ElasticSearchLite/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/petertasner/ElasticSearchLite</PackageProjectUrl>
+    <Company />
+    <Authors>Peter Tasner</Authors>
+    <RepositoryUrl>https://github.com/petertasner/ElasticSearchLite</RepositoryUrl>
+    <RepositoryType>Github</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
