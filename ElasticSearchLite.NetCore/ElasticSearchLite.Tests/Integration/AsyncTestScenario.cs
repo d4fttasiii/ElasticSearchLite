@@ -1,9 +1,8 @@
 ﻿using ElasticSearchLite.NetCore;
 using ElasticSearchLite.NetCore.Queries;
-using ElasticSearchLite.Tests.Poco;
+using ElasticSearchLite.Tests.Pocos;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Linq;
 using System.Threading;
 
@@ -11,23 +10,8 @@ namespace ElasticSearchLite.Tests.Integration
 {
     [TestCategory("Integration")]
     [TestClass]
-    public class AsyncTestScenario
+    public class AsyncTestScenario : AbstractIntegrationScenario
     {
-        private static string indexName = "exampleindex";
-        private static string typeName = "example";
-        private ElasticLiteClient Client { get; } = new ElasticLiteClient("http://localhost:9200");
-        private MyPoco poco = new MyPoco
-        {
-            Index = indexName,
-            Type = typeName,
-            TestInteger = 12345,
-            TestText = "ABCDEFG",
-            TestBool = true,
-            TestDateTime = new DateTime(2017, 9, 10),
-            TestDouble = 1.337,
-            TestStringArray = new[] { "A", "B", "C", "D" }
-        };
-
         [TestMethod]
         public void AsyncTestScenario_Index_Search_Update_Verify_Delete()
         {
@@ -42,8 +26,8 @@ namespace ElasticSearchLite.Tests.Integration
             Thread.Sleep(2000);
 
             var document = (await Search
-                .In(indexName)
-                .Return<MyPoco>()
+                .In(IndexName)
+                .Return<Poco>()
                 .Term(p => p.Id, poco.Id)
                 .ExecuteAsyncWith(Client))
                 .Single();
@@ -62,8 +46,8 @@ namespace ElasticSearchLite.Tests.Integration
 
             Thread.Sleep(2000);
 
-            (await Search.In(indexName)
-                .Return<MyPoco>()
+            (await Search.In(IndexName)
+                .Return<Poco>()
                 .Term(p => p.Id, poco.Id)
                 .ExecuteAsyncWith(Client))
                 .Single()
@@ -78,8 +62,8 @@ namespace ElasticSearchLite.Tests.Integration
         {
             poco.Id = "1337";
 
-            Bulk<MyPoco>
-                 .Create("mypocoindex")
+            Bulk<Poco>
+                 .Create(IndexName)
                  .Index(poco)
                  .Delete(poco)
                  .ExecuteAsyncWith(Client);

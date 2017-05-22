@@ -3,7 +3,7 @@ using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Queries.Generator;
 using FluentAssertions;
 using System;
-using ElasticSearchLite.Tests.Poco;
+using ElasticSearchLite.Tests.Pocos;
 
 namespace ElasticSearchLite.Tests.Unit
 {
@@ -11,11 +11,11 @@ namespace ElasticSearchLite.Tests.Unit
     {
         protected IStatementFactory StatementFactory { get; } = new StatementFactory();
 
-        protected MyPoco poco = new MyPoco();
+        protected Poco poco = new Poco();
 
         protected void InitPoco()
         {
-            poco = new MyPoco
+            poco = new Poco
             {
                 Id = "Id-1337",
                 Index = "mypocoindex",

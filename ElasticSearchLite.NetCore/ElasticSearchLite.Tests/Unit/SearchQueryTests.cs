@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.NetCore.Models;
-using ElasticSearchLite.Tests.Poco;
+using ElasticSearchLite.Tests.Pocos;
 using System;
 
 namespace ElasticSearchLite.Tests.Unit
@@ -21,7 +21,7 @@ namespace ElasticSearchLite.Tests.Unit
         {
             // Arrange
             var query = Search.In("mypocoindex")
-                .Return<MyPoco>()
+                .Return<Poco>()
                 .Term(p => p.TestText, "ABCDEFG")
                     .Or("GFEDCBA")
                 .Take(15)
@@ -45,7 +45,7 @@ namespace ElasticSearchLite.Tests.Unit
         {
             // Arrange
             var query = Search.In("mypocoindex")
-                .Return<MyPoco>()
+                .Return<Poco>()
                 .Match(p => p.TestText, "ABCDEFG")
                 .Take(10)
                 .Skip(10);
@@ -68,7 +68,7 @@ namespace ElasticSearchLite.Tests.Unit
         {
             // Arrange
             var query = Search.In("mypocoindex")
-                .Return<MyPoco>()
+                .Return<Poco>()
                 .Range(p => p.Id, ElasticRangeOperations.Gt, 1)
                     .And(ElasticRangeOperations.Lt, 10)
                 .Take(20);

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Globalization;
 using System.Text;
+using Newtonsoft.Json;
 using static ElasticSearchLite.NetCore.Queries.Search;
 using static ElasticSearchLite.NetCore.Queries.Delete;
 
@@ -39,13 +40,14 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
         private string GenerateSearchQuery(SearchQuery searchQuery)
         {
-            var statementParts = new List<string>
-            {
-                GenerateQuery(searchQuery),
-                GenerateSize(searchQuery.Size),
-                GenerateFrom(searchQuery.From)
-            };
+            var statementParts = new List<string>();
+            var query = GenerateQuery(searchQuery);
 
+            if (!string.IsNullOrEmpty(query)) { statementParts.Add(query); }
+            if (searchQuery.Size != 0) { statementParts.Add(GenerateSize(searchQuery.Size)); }
+            if (searchQuery.From != 0) { statementParts.Add(GenerateFrom(searchQuery.From)); }
+            if (searchQuery.SortingFields != null && searchQuery.SortingFields.Count > 0) { statementParts.Add(GenerateSort(searchQuery.SortingFields)); }
+          
             return $"{{ {string.Join(",", statementParts)} }}";
         }
 
@@ -135,45 +137,12 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             return string.Empty;
         }
 
-        private string EscapeValue(object value)
-        {
-            if (value.GetType().IsArray)
-            {
-                var values = (value as object[]).Select(v => EscapeValue(v));
-                var joinedValues = string.Join(",", values);
-
-                return $"[{joinedValues}]";
-            }
-
-            switch (value)
-            {
-                case double number:
-                    return number.ToString(CultureInfo.InvariantCulture);
-                case float number:
-                    return number.ToString(CultureInfo.InvariantCulture);
-                case int number:
-                    return number.ToString();
-                case long number:
-                    return number.ToString();
-                case byte b:
-                    return b.ToString();
-                case string text:
-                    return $@"""{text}""";
-                case DateTime date:
-                    return $@"""{date.ToString("yyyy-MM-dd HH:mm:ss")}""";
-                case TimeSpan time:
-                    return time.ToString("HH:mm:ss");
-                case bool logical:
-                    return logical.ToString().ToLower();
-                default:
-                    throw new Exception("Unknown type as POCO property");
-            }
-        }
-
+        private string EscapeValue(object value) => JsonConvert.SerializeObject(value);
         private string GenerateMatch(ElasticMatchCodition condition) => $@"""match"": {{ ""{condition.Field.Name}"" : {EscapeValue(condition.Value)} }}";
         private string GenerateTerms(List<ElasticTermCodition> conditions) => $@"""terms"": {{ ""{conditions.First().Field.Name}"" : {EscapeValue(conditions.Select(c => c.Value).ToArray())} }}";
         private string GenerateRange(List<ElasticRangeCondition> conditions) => $@"""range"": {{""{conditions.First().Field.Name}"": {{ {string.Join(",", conditions.Select(c => $@" ""{c.Operation.Name}"": {EscapeValue(c.Value)}"))} }} }}";
         private string GenerateSize(int size) => $@"""size"": {size}";
         private string GenerateFrom(int from) => $@"""from"": {from}";
+        private string GenerateSort(List<ElasticSort> sortingFields) => $@"""sort"": [{string.Join(",", sortingFields.Select(sf => $@"{{""{sf.Field.Name}"": ""{sf.Order.Name}""}}"))}]";
     }
 }

@@ -1,5 +1,5 @@
 ﻿using ElasticSearchLite.NetCore.Queries;
-using ElasticSearchLite.Tests.Poco;
+using ElasticSearchLite.Tests.Pocos;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -13,7 +13,7 @@ namespace ElasticSearchLite.Tests.Unit
         public void BulkQuery_Generation()
         {
             InitPoco();
-            var query = Bulk<MyPoco>.Create("mypocoindex")
+            var query = Bulk<Poco>.Create("mypocoindex")
                 .Index(poco)
                 .Delete(poco);
             var statement = StatementFactory.Generate(query);

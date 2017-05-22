@@ -1,9 +1,9 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using System;
 
-namespace ElasticSearchLite.Tests.Poco
+namespace ElasticSearchLite.Tests.Pocos
 {
-    public class MyPoco : IElasticPoco
+    public class Poco : IElasticPoco
     {
         public string Id { get; set; }
         public string Type { get; set; }

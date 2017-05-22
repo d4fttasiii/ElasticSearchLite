@@ -1,6 +1,6 @@
 ﻿using ElasticSearchLite.NetCore.Models;
 using ElasticSearchLite.NetCore.Queries;
-using ElasticSearchLite.Tests.Poco;
+using ElasticSearchLite.Tests.Pocos;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -14,7 +14,7 @@ namespace ElasticSearchLite.Tests.Unit
         [TestMethod]
         public void DeleteQuery_ExceptionTest_Poco()
         {
-            TestExceptions(typeof(ArgumentNullException), () => Delete.Document(A.Fake<MyPoco>()), "Poco is null");
+            TestExceptions(typeof(ArgumentNullException), () => Delete.Document(A.Fake<Poco>()), "Poco is null");
         }
 
         [TestMethod]
@@ -53,7 +53,7 @@ namespace ElasticSearchLite.Tests.Unit
             InitPoco();
             var query = Delete
                 .From("mypocoindex")
-                .Documents<MyPoco>()
+                .Documents<Poco>()
                 .Term(p => p.Id, "123");
 
             var queryObject = new
@@ -76,7 +76,7 @@ namespace ElasticSearchLite.Tests.Unit
             InitPoco();
             var query = Delete
                 .From("mypocoindex")
-                .Documents<MyPoco>()
+                .Documents<Poco>()
                 .Match(p => p.Id, "123");
             var queryObject = new
             {
@@ -98,7 +98,7 @@ namespace ElasticSearchLite.Tests.Unit
             InitPoco();
             var query = Delete
                 .From("mypocoindex")
-                .Documents<MyPoco>()
+                .Documents<Poco>()
                 .Range(p => p.Id, ElasticRangeOperations.Gte, "123");
             var queryObject = new
             {

@@ -1,5 +1,5 @@
 ﻿using ElasticSearchLite.NetCore.Queries;
-using ElasticSearchLite.Tests.Poco;
+using ElasticSearchLite.Tests.Pocos;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -13,7 +13,7 @@ namespace ElasticSearchLite.Tests.Unit
         [TestMethod]
         public void IndexQuery_ExceptionTest_Poco()
         {
-            TestExceptions(typeof(ArgumentNullException), () => Index.Document(A.Fake<MyPoco>()), "Poco is null");
+            TestExceptions(typeof(ArgumentNullException), () => Index.Document(A.Fake<Poco>()), "Poco is null");
         }
 
         [TestMethod]

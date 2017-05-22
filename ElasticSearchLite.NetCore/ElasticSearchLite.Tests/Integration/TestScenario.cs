@@ -1,9 +1,8 @@
 ﻿using ElasticSearchLite.NetCore;
 using ElasticSearchLite.NetCore.Queries;
-using ElasticSearchLite.Tests.Poco;
+using ElasticSearchLite.Tests.Pocos;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Linq;
 using System.Threading;
 
@@ -11,23 +10,8 @@ namespace ElasticSearchLite.Tests.Integration
 {
     [TestCategory("Integration")]
     [TestClass]
-    public class TestScenario
-    {
-        private static string indexName = "exampleindex";
-        private static string typeName = "example";
-        private ElasticLiteClient Client { get; } = new ElasticLiteClient("http://localhost:9200");
-        private MyPoco poco = new MyPoco
-        {
-            Index = indexName,
-            Type = typeName,
-            TestInteger = 12345,
-            TestText = "ABCDEFG",
-            TestBool = true,
-            TestDateTime = new DateTime(2017, 9, 10),
-            TestDouble = 1.337,
-            TestStringArray = new[] { "A", "B", "C", "D" }
-        };
-
+    public class TestScenario : AbstractIntegrationScenario
+    {  
         [TestMethod]
         public void TestScenario_Index_Search_Update_Verify_Delete()
         {
@@ -37,8 +21,8 @@ namespace ElasticSearchLite.Tests.Integration
             Thread.Sleep(2000);
 
             var document = Search
-                .In(indexName)
-                .Return<MyPoco>()
+                .In(IndexName)
+                .Return<Poco>()
                 .Term(p => p.Id, poco.Id)
                 .ExecuteWith(Client)
                 .Single();
@@ -57,8 +41,8 @@ namespace ElasticSearchLite.Tests.Integration
 
             Thread.Sleep(2000);
 
-            Search.In(indexName)
-                .Return<MyPoco>()
+            Search.In(IndexName)
+                .Return<Poco>()
                 .Term(p => p.Id, poco.Id)
                 .ExecuteWith(Client)
                 .Single()
@@ -73,8 +57,8 @@ namespace ElasticSearchLite.Tests.Integration
         {
             poco.Id = "1337";
 
-            Client.ExecuteBulk(Bulk<MyPoco>
-                .Create("mypocoindex")
+            Client.ExecuteBulk(Bulk<Poco>
+                .Create(IndexName)
                 .Index(poco)
                 .Delete(poco));
         }

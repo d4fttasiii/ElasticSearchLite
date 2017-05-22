@@ -1,10 +1,8 @@
 ﻿using ElasticSearchLite.NetCore.Queries;
-using ElasticSearchLite.Tests.Poco;
+using ElasticSearchLite.Tests.Pocos;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ElasticSearchLite.Tests.Unit
 {
@@ -15,7 +13,7 @@ namespace ElasticSearchLite.Tests.Unit
         [TestMethod]
         public void UpsertQuery_ExceptionTest_Poco()
         {
-            TestExceptions(typeof(ArgumentNullException), () => Upsert.Document(A.Fake<MyPoco>()), "Poco is null");
+            TestExceptions(typeof(ArgumentNullException), () => Upsert.Document(A.Fake<Poco>()), "Poco is null");
         }
 
         [TestMethod]
