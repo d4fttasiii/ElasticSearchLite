@@ -10,21 +10,29 @@ A simple .NET Core wrapper for ElasticSearch.Net
 var client = new ElasticLiteClient("http://myserver:9200", "http://myserver:9201");
 ```
 
-**Implement IElasticPoco interface**
+**Implement IElasticPoco interface for your pocos.**
 
 ```csharp
 public class MyPoco : IElasticPoco
 {
-    public string Id { get; set; }
+	public string Id { get; set; }
     public string Type { get; set; }
     public string Index { get; set; }
-    public double Score { get; set; }
-    public string TestText { get; set; }
-    public int TestInteger { get; set; }
-    public double TestDouble { get; set; }
-    public DateTime TestDateTime { get; set; }
-    public bool TestBool { get; set; }
-    public string[] TestStringArray { get; set; }
+    public double? Score { get; set; }
+    public Tag Tag { get; set; }
+    public Position Position { get; set; }
+    public string Name { get; set; }
+    public DateTime LastModified { get; set; }
+}
+public class Tag
+{
+    public string Name { get; set; }
+    public string Summary { get; set; }
+}
+public class Position
+{
+    public double X { get; set; }
+    public double Y { get; set; }
 }
 ```
 
@@ -39,8 +47,8 @@ var client = new ElasticLiteClient("http://myserver:9200");
 var pocosFound = Search
     .In("mypocoindex")
     .Return<MyPoco>()
-    .Term(p => p.TestText, "ABCDEFG")
-    .Sort(p => p.TestDateTime, ElasticSortOrders.Descending)
+    .Term(p => p.Name, "ABCDEFG")
+    .Sort(p => p.LastModified, ElasticSortOrders.Descending)
     .Take(20)
     .Skip(20)
     .ExecuteWith(client);
@@ -56,7 +64,8 @@ var poco = new MyPoco
 { 
     Index = "mypocoindex", 
     Type = "mypoco", 
-    TestText = "ElasticSearch is awesome!" 
+    Name = "ElasticSearch is awesome!",
+	LastModified = DateTime.Now()
 };
 
 Index.Document(poco)
@@ -69,7 +78,7 @@ Update can be used to persist POCO changes to ElasticSearch as in seen in this e
 
 ```csharp
 var client = new ElasticLiteClient("http://myserver:9200");
-poco.LastChanged = DateTime.UtcNow;
+poco.LastModified = DateTime.UtcNow;
 
 Update
     .Document(poco)
@@ -98,6 +107,6 @@ var client = new ElasticLiteClient("http://myserver:9200");
 var deleteDocuments = Delete
     .From("mypocoindex")
     .Documents<MyPoco>()
-    .Term(p => p.TestText, "ABCDEFG")
+    .Term(p => p.Name, "ABCDEFG")
     .ExecuteWith(client);
 ```
