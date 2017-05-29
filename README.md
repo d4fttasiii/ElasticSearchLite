@@ -15,7 +15,7 @@ var client = new ElasticLiteClient("http://myserver:9200", "http://myserver:9201
 ```csharp
 public class MyPoco : IElasticPoco
 {
-	public string Id { get; set; }
+    public string Id { get; set; }
     public string Type { get; set; }
     public string Index { get; set; }
     public double? Score { get; set; }
