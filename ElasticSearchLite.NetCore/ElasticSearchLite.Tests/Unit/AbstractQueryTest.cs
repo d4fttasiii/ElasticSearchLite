@@ -37,12 +37,12 @@ namespace ElasticSearchLite.Tests.Unit
             statementObject.ShouldBeEquivalentTo(JsonConvert.DeserializeAnonymousType(queryStatement, statementObject));
         }
 
-        protected void TestExceptions(Type exception, Action ctor, string becauseMessage)
+        protected void TestExceptions(Type exception, Action action, string becauseMessage)
         {
             try
             {
                 // Act
-                ctor();
+                action();
             }
             catch (Exception ex)
             {

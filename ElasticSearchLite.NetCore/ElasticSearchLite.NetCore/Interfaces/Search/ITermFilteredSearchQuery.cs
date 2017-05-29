@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq.Expressions;
-
-namespace ElasticSearchLite.NetCore.Interfaces.Search
+﻿namespace ElasticSearchLite.NetCore.Interfaces.Search
 {
     public interface ITermFilteredSearchQuery<TPoco> : IFilteredSearchQuery<TPoco>
         where TPoco: IElasticPoco

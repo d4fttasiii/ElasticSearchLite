@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Elasticsearch.Net;
 using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.NetCore.Queries.Generator;
+using ElasticSearchLite.NetCore.Exceptions;
 using ElasticSearchLite.NetCore.Interfaces;
 using System.Linq;
 using ElasticSearchLite.NetCore.Models;
@@ -71,6 +72,7 @@ namespace ElasticSearchLite.NetCore
         {
             var query = searchQuery as SearchQuery<TPoco>;
             var statement = Generator.Generate(query);
+            IndexExists(query.IndexName);
 
             return ProcessSeachResponse<TPoco>(LowLevelClient.Search<string>(query.IndexName, statement));
 
@@ -87,10 +89,12 @@ namespace ElasticSearchLite.NetCore
         {
             var query = searchQuery as SearchQuery<TPoco>;
             var statement = Generator.Generate(query);
+            IndexExists(query.IndexName);
 
             return ProcessSeachResponse<TPoco>(await LowLevelClient.SearchAsync<string>(query.IndexName, statement));
 
         }
+
         /// <summary>
         /// Executes an IndexQuery using the Index API which creates a new document in the index.
         /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/docs-index_.html
@@ -260,6 +264,13 @@ namespace ElasticSearchLite.NetCore
             if (!response.Success)
             {
                 throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+            }
+        }
+        private void IndexExists(string indexName)
+        {
+            if (LowLevelClient.IndicesExists<string>(indexName).HttpStatusCode == 404)
+            {
+                throw new IndexNotAvailableException($"{indexName} index doesn't exist");
             }
         }
 

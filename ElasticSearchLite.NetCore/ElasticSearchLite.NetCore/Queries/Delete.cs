@@ -2,11 +2,9 @@
 using ElasticSearchLite.NetCore.Models;
 using System;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
-
     public class Delete
     {
         private string IndexName { get; }

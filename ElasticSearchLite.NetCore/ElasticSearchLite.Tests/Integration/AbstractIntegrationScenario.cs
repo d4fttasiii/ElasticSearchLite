@@ -1,5 +1,6 @@
 ﻿using ElasticSearchLite.NetCore;
 using ElasticSearchLite.Tests.Pocos;
+using FluentAssertions;
 using System;
 
 namespace ElasticSearchLite.Tests.Integration
@@ -21,5 +22,19 @@ namespace ElasticSearchLite.Tests.Integration
             TestDouble = 1.337,
             TestStringArray = new[] { "A", "B", "C", "D" }
         };
+
+        protected void TestExceptions(Type exception, Action action, string becauseMessage)
+        {
+            try
+            {
+                // Act
+                action();
+            }
+            catch (Exception ex)
+            {
+                // Assert
+                ex.GetType().ShouldBeEquivalentTo(exception, becauseMessage);
+            }
+        }
     }
 }
