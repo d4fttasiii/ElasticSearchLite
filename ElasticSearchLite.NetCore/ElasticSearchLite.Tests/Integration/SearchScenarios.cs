@@ -1,4 +1,5 @@
 ﻿using ElasticSearchLite.NetCore;
+using ElasticSearchLite.NetCore.Exceptions;
 using ElasticSearchLite.NetCore.Models;
 using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.Tests.Pocos;
@@ -80,6 +81,19 @@ namespace ElasticSearchLite.Tests.Integration
                 poco.LastModified.Should().BeAfter(new DateTime(2017, 9, 14));
                 poco.LastModified.Should().BeBefore(new DateTime(2017, 9, 21));
             }
+        }
+
+        [TestMethod]
+        public void SearchScenario_Index_Doesnt_Exists()
+        {
+            TestExceptions(typeof(IndexNotAvailableException), () =>
+            {
+                Search.In("ishouldntexistsindex")
+                    .Return<Poco>()
+                    .ExecuteWith(Client);
+            }, 
+            "Index not available exception should be thrown.");
+
         }
 
         [TestCleanup]
