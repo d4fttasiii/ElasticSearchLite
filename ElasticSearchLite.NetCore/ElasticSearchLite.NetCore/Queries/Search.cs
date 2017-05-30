@@ -115,7 +115,7 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <param name="propertyExpression"></param>
             /// <param name="sortOrder"></param>
             /// <returns></returns>
-            public ISortedSearchQuery<TPoco> Sort(Expression<Func<TPoco, object>> propertyExpression, ElasticSortOrders sortOrder)
+            public ISortedSearchQuery<TPoco> Sort(Expression<Func<TPoco, object>> propertyExpression, ElasticSortOrders sortOrder = null)
             {
                 SortingFields.Add(new ElasticSort
                 {
@@ -123,7 +123,7 @@ namespace ElasticSearchLite.NetCore.Queries
                     {
                         Name = GetCorrectPropertyName(propertyExpression)
                     },
-                    Order = sortOrder
+                    Order = sortOrder ?? ElasticSortOrders.Ascending
                 });
 
                 return this;
@@ -134,7 +134,7 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <param name="propertyExpression"></param>
             /// <param name="sortOrder"></param>
             /// <returns></returns>
-            public ISortedSearchQuery<TPoco> ThenBy(Expression<Func<TPoco, object>> propertyExpression, ElasticSortOrders sortOrder) => Sort(propertyExpression, sortOrder);
+            public ISortedSearchQuery<TPoco> ThenBy(Expression<Func<TPoco, object>> propertyExpression, ElasticSortOrders sortOrder = null) => Sort(propertyExpression, sortOrder);
             /// <summary>
             /// Limits the size of the document result set.
             /// </summary>
@@ -181,7 +181,7 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <param name="operation"></param>
             /// <param name="value"></param>
             /// <returns></returns>
-            public IRangeFilteredSearchQuery<TPoco> And(ElasticRangeOperations operation, object value)
+            public IFilteredSearchQuery<TPoco> And(ElasticRangeOperations operation, object value)
             {
                 var condition = RangeConditions.LastOrDefault();
                 RangeConditions.Add(new ElasticRangeCondition
