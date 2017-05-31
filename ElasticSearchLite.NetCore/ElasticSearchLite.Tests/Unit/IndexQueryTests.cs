@@ -3,6 +3,9 @@ using ElasticSearchLite.Tests.Pocos;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using ElasticSearchLite.NetCore.Queries.Generator;
+using FluentAssertions;
+using Newtonsoft.Json;
 
 namespace ElasticSearchLite.Tests.Unit
 {
@@ -49,6 +52,7 @@ namespace ElasticSearchLite.Tests.Unit
 
             // Act and Assert
             TestQuery(statementObject, query);
+            TestQuery(statementObject, query, true);
         }
     }
 }
