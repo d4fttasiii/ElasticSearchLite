@@ -11,6 +11,6 @@ namespace ElasticSearchLite.NetCore.Interfaces.Search
         /// <param name="operation"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        IRangeFilteredSearchQuery<TPoco> And(ElasticRangeOperations operation, object value);
+        IFilteredSearchQuery<TPoco> And(ElasticRangeOperations operation, object value);
     }
 }

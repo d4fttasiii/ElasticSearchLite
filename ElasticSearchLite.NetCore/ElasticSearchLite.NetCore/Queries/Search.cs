@@ -193,11 +193,6 @@ namespace ElasticSearchLite.NetCore.Queries
 
                 return this;
             }
-
-            IRangeFilteredSearchQuery<TPoco> IRangeFilteredSearchQuery<TPoco>.And(ElasticRangeOperations operation, object value)
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }
