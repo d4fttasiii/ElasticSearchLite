@@ -1,5 +1,5 @@
-﻿using System;
-using ElasticSearchLite.NetCore.Interfaces;
+﻿using ElasticSearchLite.NetCore.Interfaces;
+using System;
 
 namespace ElasticSearchLite.NetCore.Queries
 {

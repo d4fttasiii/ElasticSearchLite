@@ -1,36 +1,31 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
-using ElasticSearchLite.NetCore.Models;
-using System.Linq;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
-    public abstract class AbstractQuery : IQuery
+    public abstract class AbstractBaseQuery : IQuery
     {
         internal string IndexName { get; }
         internal string TypeName { get; }
-        internal List<ElasticTermCodition> TermConditions { get; } = new List<ElasticTermCodition>();
-        internal ElasticMatchCodition MatchCondition { get; set; }
-        internal List<ElasticRangeCondition> RangeConditions { get; } = new List<ElasticRangeCondition>();
         internal IElasticPoco Poco { get; set; }
 
-        protected AbstractQuery(IElasticPoco poco)
+        protected AbstractBaseQuery(IElasticPoco poco)
         {
             Poco = poco ?? throw new ArgumentNullException(nameof(poco));
             IndexName = poco.Index ?? throw new ArgumentNullException(nameof(poco.Index));
             TypeName = poco.Type ?? throw new ArgumentNullException(nameof(poco.Type));
         }
 
-        protected AbstractQuery(string indexName)
+        protected AbstractBaseQuery(string indexName)
         {
             if (string.IsNullOrEmpty(indexName)) { throw new ArgumentNullException(nameof(indexName)); }
 
             IndexName = indexName;
         }
 
-        protected AbstractQuery(string indexName, string typeName)
+        protected AbstractBaseQuery(string indexName, string typeName)
         {
             if (string.IsNullOrEmpty(indexName)) { throw new ArgumentNullException(nameof(indexName)); }
             if (string.IsNullOrEmpty(typeName)) { throw new ArgumentNullException(nameof(typeName)); }

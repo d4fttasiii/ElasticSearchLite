@@ -1,8 +1,8 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace ElasticSearchLite.NetCore.Queries
 {

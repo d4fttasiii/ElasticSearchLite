@@ -1,27 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using Elasticsearch.Net;
-using ElasticSearchLite.NetCore.Queries;
-using ElasticSearchLite.NetCore.Queries.Generator;
+﻿using Elasticsearch.Net;
 using ElasticSearchLite.NetCore.Exceptions;
 using ElasticSearchLite.NetCore.Interfaces;
-using System.Linq;
-using ElasticSearchLite.NetCore.Models;
-using Newtonsoft.Json.Linq;
 using ElasticSearchLite.NetCore.Interfaces.Search;
+using ElasticSearchLite.NetCore.Models;
+using ElasticSearchLite.NetCore.Queries;
+using ElasticSearchLite.NetCore.Queries.Generator;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using static ElasticSearchLite.NetCore.Queries.Delete;
 using static ElasticSearchLite.NetCore.Queries.Search;
 
 namespace ElasticSearchLite.NetCore
 {
+    // TODO: Handling different http status codes!
     public class ElasticLiteClient : IDisposable
     {
         private bool disposedValue = false;
         private IStatementFactory Generator { get; } = new StatementFactory();
         public ElasticLowLevelClient LowLevelClient { get; private set; }
-
-        public Newtonsoft.Json.Serialization.NamingStrategy NameingStrategy { get { return Generator.NamingStrategy; } set { Generator.NamingStrategy = value; } }
+        public NamingStrategy NameingStrategy { get { return Generator.NamingStrategy; } set { Generator.NamingStrategy = value; } }
 
         /// <summary>
         /// Creates ElasticSearchLite Client which uses the low level elastic client  
@@ -59,7 +60,6 @@ namespace ElasticSearchLite.NetCore
 
             var connectionPool = new StickyConnectionPool(uris);
             var settings = new ConnectionConfiguration(connectionPool).ThrowExceptions().DisableDirectStreaming();
-
             LowLevelClient = new ElasticLowLevelClient(settings);
         }
         /// <summary>

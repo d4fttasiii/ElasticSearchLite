@@ -2,7 +2,7 @@
 
 namespace ElasticSearchLite.NetCore.Queries
 {
-    public class Index : AbstractQuery
+    public class Index : AbstractBaseQuery
     {
         protected Index(IElasticPoco poco) : base(poco) { }
         /// <summary>

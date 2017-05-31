@@ -2,7 +2,7 @@
 
 namespace ElasticSearchLite.NetCore.Queries
 {
-    public class Upsert : AbstractQuery
+    public class Upsert : AbstractBaseQuery
     {
         public Upsert(IElasticPoco poco) : base(poco) { }
         /// <summary>

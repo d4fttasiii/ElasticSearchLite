@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
-using ElasticSearchLite.NetCore.Interfaces;
+﻿using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Queries.Generator;
-using FluentAssertions;
-using System;
 using ElasticSearchLite.Tests.Pocos;
+using FluentAssertions;
+using Newtonsoft.Json;
+using System;
 
 namespace ElasticSearchLite.Tests.Unit
 {

@@ -8,6 +8,9 @@ using System.Linq.Expressions;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
+    /// <summary>
+    /// TODOS: match, match_phrase, bool_query, handling sources
+    /// </summary>
     public class Search
     {
         private string IndexName { get; }
@@ -37,7 +40,7 @@ namespace ElasticSearchLite.NetCore.Queries
             return new SearchQuery<TPoco>(IndexName);
         }
 
-        public abstract class SearchQuery : AbstractQuery
+        public abstract class SearchQuery : AbstractConditionalQuery
         {
             protected internal List<ElasticSort> SortingFields { get; } = new List<ElasticSort>();
             protected internal int Size { get; set; } = 25;
@@ -57,7 +60,7 @@ namespace ElasticSearchLite.NetCore.Queries
         {
             internal SearchQuery(string indexName) : base(indexName) { }
             /// <summary>
-            /// Term Query finds documents that contain the exact term specified in the inverted index.
+            /// Term Query finds documents that contain the exact term specified in the inverted index. Doesn't affect the score.
             /// </summary>
             /// <param name="propertyExpression">Field name</param>
             /// <param name="value">Value which should equal the field content</param>
@@ -74,24 +77,71 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
             /// <summary>
-            /// Match Query
+            /// Match Query for full text search.
             /// </summary>
             /// <param name="propertyExpression">Field property</param>
             /// <param name="value">Value matching the field</param>
             /// <returns></returns>
             public IFilteredSearchQuery<TPoco> Match(Expression<Func<TPoco, object>> propertyExpression, object value)
             {
-                var condition = new ElasticMatchCodition
+                MatchCondition = new ElasticMatchCodition
                 {
                     Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
                     Value = value ?? throw new ArgumentNullException(nameof(value))
-                };
-                MatchCondition = condition;
+                }; 
 
                 return this;
             }
             /// <summary>
-            /// Returns document for a range
+            /// match_phrase Query for search whole phrases.
+            /// </summary>
+            /// <param name="propertyExpression">Field property</param>
+            /// <param name="value">Value matching the field</param>
+            /// <returns></returns>
+            public IFilteredSearchQuery<TPoco> MatchPhrase(Expression<Func<TPoco, object>> propertyExpression, string value)
+            {
+                MatchPhraseCondition = new ElasticMatchCodition
+                {
+                    Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
+                    Value = value ?? throw new ArgumentNullException(nameof(value))
+                };
+
+                return this;
+            }
+            /// <summary>
+            /// match_phrase_prefix Query for auto_complete like functionality.
+            /// </summary>
+            /// <param name="propertyExpression">Field property</param>
+            /// <param name="value">Value matching the field</param>
+            /// <returns></returns>
+            public IFilteredSearchQuery<TPoco> MatchPhrasePrefix(Expression<Func<TPoco, object>> propertyExpression, string value)
+            {
+                MatchPhrasePrefixCondition = new ElasticMatchCodition
+                {
+                    Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
+                    Value = value ?? throw new ArgumentNullException(nameof(value))
+                };
+
+                return this;
+            }
+            /// <summary>
+            /// Multi Match Query - Matching the same value (query) on multiple fields using an OR combination between fields.
+            /// </summary>
+            /// <param name="value">A value matching multiple fields</param>
+            /// <param name="propertyExpressions">Multiple field properties</param>
+            /// <returns></returns>
+            public IFilteredSearchQuery<TPoco> MultiMatch(object value, params Expression<Func<TPoco, object>>[] propertyExpressions)
+            {
+                MultiMatchConditions = new ElasticMultiMatchCondition
+                {
+                    Value = value ?? throw new ArgumentNullException(nameof(value)),
+                    Fields = propertyExpressions.Select(pe => new ElasticField { Name = GetCorrectPropertyName(pe) })
+                };
+
+                return this;
+            }
+            /// <summary>
+            /// Returns document for a numeric range or timeinterval. It doesn't affect the score (filter context).
             /// </summary>
             /// <param name="propertyExpression">Field property</param>
             /// <param name="op">Range operator</param>
@@ -110,7 +160,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
             /// <summary>
-            /// Orders the documents by this given field
+            /// Orders the documents by this given field (default ASC)
             /// </summary>
             /// <param name="propertyExpression"></param>
             /// <param name="sortOrder"></param>
@@ -129,7 +179,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
             /// <summary>
-            /// Ands another field to the order by fields
+            /// Adds another field to the order by fields
             /// </summary>
             /// <param name="propertyExpression"></param>
             /// <param name="sortOrder"></param>
@@ -176,7 +226,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
             /// <summary>
-            /// Extends the range condition
+            /// Extends the range condition with a second value (to part in between)
             /// </summary>
             /// <param name="operation"></param>
             /// <param name="value"></param>

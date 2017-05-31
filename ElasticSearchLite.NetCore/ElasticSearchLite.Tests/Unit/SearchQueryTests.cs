@@ -1,7 +1,7 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.NetCore.Models;
+using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.Tests.Pocos;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
 namespace ElasticSearchLite.Tests.Unit
@@ -64,6 +64,86 @@ namespace ElasticSearchLite.Tests.Unit
             TestQuery(statementObject, query);
             TestQuery(statementObject, query, true);
         }
+
+        [TestMethod]
+        public void SearchQuery_Generation_MatchPhrase()
+        {
+            // Arrange
+            var query = Search.In("mypocoindex")
+                .Return<Poco>()
+                .MatchPhrase(p => p.TestText, "ABCD EFGH")
+                .Take(10)
+                .Skip(10);
+            var statementObject = new
+            {
+                query = new
+                {
+                    match_phrase = new { TestText = "ABCD EFGH" }
+                },
+                size = 10,
+                from = 10
+            };
+
+            // Act and Assert
+            TestQuery(statementObject, query);
+            TestQuery(statementObject, query, true);
+        }
+
+        [TestMethod]
+        public void SearchQuery_Generation_MatchPhrasePrefix()
+        {
+            // Arrange
+            var query = Search.In("mypocoindex")
+                .Return<Poco>()
+                .MatchPhrasePrefix(p => p.TestText, "ABCD EFGH")
+                .Take(10)
+                .Skip(10);
+            var statementObject = new
+            {
+                query = new
+                {
+                    match_phrase_prefix = new { TestText = "ABCD EFGH" }
+                },
+                size = 10,
+                from = 10
+            };
+
+            // Act and Assert
+            TestQuery(statementObject, query);
+            TestQuery(statementObject, query, true);
+        }
+
+        //[TestMethod]
+        //public void SearchQuery_Generation_MultiMatch()
+        //{
+        //    // Arrange
+        //    var query = Search.In("mypocoindex")
+        //        .Return<ComplexPoco>()
+        //        .MultiMatch("ABCD", p => p.Name, p => p.Description)
+        //        .Take(10)
+        //        .Skip(10);
+        //    var statementObject = new
+        //    {
+        //        query = new
+        //        {
+        //            multi_match = new
+        //            {
+        //                query = "ABCD",
+        //                fields = new string[2]
+        //                {
+        //                    "Name",
+        //                    "Description"
+        //                }
+        //            }
+        //        },
+        //        size = 10,
+        //        from = 10
+        //    };
+
+        //    // Act and Assert
+        //    TestQuery(statementObject, query);
+        //    TestQuery(statementObject, query, true);
+        //}
 
         [TestMethod]
         public void SearchQuery_Generation_Range()

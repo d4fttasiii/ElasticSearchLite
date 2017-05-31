@@ -5,6 +5,4 @@
         public ElasticField Field { get; set; }
         public object Value { get; set; }
     }
-
-    public class ElasticMatchCodition : ElasticTermCodition { }
 }

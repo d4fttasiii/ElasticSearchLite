@@ -1,13 +1,14 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Newtonsoft.Json;
-using static ElasticSearchLite.NetCore.Queries.Search;
 using static ElasticSearchLite.NetCore.Queries.Delete;
+using static ElasticSearchLite.NetCore.Queries.Search;
 
 namespace ElasticSearchLite.NetCore.Queries.Generator
 {
@@ -15,8 +16,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
     {
         private static List<string> ExcludedProperties { get; } = new List<string> { "Index", "Id", "Type", "Score" };
         private IEnumerable<PropertyInfo> UpdatetableProperties(IElasticPoco poco) => poco.GetType().GetProperties().Where(p => !ExcludedProperties.Contains(p.Name));
-
-        public Newtonsoft.Json.Serialization.NamingStrategy NamingStrategy { get; set; } = new Newtonsoft.Json.Serialization.DefaultNamingStrategy();
+        public NamingStrategy NamingStrategy { get; set; } = new DefaultNamingStrategy();
 
         public string Generate(IQuery query)
         {
@@ -118,11 +118,27 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             return string.Join(",", propertiesAsJson);
         }
 
-        private string GenerateQuery(AbstractQuery query)
+        private string GenerateQuery(AbstractConditionalQuery query)
         {
             if (query.MatchCondition != null)
             {
                 return $@"""query"": {{ {GenerateMatch(query.MatchCondition)} }}";
+            }
+
+            if (query.MatchPhraseCondition != null)
+            {
+                return $@"""query"": {{ {GenerateMatchPhrase(query.MatchPhraseCondition)} }}";
+            }
+
+            if (query.MatchPhrasePrefixCondition != null)
+            {
+                return $@"""query"": {{ {GenerateMatchPhrasePrefixPhrase(query.MatchPhrasePrefixCondition)} }}";
+
+            }
+
+            if (query.MultiMatchConditions != null)
+            {
+                return $@"""query"": {{ {GenerateMultiMatch(query.MultiMatchConditions)} }}";
             }
 
             if (query.TermConditions.Count > 0)
@@ -141,6 +157,9 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         private string GetName(string name) => NamingStrategy.GetPropertyName(name, false);
         private string EscapeValue(object value) => JsonConvert.SerializeObject(value);
         private string GenerateMatch(ElasticMatchCodition condition) => $@"""match"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {EscapeValue(condition.Value)} }}";
+        private string GenerateMatchPhrase(ElasticMatchCodition condition) => $@"""match_phrase"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {EscapeValue(condition.Value)} }}";
+        private string GenerateMatchPhrasePrefixPhrase(ElasticMatchCodition condition) => $@"""match_phrase_prefix"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {EscapeValue(condition.Value)} }}";
+        private string GenerateMultiMatch(ElasticMultiMatchCondition condition) => $@"""multi_match"": {{ ""query"": {EscapeValue(condition.Value)}, ""fields"": [{string.Join(",", condition.Fields.Select(cf => $@"""{NamingStrategy.GetPropertyName(cf.Name, false)}"""))}] }}";
         private string GenerateTerms(List<ElasticTermCodition> conditions) => $@"""terms"": {{ ""{NamingStrategy.GetPropertyName(conditions.First().Field.Name, false)}"" : {EscapeValue(conditions.Select(c => c.Value).ToArray())} }}";
         private string GenerateRange(List<ElasticRangeCondition> conditions) => $@"""range"": {{""{NamingStrategy.GetPropertyName(conditions.First().Field.Name, false)}"": {{ {string.Join(",", conditions.Select(c => $@" ""{c.Operation.Name}"": {EscapeValue(c.Value)}"))} }} }}";
         private string GenerateSize(int size) => $@"""size"": {size}";

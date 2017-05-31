@@ -7,7 +7,7 @@ namespace ElasticSearchLite.NetCore.Interfaces.Search
     public interface IFilteredSearchQuery<TPoco> : IExecutableSearchQuery<TPoco> where TPoco : IElasticPoco
     {
         /// <summary>
-        /// Orders the documents by this given field
+        /// Orders the documents by this given field (default ASC)
         /// </summary>
         /// <param name="propertyExpression"></param>
         /// <param name="sortOrder"></param>

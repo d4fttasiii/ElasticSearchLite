@@ -9,7 +9,7 @@ namespace ElasticSearchLite.Tests.Integration
     {
         protected static string IndexName { get; } = "exampleindex";
         protected static string TypeName { get; } = "example";
-        protected ElasticLiteClient Client { get; } = new ElasticLiteClient("http://bsv-postgres001:9200");
+        protected ElasticLiteClient Client { get; } = new ElasticLiteClient("http://localhost:9200/");
 
         protected Poco poco = new Poco
         {

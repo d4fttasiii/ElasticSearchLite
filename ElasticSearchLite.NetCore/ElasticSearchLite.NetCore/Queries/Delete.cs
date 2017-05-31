@@ -41,7 +41,7 @@ namespace ElasticSearchLite.NetCore.Queries
         public DeleteQuery<TPoco> Documents<TPoco>()
             where TPoco : IElasticPoco => new DeleteQuery<TPoco>(IndexName);
 
-        public abstract class DeleteQuery : AbstractQuery
+        public abstract class DeleteQuery : AbstractConditionalQuery
         {
             internal DeleteQuery(IElasticPoco poco) : base(poco)
             {

@@ -18,7 +18,7 @@
         /// </summary>
         string Index { get; set; }
         /// <summary>
-        /// A value between 0 and 1 which describes the document's relevance for a certain search.
+        /// A value which describes the document's relevance for a certain search.
         /// </summary>
         double? Score { get; set; }
     }

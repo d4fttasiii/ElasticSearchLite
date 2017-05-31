@@ -6,7 +6,7 @@ namespace ElasticSearchLite.NetCore.Interfaces.Search
         where TPoco : IElasticPoco
     {
         /// <summary>
-        /// Extends the range condition
+        /// Extends the range condition with a second value (to part in between)
         /// </summary>
         /// <param name="operation"></param>
         /// <param name="value"></param>

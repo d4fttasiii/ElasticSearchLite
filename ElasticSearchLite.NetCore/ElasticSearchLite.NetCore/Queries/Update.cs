@@ -2,10 +2,9 @@
 
 namespace ElasticSearchLite.NetCore.Queries
 {
-    public class Update : AbstractQuery
+    public class Update : AbstractBaseQuery
     {
         protected Update(IElasticPoco poco) : base(poco) { }
-
         /// <summary>
         /// Creates an update statement for the given poco
         /// It used the Update API 

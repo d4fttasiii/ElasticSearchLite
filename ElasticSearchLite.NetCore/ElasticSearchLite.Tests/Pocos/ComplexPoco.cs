@@ -12,6 +12,7 @@ namespace ElasticSearchLite.Tests.Pocos
         public Tag Tag { get; set; }
         public Position Position { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
         public DateTime LastModified { get; set; }
     }
 

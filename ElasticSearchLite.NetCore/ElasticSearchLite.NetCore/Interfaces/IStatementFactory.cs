@@ -1,8 +1,10 @@
-﻿namespace ElasticSearchLite.NetCore.Interfaces
+﻿using Newtonsoft.Json.Serialization;
+
+namespace ElasticSearchLite.NetCore.Interfaces
 {
     public interface IStatementFactory
     {
         string Generate(IQuery query);
-        Newtonsoft.Json.Serialization.NamingStrategy NamingStrategy { get; set; }
+        NamingStrategy NamingStrategy { get; set; }
     }
 }
