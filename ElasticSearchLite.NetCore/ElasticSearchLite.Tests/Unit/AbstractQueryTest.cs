@@ -28,13 +28,23 @@ namespace ElasticSearchLite.Tests.Unit
             };
         }
 
-        protected void TestQuery<T>(T statementObject, IQuery query)
+        protected void TestQuery<T>(T statementObject, IQuery query, bool camelCase = false)
         {
+            Newtonsoft.Json.JsonSerializerSettings settings = new JsonSerializerSettings();
+            if (camelCase)
+            {
+                StatementFactory.NamingStrategy = new Newtonsoft.Json.Serialization.CamelCaseNamingStrategy();
+                settings.ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver();
+            }
+            else
+            {
+                StatementFactory.NamingStrategy = new Newtonsoft.Json.Serialization.DefaultNamingStrategy();
+            }
             // Act
             var queryStatement = StatementFactory.Generate(query);
 
             // Assert
-            statementObject.ShouldBeEquivalentTo(JsonConvert.DeserializeAnonymousType(queryStatement, statementObject));
+            statementObject.ShouldBeEquivalentTo(JsonConvert.DeserializeAnonymousType(queryStatement, statementObject, settings));
         }
 
         protected void TestExceptions(Type exception, Action action, string becauseMessage)

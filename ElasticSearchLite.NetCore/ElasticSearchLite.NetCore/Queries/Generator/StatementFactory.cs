@@ -16,6 +16,8 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         private static List<string> ExcludedProperties { get; } = new List<string> { "Index", "Id", "Type", "Score" };
         private IEnumerable<PropertyInfo> UpdatetableProperties(IElasticPoco poco) => poco.GetType().GetProperties().Where(p => !ExcludedProperties.Contains(p.Name));
 
+        public Newtonsoft.Json.Serialization.NamingStrategy NamingStrategy { get; set; } = new Newtonsoft.Json.Serialization.DefaultNamingStrategy();
+
         public string Generate(IQuery query)
         {
             switch (query)
@@ -46,7 +48,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             if (searchQuery.Size != 0) { statementParts.Add(GenerateSize(searchQuery.Size)); }
             if (searchQuery.From != 0) { statementParts.Add(GenerateFrom(searchQuery.From)); }
             if (searchQuery.SortingFields != null && searchQuery.SortingFields.Count > 0) { statementParts.Add(GenerateSort(searchQuery.SortingFields)); }
-          
+
             return $"{{ {string.Join(",", statementParts)} }}";
         }
 
@@ -111,7 +113,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         {
             var propertiesAsJson = properties
                 .Where(p => p.GetValue(poco) != null)
-                .Select(p => $@"""{p.Name}"": {EscapeValue(p.GetValue(poco))}");
+                .Select(p => $@"""{GetName(p.Name)}"": {EscapeValue(p.GetValue(poco))}");
 
             return string.Join(",", propertiesAsJson);
         }
@@ -136,12 +138,13 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             return string.Empty;
         }
 
+        private string GetName(string name) => NamingStrategy.GetPropertyName(name, false);
         private string EscapeValue(object value) => JsonConvert.SerializeObject(value);
-        private string GenerateMatch(ElasticMatchCodition condition) => $@"""match"": {{ ""{condition.Field.Name}"" : {EscapeValue(condition.Value)} }}";
-        private string GenerateTerms(List<ElasticTermCodition> conditions) => $@"""terms"": {{ ""{conditions.First().Field.Name}"" : {EscapeValue(conditions.Select(c => c.Value).ToArray())} }}";
-        private string GenerateRange(List<ElasticRangeCondition> conditions) => $@"""range"": {{""{conditions.First().Field.Name}"": {{ {string.Join(",", conditions.Select(c => $@" ""{c.Operation.Name}"": {EscapeValue(c.Value)}"))} }} }}";
+        private string GenerateMatch(ElasticMatchCodition condition) => $@"""match"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {EscapeValue(condition.Value)} }}";
+        private string GenerateTerms(List<ElasticTermCodition> conditions) => $@"""terms"": {{ ""{NamingStrategy.GetPropertyName(conditions.First().Field.Name, false)}"" : {EscapeValue(conditions.Select(c => c.Value).ToArray())} }}";
+        private string GenerateRange(List<ElasticRangeCondition> conditions) => $@"""range"": {{""{NamingStrategy.GetPropertyName(conditions.First().Field.Name, false)}"": {{ {string.Join(",", conditions.Select(c => $@" ""{c.Operation.Name}"": {EscapeValue(c.Value)}"))} }} }}";
         private string GenerateSize(int size) => $@"""size"": {size}";
         private string GenerateFrom(int from) => $@"""from"": {from}";
-        private string GenerateSort(List<ElasticSort> sortingFields) => $@"""sort"": [{string.Join(",", sortingFields.Select(sf => $@"{{""{sf.Field.Name}"": ""{sf.Order.Name}""}}"))}]";
+        private string GenerateSort(List<ElasticSort> sortingFields) => $@"""sort"": [{string.Join(",", sortingFields.Select(sf => $@"{{""{NamingStrategy.GetPropertyName(sf.Field.Name, false)}"": ""{sf.Order.Name}""}}"))}]";
     }
 }

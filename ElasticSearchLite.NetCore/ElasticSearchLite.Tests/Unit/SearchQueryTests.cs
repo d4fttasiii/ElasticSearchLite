@@ -38,6 +38,7 @@ namespace ElasticSearchLite.Tests.Unit
 
             // Act and Assert
             TestQuery(statementObject, query);
+            TestQuery(statementObject, query, true);
         }
 
         [TestMethod]
@@ -61,6 +62,7 @@ namespace ElasticSearchLite.Tests.Unit
 
             // Act and Assert
             TestQuery(statementObject, query);
+            TestQuery(statementObject, query, true);
         }
 
         [TestMethod]
@@ -91,6 +93,7 @@ namespace ElasticSearchLite.Tests.Unit
 
             // Act and Assert
             TestQuery(statementObject, query);
+            TestQuery(statementObject, query, true);
         }
     }
 }

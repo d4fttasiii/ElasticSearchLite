@@ -21,6 +21,8 @@ namespace ElasticSearchLite.NetCore
         private IStatementFactory Generator { get; } = new StatementFactory();
         public ElasticLowLevelClient LowLevelClient { get; private set; }
 
+        public Newtonsoft.Json.Serialization.NamingStrategy NameingStrategy { get { return Generator.NamingStrategy; } set { Generator.NamingStrategy = value; } }
+
         /// <summary>
         /// Creates ElasticSearchLite Client which uses the low level elastic client  
         /// </summary>

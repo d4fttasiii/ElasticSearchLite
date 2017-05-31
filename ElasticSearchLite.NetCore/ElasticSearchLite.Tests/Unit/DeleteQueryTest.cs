@@ -68,6 +68,7 @@ namespace ElasticSearchLite.Tests.Unit
             };
 
             TestQuery(queryObject, query);
+            TestQuery(queryObject, query, true);
         }
 
         [TestMethod]
@@ -90,6 +91,7 @@ namespace ElasticSearchLite.Tests.Unit
             };
 
             TestQuery(queryObject, query);
+            TestQuery(queryObject, query, true);
         }
 
         [TestMethod]
@@ -115,6 +117,7 @@ namespace ElasticSearchLite.Tests.Unit
             };
 
             TestQuery(queryObject, query);
+            TestQuery(queryObject, query, true);
         }
     }
 }
