@@ -19,7 +19,7 @@ namespace ElasticSearchLite.NetCore.Interfaces.Search
         /// <param name="propertyExpression">Field property</param>
         /// <param name="value">Value matching the field</param>
         /// <returns></returns>
-        IFilteredSearchQuery<TPoco> Match(Expression<Func<TPoco, object>> propertyExpression, object value);
+        IMatchFilteringQuery<TPoco> Match(Expression<Func<TPoco, object>> propertyExpression, object value);
         /// <summary>
         /// match_phrase Query for search whole phrases.
         /// </summary>
@@ -51,6 +51,7 @@ namespace ElasticSearchLite.NetCore.Interfaces.Search
         IRangeFilteredSearchQuery<TPoco> Range(Expression<Func<TPoco, object>> propertyExpression, ElasticRangeOperations rangeOperation, object value);
         /// <summary>
         /// Orders the documents by this given field (default ASC)
+        /// NOTE: the default sort is: ["_doc"] to skip scoring and increase performance.
         /// </summary>
         /// <param name="propertyExpression">Field property</param>
         /// <param name="sortOrder"></param>

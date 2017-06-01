@@ -47,7 +47,8 @@ namespace ElasticSearchLite.Tests.Unit
             // Arrange
             var query = Search.In("mypocoindex")
                 .Return<Poco>()
-                .Match(p => p.TestText, "ABCDEFG")
+                .Match(p => p.TestText, "ABCD EFGH")
+                    .Operator(ElasticOperators.And)
                 .Take(10)
                 .Skip(10);
             var statementObject = new

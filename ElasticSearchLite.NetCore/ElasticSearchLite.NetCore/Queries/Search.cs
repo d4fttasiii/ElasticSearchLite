@@ -52,6 +52,7 @@ namespace ElasticSearchLite.NetCore.Queries
             SearchQuery,
             ISearchQuery<TPoco>,
             IFilteredSearchQuery<TPoco>,
+            IMatchFilteringQuery<TPoco>,
             ITermFilteredSearchQuery<TPoco>,
             IRangeFilteredSearchQuery<TPoco>,
             ISortedSearchQuery<TPoco>,
@@ -82,13 +83,24 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <param name="propertyExpression">Field property</param>
             /// <param name="value">Value matching the field</param>
             /// <returns></returns>
-            public IFilteredSearchQuery<TPoco> Match(Expression<Func<TPoco, object>> propertyExpression, object value)
+            public IMatchFilteringQuery<TPoco> Match(Expression<Func<TPoco, object>> propertyExpression, object value)
             {
                 MatchCondition = new ElasticMatchCodition
                 {
                     Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
                     Value = value ?? throw new ArgumentNullException(nameof(value))
                 }; 
+
+                return this;
+            }
+            /// <summary>
+            /// Setting up the match operation
+            /// </summary>
+            /// <param name="op">Operation type between match tokens (and, or)</param>
+            /// <returns></returns>
+            public IFilteredSearchQuery<TPoco> Operator(ElasticOperators op = null)
+            {
+                MatchCondition.Operation = op ?? ElasticOperators.And;
 
                 return this;
             }
@@ -161,6 +173,7 @@ namespace ElasticSearchLite.NetCore.Queries
             }
             /// <summary>
             /// Orders the documents by this given field (default ASC)
+            /// NOTE: the default sort is: ["_doc"] to skip scoring and increase performance.
             /// </summary>
             /// <param name="propertyExpression"></param>
             /// <param name="sortOrder"></param>

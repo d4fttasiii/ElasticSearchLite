@@ -156,7 +156,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
         private string GetName(string name) => NamingStrategy.GetPropertyName(name, false);
         private string EscapeValue(object value) => JsonConvert.SerializeObject(value);
-        private string GenerateMatch(ElasticMatchCodition condition) => $@"""match"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {EscapeValue(condition.Value)} }}";
+        private string GenerateMatch(ElasticMatchCodition condition) => $@"""match"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {{ ""query"": {EscapeValue(condition.Value)}, ""operator"": ""{condition.Operation.Name}"" }} }}";
         private string GenerateMatchPhrase(ElasticMatchCodition condition) => $@"""match_phrase"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {EscapeValue(condition.Value)} }}";
         private string GenerateMatchPhrasePrefixPhrase(ElasticMatchCodition condition) => $@"""match_phrase_prefix"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {EscapeValue(condition.Value)} }}";
         private string GenerateMultiMatch(ElasticMultiMatchCondition condition) => $@"""multi_match"": {{ ""query"": {EscapeValue(condition.Value)}, ""fields"": [{string.Join(",", condition.Fields.Select(cf => $@"""{NamingStrategy.GetPropertyName(cf.Name, false)}"""))}] }}";
