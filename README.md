@@ -44,13 +44,25 @@ After creating a new ElasticLiteClient object, you can build up your Search obje
 
 ```csharp
 var client = new ElasticLiteClient("http://myserver:9200");
-var pocosFound = Search
+
+// Term query example
+var pocosFoundWithTerm = Search
     .In("mypocoindex")
     .Return<MyPoco>()
     .Term(p => p.Name, "ABCDEFG")
     .Sort(p => p.LastModified, ElasticSortOrders.Descending)
     .Take(20)
-    .Skip(20)
+    .Skip(0)
+    .ExecuteWith(client);
+    
+// Match query example
+var pocosFoundWithMatch = Search
+    .In("mypocoindex")
+    .Return<MyPoco>()
+    .Match(p => p.Name, "ABCD EFGH")
+    	.Operator(ElasticOperators.Or)
+    .Sort(p => p.LastModified)
+    	.ThenBy(p => p.Score, ElasticSortOrders.Descending)
     .ExecuteWith(client);
 ```
 
