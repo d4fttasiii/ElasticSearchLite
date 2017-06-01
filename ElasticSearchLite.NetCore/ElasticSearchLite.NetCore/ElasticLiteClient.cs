@@ -63,6 +63,24 @@ namespace ElasticSearchLite.NetCore
             LowLevelClient = new ElasticLowLevelClient(settings);
         }
         /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TPoco"></typeparam>
+        /// <param name="get"></param>
+        /// <returns></returns>
+        public TPoco ExecuteGet<TPoco>(Get get) where TPoco : IElasticPoco
+        {
+            IndexExists(get.IndexName);
+            var response = LowLevelClient.Get<string>(get.IndexName, get.TypeName, get.Id.ToString());
+            if (!response.Success)
+            {
+                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+            }
+            var data = JObject.Parse(response.Body)?.First;
+
+            return MapResponseToPoco<TPoco>(data);            
+        }
+        /// <summary>
         /// Executes a SearchQuery using the Search API and returns a list of generic pocos.
         /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/_the_search_api.html
         /// </summary>
@@ -73,11 +91,9 @@ namespace ElasticSearchLite.NetCore
             where TPoco : IElasticPoco
         {
             var query = searchQuery as SearchQuery<TPoco>;
-            var statement = Generator.Generate(query);
             IndexExists(query.IndexName);
 
-            return ProcessSeachResponse<TPoco>(LowLevelClient.Search<string>(query.IndexName, statement));
-
+            return ProcessSeachResponse<TPoco>(LowLevelClient.Search<string>(query.IndexName, Generator.Generate(query)));
         }
         /// <summary>
         /// Executes an asyncronus SearchQuery using the Search API and returns a list of generic pocos.
@@ -90,11 +106,9 @@ namespace ElasticSearchLite.NetCore
              where TPoco : IElasticPoco
         {
             var query = searchQuery as SearchQuery<TPoco>;
-            var statement = Generator.Generate(query);
             IndexExists(query.IndexName);
 
-            return ProcessSeachResponse<TPoco>(await LowLevelClient.SearchAsync<string>(query.IndexName, statement));
-
+            return ProcessSeachResponse<TPoco>(await LowLevelClient.SearchAsync<string>(query.IndexName, Generator.Generate(query)));
         }
 
         /// <summary>
@@ -105,13 +119,11 @@ namespace ElasticSearchLite.NetCore
         public void ExecuteIndex(Index query)
         {
             var statement = Generator.Generate(query);
-
             var response = !string.IsNullOrEmpty(query.Poco.Id) ?
                 LowLevelClient.Index<string>(query.IndexName, query.TypeName, query.Poco.Id, statement) :
                 LowLevelClient.Index<string>(query.IndexName, query.TypeName, statement);
 
             ProcessIndexResponse(query, response);
-
         }
         /// <summary>
         /// Executes an asyncronus IndexQuery using the Index API which creates a new document in the index.
@@ -121,7 +133,6 @@ namespace ElasticSearchLite.NetCore
         public async Task ExecuteIndexAsync(Index query)
         {
             var statement = Generator.Generate(query);
-
             var response = !string.IsNullOrEmpty(query.Poco.Id) ?
                 LowLevelClient.IndexAsync<string>(query.IndexName, query.TypeName, query.Poco.Id, statement) :
                 LowLevelClient.IndexAsync<string>(query.IndexName, query.TypeName, statement);
@@ -285,17 +296,23 @@ namespace ElasticSearchLite.NetCore
 
             var data = JObject.Parse(response.Body);
             var hits = new List<TPoco>();
-            foreach (var x in data[ElasticFields.Hits.Name][ElasticFields.Hits.Name])
+            foreach (var jToken in data[ElasticFields.Hits.Name][ElasticFields.Hits.Name])
             {
-                var document = x[ElasticFields.Source.Name].ToObject<TPoco>();
-                document.Id = x[ElasticFields.Id.Name].ToString();
-                document.Index = x[ElasticFields.Index.Name].ToString();
-                document.Type = x[ElasticFields.Type.Name].ToString();
-                document.Score = x[ElasticFields.Score.Name].ToObject<double?>();
-                hits.Add(document);
+                hits.Add(MapResponseToPoco<TPoco>(jToken));
             }
 
             return hits;
+        }
+
+        private static TPoco MapResponseToPoco<TPoco>(JToken jToken) where TPoco : IElasticPoco
+        {
+            var document = jToken[ElasticFields.Source.Name].ToObject<TPoco>();
+            document.Id = jToken[ElasticFields.Id.Name].ToString();
+            document.Index = jToken[ElasticFields.Index.Name].ToString();
+            document.Type = jToken[ElasticFields.Type.Name].ToString();
+            document.Score = jToken[ElasticFields.Score.Name].ToObject<double?>();
+
+            return document;
         }
 
         private static void ProcessIndexResponse(Index query, ElasticsearchResponse<string> response)
