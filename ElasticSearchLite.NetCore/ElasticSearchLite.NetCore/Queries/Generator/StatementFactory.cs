@@ -47,7 +47,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             if (!string.IsNullOrEmpty(query)) { statementParts.Add(query); }
             if (searchQuery.Size != 0) { statementParts.Add(GenerateSize(searchQuery.Size)); }
             if (searchQuery.From != 0) { statementParts.Add(GenerateFrom(searchQuery.From)); }
-            if (searchQuery.SortingFields != null && searchQuery.SortingFields.Count > 0) { statementParts.Add(GenerateSort(searchQuery.SortingFields)); }
+            statementParts.Add(GenerateSort(searchQuery.SortingFields));
 
             return $"{{ {string.Join(",", statementParts)} }}";
         }
@@ -164,6 +164,15 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         private string GenerateRange(List<ElasticRangeCondition> conditions) => $@"""range"": {{""{NamingStrategy.GetPropertyName(conditions.First().Field.Name, false)}"": {{ {string.Join(",", conditions.Select(c => $@" ""{c.Operation.Name}"": {EscapeValue(c.Value)}"))} }} }}";
         private string GenerateSize(int size) => $@"""size"": {size}";
         private string GenerateFrom(int from) => $@"""from"": {from}";
-        private string GenerateSort(List<ElasticSort> sortingFields) => $@"""sort"": [{string.Join(",", sortingFields.Select(sf => $@"{{""{NamingStrategy.GetPropertyName(sf.Field.Name, false)}"": ""{sf.Order.Name}""}}"))}]";
+        // TODO: search_after implementation
+        private string GenerateSort(List<ElasticSort> sortingFields)
+        {
+            if(sortingFields != null && sortingFields.Count > 0)
+            {
+                return $@"""sort"": [{string.Join(",", sortingFields.Select(sf => $@"{{""{NamingStrategy.GetPropertyName(sf.Field.Name, false)}"": ""{sf.Order.Name}""}}"))}]";
+            }
+
+            return $@"""sort"": [""_doc""]";
+        }
     }
 }

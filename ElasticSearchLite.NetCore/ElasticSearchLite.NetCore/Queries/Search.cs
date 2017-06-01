@@ -200,11 +200,13 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <summary>
             /// Skips a certain number of documents.
             /// </summary>
-            /// <param name="skip">Number of documents to skip (Offset).</param>
+            /// <param name="skip">Number of documents to skip (Offset). Cannot be more than 10.000!</param>
             /// <returns></returns>
             public IExecutableSearchQuery<TPoco> Skip(int skip)
             {
                 if (skip < 0) { throw new ArgumentException($"The given value {nameof(skip)} should be at least 0 or higher!"); }
+                if (skip > 10000) { throw new ArgumentException($"The given value {nameof(skip)} should be at less than 10.000!"); }
+
                 From = skip;
 
                 return this;
