@@ -3,12 +3,15 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <AssemblyVersion>0.9.2.0</AssemblyVersion>
-    <FileVersion>0.9.2.0</FileVersion>
+    <AssemblyVersion>0.9.3.0</AssemblyVersion>
+    <FileVersion>0.9.3.0</FileVersion>
     <PackageTags>Elastic, ElasticSearch</PackageTags>
     <NeutralLanguage>en-GB</NeutralLanguage>
-    <PackageReleaseNotes>A simple .NET Core wrapper for ElasticSearch.Net</PackageReleaseNotes>
-    <Version>0.9.2</Version>
+    <PackageReleaseNotes>Added naming strartegy handling.
+Added GET Api calls.
+Updated Search queries with match_phrase, multi_match, match_phrase_prefix.
+Improved Search sort performance.</PackageReleaseNotes>
+    <Version>0.9.3</Version>
     <PackageLicenseUrl>https://github.com/petertasner/ElasticSearchLite/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/petertasner/ElasticSearchLite</PackageProjectUrl>
     <Company />
