@@ -7,12 +7,15 @@ namespace ElasticSearchLite.NetCore.Queries
 {
     public class Create
     {
-        public static CreateQuery Index(string indexName) => new CreateQuery(indexName);
+        public static IConfigurableCreate Index(string indexName) => new CreateQuery(indexName);
 
         public sealed class CreateQuery 
             : AbstractBaseQuery,
             IConfigurableCreate,
-            IMappableCreate
+            IMappableCreate,
+            IMappingAddedCreate,
+            IMappingWithTypeAddedCreate,
+            IFieldAnalyserAddedCreate
         {
             internal int NumberOfShards { get; private set; } = 5;
             internal int NumberOfReplicas { get; private set; } = 1;
@@ -107,23 +110,33 @@ namespace ElasticSearchLite.NetCore.Queries
             {
                 return this;
             }
-            public CreateQuery AddMapping(string name, bool indexed = true)
+            public IMappingAddedCreate AddMapping(string name, bool indexed = true)
             {
                 if(string.IsNullOrEmpty(name)) { throw new ArgumentNullException(nameof(name)); }
                 TempMapping = new ElasticMapping { Name = name };
 
                 return this;
             }
-            public CreateQuery WithType(ElasticCoreFieldDataTypes type)
+            public IMappingWithTypeAddedCreate WithType(ElasticCoreFieldDataTypes type)
             {
-                TempMapping.FieldDataType = type;
+                TempMapping.FieldDataType = type ?? throw new ArgumentNullException(nameof(type));
 
                 return this;
             }
-            public CreateQuery AndAnalyzer(ElasticAnalyzers analyzer)
+            public IFieldAnalyserAddedCreate AddFieldAnalyzer(ElasticAnalyzers analyzer)
             {
-                TempMapping.Analyzer = analyzer;
+                TempMapping.Analyzer = analyzer ?? throw new ArgumentNullException(nameof(analyzer));
 
+                return this;
+            }
+            public IMappableCreate WithConfiguration(ElasticAnalyzerConfiguration configuration)
+            {
+                TempMapping.AnalyzerConfiguration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+
+                return this;
+            }
+            public IMappableCreate WithoutConfiguration()
+            {
                 return this;
             }
         }

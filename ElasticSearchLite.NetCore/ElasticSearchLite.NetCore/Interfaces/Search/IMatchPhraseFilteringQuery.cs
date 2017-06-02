@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ElasticSearchLite.NetCore.Interfaces.Search
+﻿namespace ElasticSearchLite.NetCore.Interfaces.Search
 {
-    public interface IMatchPhraseFilteringQuery<TPoco> : IExecutableSearchQuery<TPoco> where TPoco : IElasticPoco
+    public interface IMatchPhraseFilteringQuery<TPoco> : IFilteredSearchQuery<TPoco> where TPoco : IElasticPoco
     {
         /// <summary>
         /// Adding flexibility to the match_phrase query with slop.

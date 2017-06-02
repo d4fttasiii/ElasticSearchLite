@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ElasticSearchLite.NetCore.Interfaces.Create
+﻿namespace ElasticSearchLite.NetCore.Interfaces.Create
 {
-    public interface IMappableCreate
+    public interface IMappableCreate : IQuery
     {
+        IMappingAddedCreate AddMapping(string name, bool indexed = true);
     }
 }

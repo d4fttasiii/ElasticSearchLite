@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ElasticSearchLite.NetCore.Interfaces.Create
+﻿namespace ElasticSearchLite.NetCore.Interfaces.Create
 {
     public interface IConfigurableCreate
     {
