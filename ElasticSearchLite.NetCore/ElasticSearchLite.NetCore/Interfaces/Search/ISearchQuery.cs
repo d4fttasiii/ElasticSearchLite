@@ -26,7 +26,7 @@ namespace ElasticSearchLite.NetCore.Interfaces.Search
         /// <param name="propertyExpression">Field property</param>
         /// <param name="value">Value matching the field</param>
         /// <returns></returns>
-        IFilteredSearchQuery<TPoco> MatchPhrase(Expression<Func<TPoco, object>> propertyExpression, string value);
+        IMatchPhraseFilteringQuery<TPoco> MatchPhrase(Expression<Func<TPoco, object>> propertyExpression, string value);
         /// <summary>
         /// match_phrase_prefix Query for auto_complete like functionality.
         /// </summary>

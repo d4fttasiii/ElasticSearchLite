@@ -10,7 +10,7 @@ namespace ElasticSearchLite.NetCore.Queries
         internal List<ElasticTermCodition> TermConditions { get; } = new List<ElasticTermCodition>();
         internal ElasticMultiMatchCondition MultiMatchConditions { get; set; }
         internal ElasticMatchCodition MatchCondition { get; set; }
-        internal ElasticMatchCodition MatchPhraseCondition { get; set; }
+        internal ElasticMatchPhraseCondition MatchPhraseCondition { get; set; }
         internal ElasticMatchCodition MatchPhrasePrefixCondition { get; set; }
 
         protected AbstractConditionalQuery(IElasticPoco poco) : base(poco) { }

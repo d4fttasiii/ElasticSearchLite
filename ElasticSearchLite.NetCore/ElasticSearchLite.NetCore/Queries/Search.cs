@@ -53,6 +53,7 @@ namespace ElasticSearchLite.NetCore.Queries
             ISearchQuery<TPoco>,
             IFilteredSearchQuery<TPoco>,
             IMatchFilteringQuery<TPoco>,
+            IMatchPhraseFilteringQuery<TPoco>,
             ITermFilteredSearchQuery<TPoco>,
             IRangeFilteredSearchQuery<TPoco>,
             ISortedSearchQuery<TPoco>,
@@ -110,13 +111,26 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <param name="propertyExpression">Field property</param>
             /// <param name="value">Value matching the field</param>
             /// <returns></returns>
-            public IFilteredSearchQuery<TPoco> MatchPhrase(Expression<Func<TPoco, object>> propertyExpression, string value)
+            public IMatchPhraseFilteringQuery<TPoco> MatchPhrase(Expression<Func<TPoco, object>> propertyExpression, string value)
             {
-                MatchPhraseCondition = new ElasticMatchCodition
+                MatchPhraseCondition = new ElasticMatchPhraseCondition
                 {
                     Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
-                    Value = value ?? throw new ArgumentNullException(nameof(value))
+                    Value = value ?? throw new ArgumentNullException(nameof(value)),
+                    Slop = 0
                 };
+
+                return this;
+            }
+            /// <summary>
+            /// Adding flexibility to the match_phrase query with slop.
+            /// The slop parameter tells how far apart terms are allowed to be while still considering the document a match
+            /// </summary>
+            /// <param name="slop"></param>
+            /// <returns></returns>
+            public IFilteredSearchQuery<TPoco> Slop(int slop)
+            {
+                MatchPhraseCondition.Slop = slop;
 
                 return this;
             }
