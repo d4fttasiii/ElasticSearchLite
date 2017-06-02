@@ -3,6 +3,7 @@ using ElasticSearchLite.NetCore.Interfaces.Search;
 using ElasticSearchLite.NetCore.Queries;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using static ElasticSearchLite.NetCore.Queries.Get;
 
 namespace ElasticSearchLite.NetCore
 {
@@ -42,8 +43,18 @@ namespace ElasticSearchLite.NetCore
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="search"></param>
+        /// <typeparam name="TPoco"></typeparam>
+        /// <param name="getQuery"></param>
         /// <param name="client"></param>
+        public static TPoco ExecuteWith<TPoco>(this GetQuery<TPoco> getQuery, ElasticLiteClient client)
+            where TPoco : IElasticPoco => client.ExecuteGet(getQuery);
+       /// <summary>
+       /// 
+       /// </summary>
+       /// <typeparam name="TPoco"></typeparam>
+       /// <param name="search"></param>
+       /// <param name="client"></param>
+       /// <returns></returns>
         public static IEnumerable<TPoco> ExecuteWith<TPoco>(this IExecutableSearchQuery<TPoco> search, ElasticLiteClient client)
             where TPoco : IElasticPoco => client.ExecuteSearch(search);
         /// <summary>
@@ -84,5 +95,14 @@ namespace ElasticSearchLite.NetCore
         /// <param name="client"></param>
         public static async Task<IEnumerable<TPoco>> ExecuteAsyncWith<TPoco>(this IExecutableSearchQuery<TPoco> search, ElasticLiteClient client)
             where TPoco : IElasticPoco => await client.ExecuteSearchAsync(search);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TPoco"></typeparam>
+        /// <param name="getQuery"></param>
+        /// <param name="client"></param>
+        /// <returns></returns>
+        public static Task<TPoco> ExecuteAsyncWith<TPoco>(this GetQuery<TPoco> getQuery, ElasticLiteClient client)
+            where TPoco : IElasticPoco => client.ExecuteGetAsync(getQuery);
     }
 }

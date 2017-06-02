@@ -1,10 +1,18 @@
-﻿namespace ElasticSearchLite.NetCore.Queries
-{
-    public class Get : AbstractBaseQuery
-    {
-        internal object Id { get; set; }
+﻿using ElasticSearchLite.NetCore.Interfaces;
+using System;
 
-        protected Get(string indexName) : base(indexName) { }
+namespace ElasticSearchLite.NetCore.Queries
+{
+    public class Get
+    {
+        private string IndexName { get; }
+
+        protected Get(string indexName)
+        {
+            if (string.IsNullOrEmpty(indexName)) { throw new ArgumentException($"The given index name cannot be empty!"); }
+
+            IndexName = indexName;
+        }
         /// <summary>
         /// Creates a Get API request which can return a document by id.
         /// </summary>
@@ -12,15 +20,28 @@
         /// <returns></returns>
         public static Get FromIndex(string indexName) => new Get(indexName);
         /// <summary>
-        /// Set request id
+        /// Sets the return Poco type
         /// </summary>
-        /// <param name="id">Document Id</param>
+        /// <typeparam name="TPoco"></typeparam>
         /// <returns></returns>
-        public Get ById(object id)
-        {
-            Id = id;
+        public GetQuery<TPoco> Return<TPoco>() where TPoco : IElasticPoco => new GetQuery<TPoco>(IndexName);       
 
-            return this;
+        public sealed class GetQuery<TPoco> : AbstractBaseQuery where TPoco : IElasticPoco
+        {
+            internal GetQuery(string indexName) : base(indexName) { }
+
+            internal object Id { get; set; }
+            /// <summary>
+            /// Set request id
+            /// </summary>
+            /// <param name="id">Document Id</param>
+            /// <returns></returns>
+            public GetQuery<TPoco> ById(object id)
+            {
+                Id = id;
+
+                return this;
+            }
         }
     }
 }

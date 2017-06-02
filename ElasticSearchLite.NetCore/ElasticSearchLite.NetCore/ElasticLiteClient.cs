@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static ElasticSearchLite.NetCore.Queries.Delete;
+using static ElasticSearchLite.NetCore.Queries.Get;
 using static ElasticSearchLite.NetCore.Queries.Search;
 
 namespace ElasticSearchLite.NetCore
@@ -63,15 +64,17 @@ namespace ElasticSearchLite.NetCore
             LowLevelClient = new ElasticLowLevelClient(settings);
         }
         /// <summary>
-        /// 
+        /// Executes a  get API call to get a typed JSON document from the index based on its id.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/docs-get.html
         /// </summary>
         /// <typeparam name="TPoco"></typeparam>
-        /// <param name="get"></param>
+        /// <param name="getQuery"></param>
         /// <returns></returns>
-        public TPoco ExecuteGet<TPoco>(Get get) where TPoco : IElasticPoco
+        public TPoco ExecuteGet<TPoco>(GetQuery<TPoco> getQuery)
+            where TPoco : IElasticPoco
         {
-            IndexExists(get.IndexName);
-            var response = LowLevelClient.Get<string>(get.IndexName, get.TypeName, get.Id.ToString());
+            IndexExists(getQuery.IndexName);
+            var response = LowLevelClient.Get<string>(getQuery.IndexName, getQuery.TypeName, getQuery.Id.ToString());
             if (!response.Success)
             {
                 throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
@@ -79,6 +82,27 @@ namespace ElasticSearchLite.NetCore
             var data = JObject.Parse(response.Body)?.First;
 
             return MapResponseToPoco<TPoco>(data);            
+        }
+
+        /// <summary>
+        /// Executes a  get API call to get a typed JSON document from the index based on its id.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/docs-get.html
+        /// </summary>
+        /// <typeparam name="TPoco"></typeparam>
+        /// <param name="getQuery"></param>
+        /// <returns></returns>
+        public async Task<TPoco> ExecuteGetAsync<TPoco>(GetQuery<TPoco> getQuery)
+            where TPoco : IElasticPoco
+        {
+            IndexExists(getQuery.IndexName);
+            var response = await LowLevelClient.GetAsync<string>(getQuery.IndexName, getQuery.TypeName, getQuery.Id.ToString());
+            if (!response.Success)
+            {
+                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+            }
+            var data = JObject.Parse(response.Body)?.First;
+
+            return MapResponseToPoco<TPoco>(data);
         }
         /// <summary>
         /// Executes a SearchQuery using the Search API and returns a list of generic pocos.
