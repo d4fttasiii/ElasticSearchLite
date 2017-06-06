@@ -7,7 +7,7 @@ namespace ElasticSearchLite.NetCore.Queries
 {
     public class Create
     {
-        public static IConfigurableCreate Index(string indexName) => new CreateQuery(indexName);
+        public static IConfigurableCreate Index(string indexName, string typeName) => new CreateQuery(indexName, typeName);
 
         public sealed class CreateQuery 
             : AbstractBaseQuery,
@@ -19,12 +19,12 @@ namespace ElasticSearchLite.NetCore.Queries
         {
             internal int NumberOfShards { get; private set; } = 5;
             internal int NumberOfReplicas { get; private set; } = 1;
-            internal bool AllFieldEnabled { get; private set; }
-            internal bool DynamicMappingEnabled { get; private set; }
+            internal bool AllFieldEnabled { get; private set; } = true;
+            internal bool DynamicMappingEnabled { get; private set; } = true;
             internal List<ElasticMapping> Mapping { get; }
             private ElasticMapping TempMapping { get; set; }
 
-            internal CreateQuery(string indexName) : base(indexName)
+            internal CreateQuery(string indexName, string typeName) : base(indexName, typeName)
             {
                 Mapping = new List<ElasticMapping>();
             }
@@ -63,7 +63,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
             /// <summary>
-            /// 
+            /// Enable dynamic mapping for the index
             /// </summary>
             /// <returns></returns>
             public IConfigurableCreate EnableDynamicMapping()
@@ -73,7 +73,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
             /// <summary>
-            /// 
+            /// Disable dynamic mapping for the index
             /// </summary>
             /// <returns></returns>
             public IConfigurableCreate DisableDynamicMapping()
@@ -83,7 +83,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
             /// <summary>
-            /// 
+            /// Enable _all field
             /// </summary>
             /// <returns></returns>
             public IConfigurableCreate EnableAllField()
@@ -93,7 +93,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
             /// <summary>
-            /// 
+            /// Disable _all field
             /// </summary>
             /// <returns></returns>
             public IConfigurableCreate DisableAllField()
@@ -103,13 +103,19 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
             /// <summary>
-            /// 
+            /// Go into mapping state
             /// </summary>
             /// <returns></returns>
             public IMappableCreate AddMappings()
             {
                 return this;
             }
+            /// <summary>
+            /// Adds a new field to the index
+            /// </summary>
+            /// <param name="name"></param>
+            /// <param name="indexed"></param>
+            /// <returns></returns>
             public IMappingAddedCreate AddMapping(string name, bool indexed = true)
             {
                 if(string.IsNullOrEmpty(name)) { throw new ArgumentNullException(nameof(name)); }
@@ -117,24 +123,43 @@ namespace ElasticSearchLite.NetCore.Queries
 
                 return this;
             }
+            /// <summary>
+            /// Defines the type for the previously added field
+            /// </summary>
+            /// <param name="type"></param>
+            /// <returns></returns>
             public IMappingWithTypeAddedCreate WithType(ElasticCoreFieldDataTypes type)
             {
                 TempMapping.FieldDataType = type ?? throw new ArgumentNullException(nameof(type));
 
                 return this;
             }
+            /// <summary>
+            /// Adds analyzer to the field
+            /// </summary>
+            /// <param name="analyzer"></param>
+            /// <returns></returns>
             public IFieldAnalyserAddedCreate AddFieldAnalyzer(ElasticAnalyzers analyzer)
             {
                 TempMapping.Analyzer = analyzer ?? throw new ArgumentNullException(nameof(analyzer));
 
                 return this;
             }
+            /// <summary>
+            /// Configures the previously added analyzer
+            /// </summary>
+            /// <param name="configuration"></param>
+            /// <returns></returns>
             public IMappableCreate WithConfiguration(ElasticAnalyzerConfiguration configuration)
             {
                 TempMapping.AnalyzerConfiguration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
                 return this;
             }
+            /// <summary>
+            /// Adds analyzer without configuration
+            /// </summary>
+            /// <returns></returns>
             public IMappableCreate WithoutConfiguration()
             {
                 return this;

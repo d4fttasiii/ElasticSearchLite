@@ -37,7 +37,10 @@
         /// </summary>
         /// <returns></returns>
         IConfigurableCreate DisableAllField();
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         IMappableCreate AddMappings();
     }
 }

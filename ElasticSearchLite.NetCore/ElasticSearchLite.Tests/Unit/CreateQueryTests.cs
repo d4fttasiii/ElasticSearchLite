@@ -8,9 +8,9 @@ namespace ElasticSearchLite.Tests.Unit
     public class CreateQueryTests : AbstractQueryTest
     {
         [TestMethod]
-        public void SimpleCreate_Test()
+        public void Create_Test()
         {
-            var create = Create.Index("blaindex")
+            var create = Create.Index("blaindex", "bla")
                 .SetReplicasTo(1)
                 .SetShardsTo(5)
                 .DisableDynamicMapping()
@@ -37,7 +37,59 @@ namespace ElasticSearchLite.Tests.Unit
                     .AddMapping("next_shipment")
                         .WithType(ElasticCoreFieldDataTypes.Date);
 
-            TestQuery(new { }, create);
+            TestQuery(new
+            {
+                settings = new
+                {
+                    number_of_replicas = 1,
+                    number_of_shards = 5
+                },
+                mappings = new
+                {
+                    bla = new
+                    {
+                        _all = new
+                        {
+                            enabled = false
+                        },
+                        properties = new
+                        {
+                            name = new
+                            {
+                                type = "keyword",
+                                analyzer = "simple"
+                            },
+                            description = new
+                            {
+                                type = "text",
+                                analyzer = "german"
+                            },
+                            price = new
+                            {
+                                type = "half_float"
+                            },
+                            new_product = new
+                            {
+                                type = "boolean"
+                            },
+                            sku = new
+                            {
+                                type = "keyword",
+                                analyzer = "fingerprint"
+                            },
+                            in_stock = new
+                            {
+                                type = "short",
+                                indexed = false
+                            },
+                            next_shipment = new
+                            {
+                                type = "date"
+                            }
+                        }
+                    }
+                }
+            }, create);
         }
     }
 }
