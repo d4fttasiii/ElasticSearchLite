@@ -30,7 +30,7 @@ namespace ElasticSearchLite.Tests.Unit
 
         protected void TestQuery<T>(T statementObject, IQuery query, bool camelCase = false)
         {
-            Newtonsoft.Json.JsonSerializerSettings settings = new JsonSerializerSettings();
+            JsonSerializerSettings settings = new JsonSerializerSettings();
             if (camelCase)
             {
                 StatementFactory.NamingStrategy = new Newtonsoft.Json.Serialization.CamelCaseNamingStrategy();

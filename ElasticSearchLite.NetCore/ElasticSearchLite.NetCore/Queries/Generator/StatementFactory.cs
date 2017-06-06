@@ -110,11 +110,10 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             return $@"{{ ""settings"": {{ 
                 ""number_of_shards"": {createQuery.NumberOfShards}, 
                 ""number_of_replicas"": {createQuery.NumberOfReplicas},
-                ""index.mapper.dynamic"": {createQuery.DynamicMappingEnabled}}},
-                ""{createQuery.TypeName}"": {{ ""_all"": {createQuery.AllFieldEnabled}, 
+                ""{createQuery.TypeName}"": {{ ""_all"": {EscapeValue(createQuery.AllFieldEnabled)}, 
                 {string.Join(",", createQuery.Mapping.Select(m => $@"""{m.Name}"" : {{ 
                     ""type"": ""{m.FieldDataType.Name}"" 
-                    {(m.Analyzer != null ? $@",""analyzer"": ""{m.Analyzer.Name}""" : "")} }}"))} }} }}";
+                    {(m.Analyzer != null ? $@",""analyzer"": ""{m.Analyzer.Name}""" : "")} }}"))} }} }} }}";
         }
 
         private string GenerateDocument(IElasticPoco poco)

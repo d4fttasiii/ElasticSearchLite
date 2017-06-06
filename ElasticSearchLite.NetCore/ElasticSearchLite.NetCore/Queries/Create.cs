@@ -2,6 +2,7 @@
 using ElasticSearchLite.NetCore.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
@@ -22,13 +23,11 @@ namespace ElasticSearchLite.NetCore.Queries
             internal bool AllFieldEnabled { get; private set; } = true;
             internal bool DynamicMappingEnabled { get; private set; } = true;
             internal List<ElasticMapping> Mapping { get; }
-            private ElasticMapping TempMapping { get; set; }
 
             internal CreateQuery(string indexName, string typeName) : base(indexName, typeName)
             {
                 Mapping = new List<ElasticMapping>();
             }
-
             /// <summary>
             /// Setting the number of primary shards for and index. 
             /// Default is 5.
@@ -119,7 +118,7 @@ namespace ElasticSearchLite.NetCore.Queries
             public IMappingAddedCreate AddMapping(string name, bool indexed = true)
             {
                 if(string.IsNullOrEmpty(name)) { throw new ArgumentNullException(nameof(name)); }
-                TempMapping = new ElasticMapping { Name = name };
+                Mapping.Add(new ElasticMapping { Name = name });
 
                 return this;
             }
@@ -130,7 +129,8 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <returns></returns>
             public IMappingWithTypeAddedCreate WithType(ElasticCoreFieldDataTypes type)
             {
-                TempMapping.FieldDataType = type ?? throw new ArgumentNullException(nameof(type));
+                var tempMapping = Mapping.Last();
+                tempMapping.FieldDataType = type ?? throw new ArgumentNullException(nameof(type));
 
                 return this;
             }
@@ -141,7 +141,8 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <returns></returns>
             public IFieldAnalyserAddedCreate AddFieldAnalyzer(ElasticAnalyzers analyzer)
             {
-                TempMapping.Analyzer = analyzer ?? throw new ArgumentNullException(nameof(analyzer));
+                var tempMapping = Mapping.Last();
+                tempMapping.Analyzer = analyzer ?? throw new ArgumentNullException(nameof(analyzer));
 
                 return this;
             }
@@ -152,7 +153,8 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <returns></returns>
             public IMappableCreate WithConfiguration(ElasticAnalyzerConfiguration configuration)
             {
-                TempMapping.AnalyzerConfiguration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+                var tempMapping = Mapping.Last();
+                tempMapping.AnalyzerConfiguration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
                 return this;
             }
