@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using static ElasticSearchLite.NetCore.Queries.Create;
 using static ElasticSearchLite.NetCore.Queries.Delete;
 using static ElasticSearchLite.NetCore.Queries.Search;
 
@@ -34,6 +35,8 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     return GenerateUpsertQuery(upsertQuery);
                 case Bulk bulkQuery:
                     return GenerateBulkQuery(bulkQuery);
+                case CreateQuery createQuery:
+                    return GenerateCreateQuery(createQuery);
                 default:
                     throw new Exception("Unknown query type");
             }
@@ -102,6 +105,18 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             return statement.ToString();
         }
 
+        private string GenerateCreateQuery(CreateQuery createQuery)
+        {
+            return $@"{{ ""settings"": {{ 
+                ""number_of_shards"": {createQuery.NumberOfShards}, 
+                ""number_of_replicas"": {createQuery.NumberOfReplicas},
+                ""index.mapper.dynamic"": {createQuery.DynamicMappingEnabled}}},
+                ""{createQuery.TypeName}"": {{ ""_all"": {createQuery.AllFieldEnabled}, 
+                {string.Join(",", createQuery.Mapping.Select(m => $@"""{m.Name}"" : {{ 
+                    ""type"": ""{m.FieldDataType.Name}"" 
+                    {(m.Analyzer != null ? $@",""analyzer"": ""{m.Analyzer.Name}""" : "")} }}"))} }} }}";
+        }
+
         private string GenerateDocument(IElasticPoco poco)
         {
             var properties = UpdatetableProperties(poco);
@@ -133,7 +148,6 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             if (query.MatchPhrasePrefixCondition != null)
             {
                 return $@"""query"": {{ {GenerateMatchPhrasePrefixPhrase(query.MatchPhrasePrefixCondition)} }}";
-
             }
 
             if (query.MultiMatchConditions != null)

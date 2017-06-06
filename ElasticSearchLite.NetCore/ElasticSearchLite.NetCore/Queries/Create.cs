@@ -7,7 +7,7 @@ namespace ElasticSearchLite.NetCore.Queries
 {
     public class Create
     {
-        public static CreateQuery Index(string indexName) => new CreateQuery(indexName);
+        public static CreateQuery Index(string indexName, string typeName) => new CreateQuery(indexName, typeName);
 
         public sealed class CreateQuery 
             : AbstractBaseQuery,
@@ -16,12 +16,12 @@ namespace ElasticSearchLite.NetCore.Queries
         {
             internal int NumberOfShards { get; private set; } = 5;
             internal int NumberOfReplicas { get; private set; } = 1;
-            internal bool AllFieldEnabled { get; private set; }
-            internal bool DynamicMappingEnabled { get; private set; }
+            internal bool AllFieldEnabled { get; private set; } = true;
+            internal bool DynamicMappingEnabled { get; private set; } = true;
             internal List<ElasticMapping> Mapping { get; }
             private ElasticMapping TempMapping { get; set; }
 
-            internal CreateQuery(string indexName) : base(indexName)
+            internal CreateQuery(string indexName, string typeName) : base(indexName, typeName)
             {
                 Mapping = new List<ElasticMapping>();
             }
