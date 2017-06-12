@@ -7,7 +7,7 @@ namespace ElasticSearchLite.NetCore.Queries
     public abstract class AbstractConditionalQuery : AbstractBaseQuery
     {
         internal List<ElasticRangeCondition> RangeConditions { get; } = new List<ElasticRangeCondition>();
-        internal List<ElasticTermCodition> TermConditions { get; } = new List<ElasticTermCodition>();
+        internal ElasticTermCodition TermCondition { get; set; }
         internal ElasticMultiMatchCondition MultiMatchConditions { get; set; }
         internal ElasticMatchCodition MatchCondition { get; set; }
         internal ElasticMatchPhraseCondition MatchPhraseCondition { get; set; }

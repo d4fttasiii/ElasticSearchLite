@@ -69,12 +69,11 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <returns></returns>
             public ITermFilteredSearchQuery<TPoco> Term(Expression<Func<TPoco, object>> propertyExpression, object value)
             {
-                var condition = new ElasticTermCodition
+                TermCondition = new ElasticTermCodition
                 {
                     Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
-                    Value = value ?? throw new ArgumentNullException(nameof(value))
+                    Values = new List<object> { value ?? throw new ArgumentNullException(nameof(value)) }
                 };
-                TermConditions.Add(condition);
 
                 return this;
             }
@@ -90,7 +89,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 {
                     Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
                     Value = value ?? throw new ArgumentNullException(nameof(value))
-                }; 
+                };
 
                 return this;
             }
@@ -245,12 +244,7 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <returns></returns>
             public ITermFilteredSearchQuery<TPoco> Or(object value)
             {
-                var condition = TermConditions.LastOrDefault();
-                TermConditions.Add(new ElasticTermCodition
-                {
-                    Field = condition.Field,
-                    Value = value ?? throw new ArgumentNullException(nameof(value))
-                });
+                TermCondition.Values.Add(value ?? throw new ArgumentNullException(nameof(value)));
 
                 return this;
             }

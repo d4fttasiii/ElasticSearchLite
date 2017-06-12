@@ -33,12 +33,13 @@ namespace ElasticSearchLite.Tests.Unit
                     terms = new { TestText = new[] { "ABCDEFG", "GFEDCBA" } }
                 },
                 size = 15,
-                from = 15
+                from = 15,
+                sort = new[] { "_doc" }
             };
 
             // Act and Assert
-            TestQuery(statementObject, query);
-            TestQuery(statementObject, query, true);
+            TestQueryObject(statementObject, query);
+            TestQueryObject(statementObject, query, true);
         }
 
         [TestMethod]
@@ -51,19 +52,9 @@ namespace ElasticSearchLite.Tests.Unit
                     .Operator(ElasticOperators.And)
                 .Take(10)
                 .Skip(10);
-            var statementObject = new
-            {
-                query = new
-                {
-                    match = new { TestText = "ABCDEFG" }
-                },
-                size = 10,
-                from = 10
-            };
-
+           
             // Act and Assert
-            TestQuery(statementObject, query);
-            TestQuery(statementObject, query, true);
+            TestQueryString($@"{{ ""query"": {{ ""match"": {{ ""TestText"" : {{ ""query"": ""ABCD EFGH"", ""operator"": ""and"" }} }} }},""size"": 10,""from"": 10,""sort"": [""_doc""] }}", query);
         }
 
         [TestMethod]
@@ -79,15 +70,17 @@ namespace ElasticSearchLite.Tests.Unit
             {
                 query = new
                 {
-                    match_phrase = new { TestText = "ABCD EFGH" }
+                    match_phrase = new { TestText = "ABCD EFGH" },
+                    slop = 0
                 },
                 size = 10,
-                from = 10
+                from = 10,
+                sort = new[] { "_doc" }
             };
 
             // Act and Assert
-            TestQuery(statementObject, query);
-            TestQuery(statementObject, query, true);
+            TestQueryObject(statementObject, query);
+            TestQueryObject(statementObject, query, true);
         }
 
         [TestMethod]
@@ -106,12 +99,12 @@ namespace ElasticSearchLite.Tests.Unit
                     match_phrase_prefix = new { TestText = "ABCD EFGH" }
                 },
                 size = 10,
-                from = 10
+                from = 10,
+                sort = new[] { "_doc" }
             };
 
             // Act and Assert
-            TestQuery(statementObject, query);
-            TestQuery(statementObject, query, true);
+            TestQueryObject(statementObject, query);
         }
 
         //[TestMethod]
@@ -169,12 +162,25 @@ namespace ElasticSearchLite.Tests.Unit
                     }
                 },
                 size = 20,
-                from = 0
+                from = 0,
+                sort = new[] { "_doc" }
             };
 
             // Act and Assert
-            TestQuery(statementObject, query);
-            TestQuery(statementObject, query, true);
+            TestQueryObject(statementObject, query);
+        }
+
+        [TestMethod]
+        public void SearchQuery_Generate_Term_On_Nested_Document_Field()
+        {
+            var query = Search.In("mypocoindex")
+                .Return<ComplexPoco>()
+                .Term(p => p.Tag.Name, "TagName1")
+                .Take(20);
+
+            var statement = $@"{{ ""query"": {{ ""terms"": {{ ""Tag.Name"" : [""TagName1""] }} }},""size"": 20,""sort"": [""_doc""] }}";
+
+            TestQueryString(statement, query);
         }
     }
 }

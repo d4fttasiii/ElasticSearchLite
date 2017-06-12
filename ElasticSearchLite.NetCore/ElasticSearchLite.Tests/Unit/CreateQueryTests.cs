@@ -37,7 +37,7 @@ namespace ElasticSearchLite.Tests.Unit
                     .AddMapping("next_shipment")
                         .WithType(ElasticCoreFieldDataTypes.Date);
 
-            TestQuery(new
+            TestQueryObject(new
             {
                 settings = new
                 {

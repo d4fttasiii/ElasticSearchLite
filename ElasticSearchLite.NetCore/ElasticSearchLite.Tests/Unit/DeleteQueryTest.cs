@@ -67,8 +67,8 @@ namespace ElasticSearchLite.Tests.Unit
                 }
             };
 
-            TestQuery(queryObject, query);
-            TestQuery(queryObject, query, true);
+            TestQueryObject(queryObject, query);
+            TestQueryObject(queryObject, query, true);
         }
 
         [TestMethod]
@@ -79,19 +79,8 @@ namespace ElasticSearchLite.Tests.Unit
                 .From("mypocoindex")
                 .Documents<Poco>()
                 .Match(p => p.Id, "123");
-            var queryObject = new
-            {
-                query = new
-                {
-                    match = new
-                    {
-                        _id = "123"
-                    }
-                }
-            };
-
-            TestQuery(queryObject, query);
-            TestQuery(queryObject, query, true);
+           
+            TestQueryString($@"{{ ""query"": {{ ""match"": {{ ""_id"" : {{ ""query"": ""123"", ""operator"": ""and"" }} }} }} }}", query);
         }
 
         [TestMethod]
@@ -116,8 +105,8 @@ namespace ElasticSearchLite.Tests.Unit
                 }
             };
 
-            TestQuery(queryObject, query);
-            TestQuery(queryObject, query, true);
+            TestQueryObject(queryObject, query);
+            TestQueryObject(queryObject, query, true);
         }
     }
 }

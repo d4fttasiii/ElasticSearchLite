@@ -48,8 +48,8 @@ namespace ElasticSearchLite.Tests.Unit
             };
 
             // Act and Assert
-            TestQuery(statementObject, query);
-            TestQuery(statementObject, query, true);
+            TestQueryObject(statementObject, query);
+            TestQueryObject(statementObject, query, true);
         }
     }
 }

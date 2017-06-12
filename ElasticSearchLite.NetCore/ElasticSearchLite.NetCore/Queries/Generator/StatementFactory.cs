@@ -154,9 +154,9 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                 return $@"""query"": {{ {GenerateMultiMatch(query.MultiMatchConditions)} }}";
             }
 
-            if (query.TermConditions.Count > 0)
+            if (query.TermCondition != null)
             {
-                return $@"""query"": {{ {GenerateTerms(query.TermConditions)} }}";
+                return $@"""query"": {{ {GenerateTerms(query.TermCondition)} }}";
             }
 
             if (query.RangeConditions.Count > 0)
@@ -173,14 +173,20 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         private string GenerateMatchPhrase(ElasticMatchPhraseCondition condition) => $@"""match_phrase"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {{ ""query"": {EscapeValue(condition.Value)}, ""slop"": {condition.Slop} }} }}";
         private string GenerateMatchPhrasePrefixPhrase(ElasticMatchCodition condition) => $@"""match_phrase_prefix"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {EscapeValue(condition.Value)} }}";
         private string GenerateMultiMatch(ElasticMultiMatchCondition condition) => $@"""multi_match"": {{ ""query"": {EscapeValue(condition.Value)}, ""fields"": [{string.Join(",", condition.Fields.Select(cf => $@"""{NamingStrategy.GetPropertyName(cf.Name, false)}"""))}] }}";
-        private string GenerateTerms(List<ElasticTermCodition> conditions) => $@"""terms"": {{ ""{NamingStrategy.GetPropertyName(conditions.First().Field.Name, false)}"" : {EscapeValue(conditions.Select(c => c.Value).ToArray())} }}";
+        private string GenerateTerms(ElasticTermCodition condition)
+        {
+            var fieldName = string.Join(".", condition.Field.Name.Split('.').Select(name => NamingStrategy.GetPropertyName(name, false)));
+            var escapedValues = EscapeValue(condition.Values);
+
+            return $@"""terms"": {{ ""{fieldName}"" : {escapedValues} }}";
+        }
         private string GenerateRange(List<ElasticRangeCondition> conditions) => $@"""range"": {{""{NamingStrategy.GetPropertyName(conditions.First().Field.Name, false)}"": {{ {string.Join(",", conditions.Select(c => $@" ""{c.Operation.Name}"": {EscapeValue(c.Value)}"))} }} }}";
         private string GenerateSize(int size) => $@"""size"": {size}";
         private string GenerateFrom(int from) => $@"""from"": {from}";
         // TODO: search_after implementation
         private string GenerateSort(List<ElasticSort> sortingFields)
         {
-            if(sortingFields != null && sortingFields.Count > 0)
+            if (sortingFields != null && sortingFields.Count > 0)
             {
                 return $@"""sort"": [{string.Join(",", sortingFields.Select(sf => $@"{{""{NamingStrategy.GetPropertyName(sf.Field.Name, false)}"": ""{sf.Order.Name}""}}"))}]";
             }

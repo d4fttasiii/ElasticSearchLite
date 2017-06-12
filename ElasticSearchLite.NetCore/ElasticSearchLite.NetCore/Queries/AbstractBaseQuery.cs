@@ -46,17 +46,44 @@ namespace ElasticSearchLite.NetCore.Queries
             if (!parameters.Any()) { throw new ArgumentException(nameof(parameters)); }
         }
 
-        protected string GetCorrectPropertyName<T>(Expression<Func<T, Object>> expression)
+        protected string GetCorrectPropertyName<T>(Expression<Func<T, Object>> expression) => GetPropertyPath(expression);
+
+        private static MemberExpression GetMemberExpression(Expression expression)
         {
-            if (expression.Body is MemberExpression)
+            if (expression is MemberExpression)
             {
-                return ((MemberExpression)expression.Body).Member.Name;
+                return (MemberExpression)expression;
             }
-            else
+            else if (expression is LambdaExpression)
             {
-                var op = ((UnaryExpression)expression.Body).Operand;
-                return ((MemberExpression)op).Member.Name;
+                var lambdaExpression = expression as LambdaExpression;
+                if (lambdaExpression.Body is MemberExpression)
+                {
+                    return (MemberExpression)lambdaExpression.Body;
+                }
+                else if (lambdaExpression.Body is UnaryExpression)
+                {
+                    return ((MemberExpression)((UnaryExpression)lambdaExpression.Body).Operand);
+                }
             }
+            return null;
+        }
+
+        private static string GetPropertyPath(Expression expr)
+        {
+            var path = new System.Text.StringBuilder();
+            MemberExpression memberExpression = GetMemberExpression(expr);
+            do
+            {
+                if (path.Length > 0)
+                {
+                    path.Insert(0, ".");
+                }
+                path.Insert(0, memberExpression.Member.Name);
+                memberExpression = GetMemberExpression(memberExpression.Expression);
+            }
+            while (memberExpression != null);
+            return path.ToString();
         }
     }
 }

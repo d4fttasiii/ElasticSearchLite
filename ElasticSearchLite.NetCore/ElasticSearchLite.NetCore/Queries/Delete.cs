@@ -1,6 +1,7 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace ElasticSearchLite.NetCore.Queries
@@ -76,7 +77,8 @@ namespace ElasticSearchLite.NetCore.Queries
                 var condition = new ElasticMatchCodition
                 {
                     Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
-                    Value = value ?? throw new ArgumentNullException(nameof(value))
+                    Value = value ?? throw new ArgumentNullException(nameof(value)),
+                    Operation = ElasticOperators.And
                 };
                 MatchCondition = condition;
 
@@ -90,12 +92,11 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <returns>Returns the updated DeleteQuery object.</returns>
             public IDeleteExecutable<TPoco> Term(Expression<Func<TPoco, object>> propertyExpression, object value)
             {
-                var condition = new ElasticTermCodition
+                TermCondition = new ElasticTermCodition
                 {
                     Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
-                    Value = value ?? throw new ArgumentNullException(nameof(value))
+                    Values = new List<object> { value ?? throw new ArgumentNullException(nameof(value)) }
                 };
-                TermConditions.Add(condition);
 
                 return this;
             }
