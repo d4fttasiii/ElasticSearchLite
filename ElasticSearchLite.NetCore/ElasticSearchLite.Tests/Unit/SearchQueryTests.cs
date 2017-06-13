@@ -49,7 +49,7 @@ namespace ElasticSearchLite.Tests.Unit
             var query = Search.In("mypocoindex")
                 .Return<Poco>()
                 .Match(p => p.TestText, "ABCD EFGH")
-                    .Operator(ElasticOperators.And)
+                    .ByUsingOperator(ElasticOperators.And)
                 .Take(10)
                 .Skip(10);
            
@@ -65,22 +65,10 @@ namespace ElasticSearchLite.Tests.Unit
                 .Return<Poco>()
                 .MatchPhrase(p => p.TestText, "ABCD EFGH")
                 .Take(10)
-                .Skip(10);
-            var statementObject = new
-            {
-                query = new
-                {
-                    match_phrase = new { TestText = "ABCD EFGH" },
-                    slop = 0
-                },
-                size = 10,
-                from = 10,
-                sort = new[] { "_doc" }
-            };
+                .Skip(10);           
 
             // Act and Assert
-            TestQueryObject(statementObject, query);
-            TestQueryObject(statementObject, query, true);
+            TestQueryString($@"{{ ""query"": {{ ""match_phrase"": {{ ""TestText"" : {{ ""query"": ""ABCD EFGH"", ""slop"": 0 }} }} }},""size"": 10,""from"": 10,""sort"": [""_doc""] }}", query);
         }
 
         [TestMethod]

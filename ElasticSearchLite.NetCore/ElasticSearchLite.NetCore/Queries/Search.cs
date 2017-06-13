@@ -88,7 +88,8 @@ namespace ElasticSearchLite.NetCore.Queries
                 MatchCondition = new ElasticMatchCodition
                 {
                     Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
-                    Value = value ?? throw new ArgumentNullException(nameof(value))
+                    Value = value ?? throw new ArgumentNullException(nameof(value)),
+                    Fuzziness = 0
                 };
 
                 return this;
@@ -98,9 +99,20 @@ namespace ElasticSearchLite.NetCore.Queries
             /// </summary>
             /// <param name="op">Operation type between match tokens (and, or)</param>
             /// <returns></returns>
-            public IFilteredSearchQuery<TPoco> Operator(ElasticOperators op = null)
+            public IFilteredSearchQuery<TPoco> ByUsingOperator(ElasticOperators op = null)
             {
                 MatchCondition.Operation = op ?? ElasticOperators.And;
+
+                return this;
+            }
+            /// <summary>
+            /// Fuzziness allows fuzzy matching based on the type of field being queried. 
+            /// </summary>
+            /// <param name="fuzziness">Level of fuzziness</param>
+            /// <returns></returns>
+            public IFilteredSearchQuery<TPoco> WithFuzziness(int fuzziness)
+            {
+                MatchCondition.Fuzziness = fuzziness;
 
                 return this;
             }
