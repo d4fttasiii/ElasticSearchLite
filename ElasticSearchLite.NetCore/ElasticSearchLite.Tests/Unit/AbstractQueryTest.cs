@@ -27,7 +27,7 @@ namespace ElasticSearchLite.Tests.Unit
                 TestDouble = 1.337
             };
         }
-
+        
         protected void TestQueryObject<T>(T statementObject, IQuery query, bool camelCase = false)
         {
             JsonSerializerSettings settings = new JsonSerializerSettings();

@@ -63,6 +63,19 @@ namespace ElasticSearchLite.Tests.Integration
                 .Delete(poco));
         }
 
+        [TestMethod]
+        public void TestScenario_Enum_Index_Select()
+        {
+            var laPoco = Search.In("tagindex")
+                .Return<EnumPoco>()
+                .ExecuteWith(Client)
+                .FirstOrDefault();
+
+            laPoco.Should().NotBeNull();
+            laPoco.Name.ShouldBeEquivalentTo(enumPoco.Name);
+            laPoco.TagType.ShouldBeEquivalentTo(enumPoco.TagType);
+        }
+
         [TestCleanup]
         public void CleanUp()
         {

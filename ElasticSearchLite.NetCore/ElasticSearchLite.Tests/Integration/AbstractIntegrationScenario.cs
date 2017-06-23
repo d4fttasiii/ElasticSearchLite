@@ -9,7 +9,10 @@ namespace ElasticSearchLite.Tests.Integration
     {
         protected static string IndexName { get; } = "exampleindex";
         protected static string TypeName { get; } = "example";
-        protected ElasticLiteClient Client { get; } = new ElasticLiteClient("http://localhost:9200/");
+        protected ElasticLiteClient Client { get; } = new ElasticLiteClient("http://bsv-test-es002:9200/")
+        {
+            NameingStrategy = new Newtonsoft.Json.Serialization.CamelCaseNamingStrategy()
+        };
 
         protected Poco poco = new Poco
         {
@@ -21,6 +24,14 @@ namespace ElasticSearchLite.Tests.Integration
             TestDateTime = new DateTime(2017, 9, 10),
             TestDouble = 1.337,
             TestStringArray = new[] { "A", "B", "C", "D" }
+        };
+
+        protected EnumPoco enumPoco = new EnumPoco {
+            Index = "tagindex",
+            Type = "tag",
+            TagType = TagType.Theme,
+            Name = "Name1",
+            Notes = ""
         };
 
         protected void TestExceptions(Type exception, Action action, string becauseMessage)
