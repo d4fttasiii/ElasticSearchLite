@@ -2,7 +2,7 @@
 
 namespace ElasticSearchLite.NetCore.Models
 {
-    public class ElasticMatchPhraseCondition : IElasticMatch
+    public class ElasticMatchPhraseCondition : IElasticCondition
     {
         public ElasticField Field { get; set; }
         public object Value { get; set; }

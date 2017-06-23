@@ -1,4 +1,5 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
+using ElasticSearchLite.NetCore.Interfaces.Bool;
 using ElasticSearchLite.NetCore.Interfaces.Search;
 using ElasticSearchLite.NetCore.Queries;
 using System.Collections.Generic;
@@ -57,6 +58,15 @@ namespace ElasticSearchLite.NetCore
        /// <returns></returns>
         public static IEnumerable<TPoco> ExecuteWith<TPoco>(this IExecutableSearchQuery<TPoco> search, ElasticLiteClient client)
             where TPoco : IElasticPoco => client.ExecuteSearch(search);
+       /// <summary>
+       /// 
+       /// </summary>
+       /// <typeparam name="TPoco"></typeparam>
+       /// <param name="boolQuery"></param>
+       /// <param name="client"></param>
+       /// <returns></returns>
+        public static IEnumerable<TPoco> ExecuteWith<TPoco>(this IExecutableBoolQuery<TPoco> boolQuery, ElasticLiteClient client)
+            where TPoco : IElasticPoco => client.ExecuteBool(boolQuery);
         /// <summary>
         /// 
         /// </summary>
@@ -95,6 +105,15 @@ namespace ElasticSearchLite.NetCore
         /// <param name="client"></param>
         public static async Task<IEnumerable<TPoco>> ExecuteAsyncWith<TPoco>(this IExecutableSearchQuery<TPoco> search, ElasticLiteClient client)
             where TPoco : IElasticPoco => await client.ExecuteSearchAsync(search);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TPoco"></typeparam>
+        /// <param name="boolQuery"></param>
+        /// <param name="client"></param>
+        /// <returns></returns>
+        public static async Task<IEnumerable<TPoco>> ExecuteAsyncWith<TPoco>(this IExecutableBoolQuery<TPoco> boolQuery, ElasticLiteClient client)
+            where TPoco : IElasticPoco => await client.ExecuteBoolAsync(boolQuery);
         /// <summary>
         /// 
         /// </summary>

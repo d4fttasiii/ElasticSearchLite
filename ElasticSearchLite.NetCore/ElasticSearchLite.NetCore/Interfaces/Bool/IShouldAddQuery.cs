@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using ElasticSearchLite.NetCore.Models;
 
 namespace ElasticSearchLite.NetCore.Interfaces.Bool
 {
@@ -9,5 +7,6 @@ namespace ElasticSearchLite.NetCore.Interfaces.Bool
         IExecutableBoolQuery<TPoco> Match(object value);
         IExecutableBoolQuery<TPoco> MatchPhrase(object value);
         IExecutableBoolQuery<TPoco> MatchPhrasePrefix(object value);
+        IExecutableBoolQuery<TPoco> Range(ElasticRangeOperations op, object value);
     }
 }

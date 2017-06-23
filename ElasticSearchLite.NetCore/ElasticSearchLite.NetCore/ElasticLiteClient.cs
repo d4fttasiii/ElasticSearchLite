@@ -1,6 +1,7 @@
 ﻿using Elasticsearch.Net;
 using ElasticSearchLite.NetCore.Exceptions;
 using ElasticSearchLite.NetCore.Interfaces;
+using ElasticSearchLite.NetCore.Interfaces.Bool;
 using ElasticSearchLite.NetCore.Interfaces.Search;
 using ElasticSearchLite.NetCore.Models;
 using ElasticSearchLite.NetCore.Queries;
@@ -11,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static ElasticSearchLite.NetCore.Queries.Bool;
 using static ElasticSearchLite.NetCore.Queries.Delete;
 using static ElasticSearchLite.NetCore.Queries.Get;
 using static ElasticSearchLite.NetCore.Queries.Search;
@@ -81,7 +83,7 @@ namespace ElasticSearchLite.NetCore
             }
             var data = JObject.Parse(response.Body)?.First;
 
-            return MapResponseToPoco<TPoco>(data);            
+            return MapResponseToPoco<TPoco>(data);
         }
 
         /// <summary>
@@ -134,7 +136,47 @@ namespace ElasticSearchLite.NetCore
 
             return ProcessSeachResponse<TPoco>(await LowLevelClient.SearchAsync<string>(query.IndexName, Generator.Generate(query)));
         }
+        /// <summary>
+        /// A query that matches documents matching boolean combinations of other queries. The bool query maps to Lucene BooleanQuery. 
+        /// It is built using one or more boolean clauses, each clause with a typed occurrence.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/query-dsl-bool-query.html
+        /// </summary>
+        /// <param name="boolQuery"></param>
+        /// <returns>IEnumerable<TPoco></returns>
+        public IEnumerable<TPoco> ExecuteBool<TPoco>(IExecutableBoolQuery<TPoco> boolQuery) where TPoco : IElasticPoco
+        {
+            var query = boolQuery as BoolQuery<TPoco>;
+            var statement = Generator.Generate(query);
+            var response = LowLevelClient.Search<string>(query.IndexName);
 
+            if (response.Success)
+            {
+                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+            }
+
+            return ProcessSeachResponse<TPoco>(response);
+        }
+
+        /// <summary>
+        /// A query that matches documents matching boolean combinations of other queries. The bool query maps to Lucene BooleanQuery. 
+        /// It is built using one or more boolean clauses, each clause with a typed occurrence.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/query-dsl-bool-query.html
+        /// </summary>
+        /// <param name="boolQuery"></param>
+        /// <returns>IEnumerable<TPoco></returns>
+        public async Task<IEnumerable<TPoco>> ExecuteBoolAsync<TPoco>(IExecutableBoolQuery<TPoco> boolQuery) where TPoco : IElasticPoco
+        {
+            var query = boolQuery as BoolQuery<TPoco>;
+            var statement = Generator.Generate(query);
+            var response = await LowLevelClient.SearchAsync<string>(query.IndexName);
+
+            if (response.Success)
+            {
+                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+            }
+
+            return ProcessSeachResponse<TPoco>(response);
+        }
         /// <summary>
         /// Executes an IndexQuery using the Index API which creates a new document in the index.
         /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/docs-index_.html
