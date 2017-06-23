@@ -153,7 +153,7 @@ namespace ElasticSearchLite.NetCore.Queries
             /// <returns></returns>
             public IFilteredSearchQuery<TPoco> MatchPhrasePrefix(Expression<Func<TPoco, object>> propertyExpression, string value)
             {
-                MatchPhrasePrefixCondition = new ElasticMatchCodition
+                MatchPhrasePrefixCondition = new ElasticMatchPhrasePrefixCondition
                 {
                     Field = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) },
                     Value = value ?? throw new ArgumentNullException(nameof(value))

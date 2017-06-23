@@ -11,7 +11,7 @@ namespace ElasticSearchLite.NetCore.Queries
         internal ElasticMultiMatchCondition MultiMatchConditions { get; set; }
         internal ElasticMatchCodition MatchCondition { get; set; }
         internal ElasticMatchPhraseCondition MatchPhraseCondition { get; set; }
-        internal ElasticMatchCodition MatchPhrasePrefixCondition { get; set; }
+        internal ElasticMatchPhrasePrefixCondition MatchPhrasePrefixCondition { get; set; }
 
         protected AbstractConditionalQuery(IElasticPoco poco) : base(poco) { }
 

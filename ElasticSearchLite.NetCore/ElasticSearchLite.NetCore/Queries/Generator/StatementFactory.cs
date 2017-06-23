@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using static ElasticSearchLite.NetCore.Queries.Bool;
 using static ElasticSearchLite.NetCore.Queries.Create;
 using static ElasticSearchLite.NetCore.Queries.Delete;
 using static ElasticSearchLite.NetCore.Queries.Search;
@@ -37,6 +38,8 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     return GenerateBulkQuery(bulkQuery);
                 case CreateQuery createQuery:
                     return GenerateCreateQuery(createQuery);
+                case BoolQuery boolQuery:
+                    return GenerateBoolQuery(boolQuery);
                 default:
                     throw new Exception("Unknown query type");
             }
@@ -55,6 +58,10 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             return $"{{ {string.Join(",", statementParts)} }}";
         }
 
+        private string GenerateBoolQuery(BoolQuery boolQuery)
+        {
+            return $@"{{ ""query"": {{ ""bool"": {{ {GenerateBoolQueryConditions(boolQuery.Conditions)} }} }} }}";
+        }
         private string GenerateDeleteQuery(DeleteQuery deleteQuery)
         {
             return $"{{ {GenerateQuery(deleteQuery)} }}";
@@ -81,6 +88,37 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             };
 
             return $"{{ {string.Join(",", statementParts)} }}";
+        }
+
+        private string GenerateBoolQueryConditions(Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>> conditions)
+        {
+            var builder = new List<string>();
+
+            foreach (var condition in conditions.Where(c => c.Value.Count > 0))
+            {
+                var queryConditions = condition.Value.Select(c => $" {{ {GenerateCondition(c)} }} ");
+
+                builder.Add($@" ""{condition.Key.Name}"": [{string.Join(",", queryConditions)}] ");
+            }
+
+            return string.Join(",", builder);
+        }
+
+        private string GenerateCondition(IElasticCondition condition)
+        {
+            switch (condition)
+            {
+                case ElasticMatchCodition matchCondition:
+                    return GenerateMatch(matchCondition);
+                case ElasticMatchPhraseCondition matchPhraseCondition:
+                    return GenerateMatchPhrase(matchPhraseCondition);
+                case ElasticMatchPhrasePrefixCondition matchPhrasePrefixCondition:
+                    return GenerateMatchPhrasePrefixPhrase(matchPhrasePrefixCondition);
+                case ElasticRangeCondition rangeCondition:
+                    return GenerateRange(new List<ElasticRangeCondition> { rangeCondition });
+                default:
+                    throw new Exception("Unknown condition type");
+            }
         }
 
         private string GenerateBulkQuery(Bulk bulkQuery)
@@ -171,7 +209,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         private string EscapeValue(object value) => JsonConvert.SerializeObject(value);
         private string GenerateMatch(ElasticMatchCodition condition) => $@"""match"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {{ ""query"": {EscapeValue(condition.Value)}, ""operator"": ""{condition.Operation.Name}"" }} }}";
         private string GenerateMatchPhrase(ElasticMatchPhraseCondition condition) => $@"""match_phrase"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {{ ""query"": {EscapeValue(condition.Value)}, ""slop"": {condition.Slop} }} }}";
-        private string GenerateMatchPhrasePrefixPhrase(ElasticMatchCodition condition) => $@"""match_phrase_prefix"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {EscapeValue(condition.Value)} }}";
+        private string GenerateMatchPhrasePrefixPhrase(ElasticMatchPhrasePrefixCondition condition) => $@"""match_phrase_prefix"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {EscapeValue(condition.Value)} }}";
         private string GenerateMultiMatch(ElasticMultiMatchCondition condition) => $@"""multi_match"": {{ ""query"": {EscapeValue(condition.Value)}, ""fields"": [{string.Join(",", condition.Fields.Select(cf => $@"""{NamingStrategy.GetPropertyName(cf.Name, false)}"""))}] }}";
         private string GenerateTerms(ElasticTermCodition condition)
         {

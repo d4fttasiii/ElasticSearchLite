@@ -92,7 +92,8 @@ namespace ElasticSearchLite.NetCore.Queries
                 var condition = new ElasticMatchCodition
                 {
                     Field = new ElasticField { Name = tempFieldName },
-                    Value = value
+                    Value = value,
+                    Operation = ElasticOperators.And
                 };
 
                 Conditions[tempOccurrence].Add(condition);

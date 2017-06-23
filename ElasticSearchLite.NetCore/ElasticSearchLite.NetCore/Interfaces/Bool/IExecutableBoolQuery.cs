@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace ElasticSearchLite.NetCore.Interfaces.Bool
 {
-    public interface IExecutableBoolQuery<TPoco> where TPoco : IElasticPoco
+    public interface IExecutableBoolQuery<TPoco> : IQuery where TPoco : IElasticPoco
     {
         IShouldAddQuery<TPoco> Should(Expression<Func<TPoco, object>> propertyExpression);
         IMustAddQuery<TPoco> Must(Expression<Func<TPoco, object>> propertyExpression);

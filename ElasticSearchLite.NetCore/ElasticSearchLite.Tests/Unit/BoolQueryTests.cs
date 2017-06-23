@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using ElasticSearchLite.Tests.Pocos;
 using ElasticSearchLite.NetCore.Models;
+using ElasticSearchLite.NetCore;
 
 namespace ElasticSearchLite.Tests.Unit
 {
@@ -27,7 +28,7 @@ namespace ElasticSearchLite.Tests.Unit
                 .Should(t => t.TestText).Match("other thingy")
                 .MustNot(t => t.TestDateTime).Range(ElasticRangeOperations.Lt, DateTime.Now);
 
-
+            TestQueryString("", query);
         }
     }
 }
