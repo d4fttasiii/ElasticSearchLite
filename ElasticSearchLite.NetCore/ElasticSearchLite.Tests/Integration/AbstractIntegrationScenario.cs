@@ -9,12 +9,12 @@ namespace ElasticSearchLite.Tests.Integration
     {
         protected static readonly string _indexName = "exampleindex";
         protected static readonly string _typeName = "example";
-        protected readonly ElasticLiteClient _client = new ElasticLiteClient("http://localhost:9200/")
+        protected static readonly ElasticLiteClient _client = new ElasticLiteClient("http://localhost:9200/")
         {
             NameingStrategy = new Newtonsoft.Json.Serialization.CamelCaseNamingStrategy()
         };
 
-        protected Poco poco = new Poco
+        protected static readonly Poco poco = new Poco
         {
             Index = _indexName,
             Type = _typeName,
@@ -26,7 +26,8 @@ namespace ElasticSearchLite.Tests.Integration
             TestStringArray = new[] { "A", "B", "C", "D" }
         };
 
-        protected EnumPoco enumPoco = new EnumPoco {
+        protected static readonly EnumPoco enumPoco = new EnumPoco
+        {
             Index = "tagindex",
             Type = "tag",
             TagType = TagType.A,

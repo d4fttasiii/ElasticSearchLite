@@ -11,7 +11,7 @@ namespace ElasticSearchLite.Tests.Integration
     [TestCategory("Integration")]
     [TestClass]
     public class TestScenario : AbstractIntegrationScenario
-    {  
+    {
         [TestMethod]
         public void TestScenario_Index_Search_Update_Verify_Delete()
         {
@@ -50,6 +50,7 @@ namespace ElasticSearchLite.Tests.Integration
                 .ShouldBeEquivalentTo(poco.TestText);
 
             Delete.Document(poco).ExecuteWith(_client).Should().BeGreaterThan(0);
+            _client.ExecuteDrop(Drop.Index(poco.Index));
         }
 
         [TestMethod]
@@ -61,12 +62,25 @@ namespace ElasticSearchLite.Tests.Integration
                 .Create(poco.Index)
                 .Index(poco)
                 .Delete(poco));
+
+            Thread.Sleep(2000);
+
+            Search.In(poco.Index)
+                .Return<Poco>()
+                .Term(p => p.Id, "1337")
+                .ExecuteWith(_client)
+                .FirstOrDefault()
+                .Should().BeNull();
+
+            _client.ExecuteDrop(Drop.Index(poco.Index));
         }
 
         [TestMethod]
         public void TestScenario_Enum_Index_Select()
         {
             Index.Document(enumPoco).ExecuteWith(_client);
+
+            Thread.Sleep(2000);
 
             var laPoco = Search.In(enumPoco.Index)
                 .Return<EnumPoco>()
@@ -76,25 +90,9 @@ namespace ElasticSearchLite.Tests.Integration
             laPoco.Should().NotBeNull();
             laPoco.Name.ShouldBeEquivalentTo(enumPoco.Name);
             laPoco.TagType.ShouldBeEquivalentTo(enumPoco.TagType);
-        }
 
-        [TestCleanup]
-        public void CleanUp()
-        {
-            try
-            {
-                _client.ExecuteDrop(Drop.Index(poco.Index));
-                _client.ExecuteDrop(Drop.Index(enumPoco.Index));
-            }
-            catch (ElasticSearchLite.NetCore.Exceptions.IndexNotAvailableException)
-            {
-                return;
-            }
-            catch (System.Exception)
-            {
 
-                throw;
-            }
+            _client.ExecuteDrop(Drop.Index(enumPoco.Index));
         }
     }
 }
