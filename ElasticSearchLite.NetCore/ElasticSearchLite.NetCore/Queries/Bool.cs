@@ -13,7 +13,7 @@ namespace ElasticSearchLite.NetCore.Queries
 
         private Bool(string indexName)
         {
-            if (string.IsNullOrWhiteSpace(indexName)) { throw new ArgumentNullException(nameof(indexName)); }
+            if (string.IsNullOrWhiteSpace(indexName)) { throw new ArgumentException(nameof(indexName)); }
 
             _indexName = indexName;
         }

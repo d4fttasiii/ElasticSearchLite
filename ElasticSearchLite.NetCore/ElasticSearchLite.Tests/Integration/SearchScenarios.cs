@@ -50,7 +50,7 @@ namespace ElasticSearchLite.Tests.Integration
             // Pocos Added
             foreach (var poco in complexPocos)
             {
-                Index.Document(poco).ExecuteWith(Client);
+                Index.Document(poco).ExecuteWith(_client);
             }
 
             var complexPocosReturned = Search.In(complexIndexName)
@@ -58,7 +58,7 @@ namespace ElasticSearchLite.Tests.Integration
                 .Sort(cp => cp.LastModified, ElasticSortOrders.Ascending)
                 .Take(100)
                 .Skip(0)
-                .ExecuteWith(Client);
+                .ExecuteWith(_client);
 
             complexPocosReturned.Count().ShouldBeEquivalentTo(Count);
 
@@ -74,7 +74,7 @@ namespace ElasticSearchLite.Tests.Integration
                 .Return<ComplexPoco>()
                 .Range(cp => cp.LastModified, ElasticRangeOperations.Gt, new DateTime(2017, 9, 15))
                     .And(ElasticRangeOperations.Lte, new DateTime(2017, 9, 20))
-                .ExecuteWith(Client);
+                .ExecuteWith(_client);
 
             foreach (var poco in filteredPocos)
             {
@@ -90,7 +90,7 @@ namespace ElasticSearchLite.Tests.Integration
             {
                 Search.In("ishouldntexistsindex")
                     .Return<Poco>()
-                    .ExecuteWith(Client);
+                    .ExecuteWith(_client);
             }, 
             "Index not available exception should be thrown.");
 

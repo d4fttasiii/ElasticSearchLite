@@ -21,15 +21,15 @@ namespace ElasticSearchLite.Tests.Integration
         private async void RunAsyncTestScenario_Index_Search_Update_Verify_Delete()
         {
             Index.Document(poco)
-                .ExecuteWith(Client);
+                .ExecuteWith(_client);
 
             Thread.Sleep(2000);
 
             var document = (await Search
-                .In(IndexName)
+                .In(_indexName)
                 .Return<Poco>()
                 .Term(p => p.Id, poco.Id)
-                .ExecuteAsyncWith(Client))
+                .ExecuteAsyncWith(_client))
                 .Single();
 
             poco.Id.ShouldBeEquivalentTo(document.Id);
@@ -42,19 +42,19 @@ namespace ElasticSearchLite.Tests.Integration
             string.Join("", poco.TestStringArray).ShouldBeEquivalentTo(string.Join("", document.TestStringArray));
 
             poco.TestText = "ChangedText";
-            Update.Document(poco).ExecuteAsyncWith(Client);
+            Update.Document(poco).ExecuteAsyncWith(_client);
 
             Thread.Sleep(2000);
 
-            (await Search.In(IndexName)
+            (await Search.In(_indexName)
                 .Return<Poco>()
                 .Term(p => p.Id, poco.Id)
-                .ExecuteAsyncWith(Client))
+                .ExecuteAsyncWith(_client))
                 .Single()
                 .TestText
                 .ShouldBeEquivalentTo(poco.TestText);
 
-            (await Delete.Document(poco).ExecuteAsyncWith(Client)).Should().BeGreaterThan(0);
+            (await Delete.Document(poco).ExecuteAsyncWith(_client)).Should().BeGreaterThan(0);
         }
 
         [TestMethod]
@@ -63,10 +63,10 @@ namespace ElasticSearchLite.Tests.Integration
             poco.Id = "1337";
 
             Bulk<Poco>
-                 .Create(IndexName)
+                 .Create(_indexName)
                  .Index(poco)
                  .Delete(poco)
-                 .ExecuteAsyncWith(Client);
+                 .ExecuteAsyncWith(_client);
         }
     }
 }

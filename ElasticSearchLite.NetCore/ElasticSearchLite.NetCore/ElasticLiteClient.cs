@@ -291,6 +291,8 @@ namespace ElasticSearchLite.NetCore
         /// <param name="query">DropQuery object</param>
         public void ExecuteDrop(Drop query)
         {
+            IndexExists(query.IndexName);
+
             var response = LowLevelClient.IndicesDelete<string>(query.IndexName);
 
             if (!response.Success)

@@ -16,15 +16,15 @@ namespace ElasticSearchLite.Tests.Integration
         public void TestScenario_Index_Search_Update_Verify_Delete()
         {
             Index.Document(poco)
-                .ExecuteWith(Client);
+                .ExecuteWith(_client);
 
             Thread.Sleep(2000);
 
             var document = Search
-                .In(IndexName)
+                .In(_indexName)
                 .Return<Poco>()
                 .Term(p => p.Id, poco.Id)
-                .ExecuteWith(Client)
+                .ExecuteWith(_client)
                 .Single();
 
             poco.Id.ShouldBeEquivalentTo(document.Id);
@@ -37,19 +37,19 @@ namespace ElasticSearchLite.Tests.Integration
             string.Join("", poco.TestStringArray).ShouldBeEquivalentTo(string.Join("", document.TestStringArray));
 
             poco.TestText = "ChangedText";
-            Update.Document(poco).ExecuteWith(Client);
+            Update.Document(poco).ExecuteWith(_client);
 
             Thread.Sleep(2000);
 
-            Search.In(IndexName)
+            Search.In(_indexName)
                 .Return<Poco>()
                 .Term(p => p.Id, poco.Id)
-                .ExecuteWith(Client)
+                .ExecuteWith(_client)
                 .Single()
                 .TestText
                 .ShouldBeEquivalentTo(poco.TestText);
 
-            Delete.Document(poco).ExecuteWith(Client).Should().BeGreaterThan(0);
+            Delete.Document(poco).ExecuteWith(_client).Should().BeGreaterThan(0);
         }
 
         [TestMethod]
@@ -57,8 +57,8 @@ namespace ElasticSearchLite.Tests.Integration
         {
             poco.Id = "1337";
 
-            Client.ExecuteBulk(Bulk<Poco>
-                .Create(IndexName)
+            _client.ExecuteBulk(Bulk<Poco>
+                .Create(poco.Index)
                 .Index(poco)
                 .Delete(poco));
         }
@@ -66,9 +66,11 @@ namespace ElasticSearchLite.Tests.Integration
         [TestMethod]
         public void TestScenario_Enum_Index_Select()
         {
-            var laPoco = Search.In("tagindex")
+            Index.Document(enumPoco).ExecuteWith(_client);
+
+            var laPoco = Search.In(enumPoco.Index)
                 .Return<EnumPoco>()
-                .ExecuteWith(Client)
+                .ExecuteWith(_client)
                 .FirstOrDefault();
 
             laPoco.Should().NotBeNull();
@@ -79,7 +81,20 @@ namespace ElasticSearchLite.Tests.Integration
         [TestCleanup]
         public void CleanUp()
         {
-            Client.ExecuteDrop(Drop.Index(poco.Index));
+            try
+            {
+                _client.ExecuteDrop(Drop.Index(poco.Index));
+                _client.ExecuteDrop(Drop.Index(enumPoco.Index));
+            }
+            catch (ElasticSearchLite.NetCore.Exceptions.IndexNotAvailableException)
+            {
+                return;
+            }
+            catch (System.Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

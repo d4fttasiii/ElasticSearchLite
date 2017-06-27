@@ -17,20 +17,20 @@ namespace ElasticSearchLite.Tests.Pocos
 
         public TagType TagType { get; set; }
         public string Name { get; set; }
-        public IList<string> ParentTags { get; set; }
+        public List<string> ParentTags { get; set; }
         public string Notes { get; set; }
     }
 
     [JsonConverter(typeof(StringEnumConverter))]
     public enum TagType
     {
-        [EnumMember(Value = "Content")]
-        Content,
-        [EnumMember(Value = "Category")]
-        Category,
-        [EnumMember(Value = "Cluster")]
-        Cluster,
-        [EnumMember(Value = "Theme")]
-        Theme
+        [EnumMember(Value = "A")]
+        A,
+        [EnumMember(Value = "B")]
+        B,
+        [EnumMember(Value = "C")]
+        C,
+        [EnumMember(Value = "D")]
+        D
     }
 }

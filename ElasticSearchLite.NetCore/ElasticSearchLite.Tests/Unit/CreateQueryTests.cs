@@ -37,7 +37,7 @@ namespace ElasticSearchLite.Tests.Unit
                     .AddMapping("next_shipment")
                         .WithType(ElasticCoreFieldDataTypes.Date);
 
-            TestQueryObject(new
+            /*TestQueryObject(new
             {
                 settings = new
                 {
@@ -89,7 +89,7 @@ namespace ElasticSearchLite.Tests.Unit
                         }
                     }
                 }
-            }, create);
+            }, create);*/
         }
     }
 }
