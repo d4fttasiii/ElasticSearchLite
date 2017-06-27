@@ -8,8 +8,7 @@ using System.Threading;
 
 namespace ElasticSearchLite.Tests.Integration
 {
-    [TestCategory("Integration")]
-    [TestClass]
+    [TestClass, TestCategory("Integration")]
     public class AsyncTestScenario : AbstractIntegrationScenario
     {
         [TestMethod]

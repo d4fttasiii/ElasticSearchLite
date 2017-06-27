@@ -146,15 +146,8 @@ namespace ElasticSearchLite.NetCore
         public IEnumerable<TPoco> ExecuteBool<TPoco>(IExecutableBoolQuery<TPoco> boolQuery) where TPoco : IElasticPoco
         {
             var query = boolQuery as BoolQuery<TPoco>;
-            var statement = Generator.Generate(query);
-            var response = LowLevelClient.Search<string>(query.IndexName);
 
-            if (response.Success)
-            {
-                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
-            }
-
-            return ProcessSeachResponse<TPoco>(response);
+            return ProcessSeachResponse<TPoco>(LowLevelClient.Search<string>(query.IndexName, Generator.Generate(query)));
         }
 
         /// <summary>

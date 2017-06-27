@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace ElasticSearchLite.Tests.Integration
 {
-    [TestClass]
+    [TestClass, TestCategory("Integration")]
     public class SearchScenarios : AbstractIntegrationScenario
     {
         private List<ComplexPoco> complexPocos = new List<ComplexPoco>();
