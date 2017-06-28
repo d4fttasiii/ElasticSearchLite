@@ -65,7 +65,7 @@ namespace ElasticSearchLite.NetCore
        /// <param name="boolQuery"></param>
        /// <param name="client"></param>
        /// <returns></returns>
-        public static IEnumerable<TPoco> ExecuteWith<TPoco>(this IExecutableBoolQuery<TPoco> boolQuery, ElasticLiteClient client)
+        public static IEnumerable<TPoco> ExecuteWith<TPoco>(this IBoolQueryExecutable<TPoco> boolQuery, ElasticLiteClient client)
             where TPoco : IElasticPoco => client.ExecuteBool(boolQuery);
         /// <summary>
         /// 
@@ -112,7 +112,7 @@ namespace ElasticSearchLite.NetCore
         /// <param name="boolQuery"></param>
         /// <param name="client"></param>
         /// <returns></returns>
-        public static async Task<IEnumerable<TPoco>> ExecuteAsyncWith<TPoco>(this IExecutableBoolQuery<TPoco> boolQuery, ElasticLiteClient client)
+        public static async Task<IEnumerable<TPoco>> ExecuteAsyncWith<TPoco>(this IBoolQueryExecutable<TPoco> boolQuery, ElasticLiteClient client)
             where TPoco : IElasticPoco => await client.ExecuteBoolAsync(boolQuery);
         /// <summary>
         /// 

@@ -18,12 +18,12 @@ namespace ElasticSearchLite.NetCore.Queries
             _indexName = indexName;
         }
 
-        public static Bool In(string indexName)
+        public static Bool QueryIn(string indexName)
         {
             return new Bool(indexName);
         }
 
-        public IExecutableBoolQuery<TPoco> Returns<TPoco>() where TPoco : IElasticPoco
+        public IBoolQueryExecutable<TPoco> Returns<TPoco>() where TPoco : IElasticPoco
         {
             return new BoolQuery<TPoco>(_indexName);
         }
@@ -45,11 +45,11 @@ namespace ElasticSearchLite.NetCore.Queries
 
         public sealed class BoolQuery<TPoco> :
             BoolQuery,
-            IExecutableBoolQuery<TPoco>,
-            IShouldAddQuery<TPoco>,
-            IMustAddQuery<TPoco>,
-            IMustNotAddQuery<TPoco>,
-            IFilterAddQuery<TPoco>
+            IBoolQueryExecutable<TPoco>,
+            IBoolQueryShouldAdded<TPoco>,
+            IBoolQueryMustAdded<TPoco>,
+            IBoolQueryMustNotAdded<TPoco>,
+            IBoolQueryFilterAdded<TPoco>
             where TPoco : IElasticPoco
         {
             private string tempFieldName;
@@ -57,14 +57,14 @@ namespace ElasticSearchLite.NetCore.Queries
 
             internal BoolQuery(string indexName) : base(indexName) { }
 
-            public IMustAddQuery<TPoco> Must(Expression<Func<TPoco, object>> propertyExpression)
+            public IBoolQueryMustAdded<TPoco> Must(Expression<Func<TPoco, object>> propertyExpression)
             {
                 tempFieldName = GetCorrectPropertyName(propertyExpression);
                 tempOccurrence = ElasticBoolQueryOccurrences.Must;
 
                 return this;
             }
-            public IFilterAddQuery<TPoco> Filter(Expression<Func<TPoco, object>> propertyExpression)
+            public IBoolQueryFilterAdded<TPoco> Filter(Expression<Func<TPoco, object>> propertyExpression)
             {
                 tempFieldName = GetCorrectPropertyName(propertyExpression);
                 tempOccurrence = ElasticBoolQueryOccurrences.Filter;
@@ -72,7 +72,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
 
-            public IMustNotAddQuery<TPoco> MustNot(Expression<Func<TPoco, object>> propertyExpression)
+            public IBoolQueryMustNotAdded<TPoco> MustNot(Expression<Func<TPoco, object>> propertyExpression)
             {
                 tempFieldName = GetCorrectPropertyName(propertyExpression);
                 tempOccurrence = ElasticBoolQueryOccurrences.MustNot;
@@ -80,14 +80,14 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
 
-            public IShouldAddQuery<TPoco> Should(Expression<Func<TPoco, object>> propertyExpression)
+            public IBoolQueryShouldAdded<TPoco> Should(Expression<Func<TPoco, object>> propertyExpression)
             {
                 tempFieldName = GetCorrectPropertyName(propertyExpression);
                 tempOccurrence = ElasticBoolQueryOccurrences.Should;
 
                 return this;
             }
-            public IExecutableBoolQuery<TPoco> Match(object value)
+            public IBoolQueryExecutable<TPoco> Match(object value)
             {
                 var condition = new ElasticMatchCodition
                 {
@@ -101,7 +101,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
 
-            public IExecutableBoolQuery<TPoco> MatchPhrase(object value)
+            public IBoolQueryExecutable<TPoco> MatchPhrase(object value)
             {
                 var condition = new ElasticMatchPhraseCondition
                 {
@@ -114,7 +114,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
 
-            public IExecutableBoolQuery<TPoco> MatchPhrasePrefix(object value)
+            public IBoolQueryExecutable<TPoco> MatchPhrasePrefix(object value)
             {
                 var condition = new ElasticMatchPhrasePrefixCondition
                 {
@@ -127,7 +127,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
 
-            public IExecutableBoolQuery<TPoco> Range(ElasticRangeOperations op, object value)
+            public IBoolQueryExecutable<TPoco> Range(ElasticRangeOperations op, object value)
             {
                 var condition = new ElasticRangeCondition
                 {
@@ -137,6 +137,30 @@ namespace ElasticSearchLite.NetCore.Queries
                 };
 
                 Conditions[tempOccurrence].Add(condition);
+
+                return this;
+            }
+
+            public IBoolQueryExecutable<TPoco> Take(int take)
+            {
+                if(take < 0 || take > 10000)
+                {
+                    throw new ArgumentException(nameof(take));
+                }
+
+                Size = take;
+
+                return this;
+            }
+
+            public IBoolQueryExecutable<TPoco> Skip(int skip)
+            {
+                if (skip < 0 || skip > 10000)
+                {
+                    throw new ArgumentException(nameof(skip));
+                }
+
+                From = skip;
 
                 return this;
             }

@@ -143,7 +143,7 @@ namespace ElasticSearchLite.NetCore
         /// </summary>
         /// <param name="boolQuery"></param>
         /// <returns>IEnumerable<TPoco></returns>
-        public IEnumerable<TPoco> ExecuteBool<TPoco>(IExecutableBoolQuery<TPoco> boolQuery) where TPoco : IElasticPoco
+        public IEnumerable<TPoco> ExecuteBool<TPoco>(IBoolQueryExecutable<TPoco> boolQuery) where TPoco : IElasticPoco
         {
             var query = boolQuery as BoolQuery<TPoco>;
 
@@ -157,7 +157,7 @@ namespace ElasticSearchLite.NetCore
         /// </summary>
         /// <param name="boolQuery"></param>
         /// <returns>IEnumerable<TPoco></returns>
-        public async Task<IEnumerable<TPoco>> ExecuteBoolAsync<TPoco>(IExecutableBoolQuery<TPoco> boolQuery) where TPoco : IElasticPoco
+        public async Task<IEnumerable<TPoco>> ExecuteBoolAsync<TPoco>(IBoolQueryExecutable<TPoco> boolQuery) where TPoco : IElasticPoco
         {
             var query = boolQuery as BoolQuery<TPoco>;
             var statement = Generator.Generate(query);

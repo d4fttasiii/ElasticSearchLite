@@ -15,14 +15,14 @@ namespace ElasticSearchLite.Tests.Unit
         [TestMethod]
         public void BoolQuery_ExceptionTest_Index()
         {
-            TestExceptions(typeof(ArgumentException), () => Bool.In(null), "Index name is null");
+            TestExceptions(typeof(ArgumentException), () => Bool.QueryIn(null), "Index name is null");
         }
 
         [TestMethod]
         public void BoolQuery_Building_Fluently()
         {
             // Arrange
-            var query = Bool.In("mypocoindex")
+            var query = Bool.QueryIn("mypocoindex")
                 .Returns<Poco>()
                 .Should(t => t.TestText).Match("something")
                 .Should(t => t.TestText).Match("other thingy")

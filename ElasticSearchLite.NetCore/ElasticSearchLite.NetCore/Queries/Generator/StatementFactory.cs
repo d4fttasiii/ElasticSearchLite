@@ -60,7 +60,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
         private string GenerateBoolQuery(BoolQuery boolQuery)
         {
-            return $@"{{ ""query"": {{ ""bool"": {{ {GenerateBoolQueryConditions(boolQuery.Conditions)} }} }} }}";
+            return $@"{{ ""query"": {{ ""bool"": {{ {GenerateBoolQueryConditions(boolQuery.Conditions)} }} }}, {GenerateSize(boolQuery.Size)}, {GenerateFrom(boolQuery.From)} }}";
         }
         private string GenerateDeleteQuery(DeleteQuery deleteQuery)
         {

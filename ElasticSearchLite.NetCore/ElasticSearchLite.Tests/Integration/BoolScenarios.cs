@@ -15,16 +15,16 @@ namespace ElasticSearchLite.Tests.Integration
         [TestMethod]
         public void BoolScenario_Search_For_MatchPhrasePrefix()
         {
-            var texts = Bool.In("textindex")
+            var texts = Bool.QueryIn("textindex")
                 .Returns<Poco>()
                 .Should(p => p.TestText)
                     .MatchPhrasePrefix("1")
-                .Must(p => p.TestInteger)
-                    .Range(ElasticRangeOperations.Gt, 50)
+                .Take(100)
+                .Skip(0)
                 .ExecuteWith(_client);
 
             texts.Should().NotBeNull();
-            texts.Count().Should().Equals(10);
+            texts.Count().Should().Equals(20);
         }
 
         [TestInitialize]
