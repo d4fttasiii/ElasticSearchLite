@@ -1,5 +1,6 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Interfaces.Bool;
+using ElasticSearchLite.NetCore.Interfaces.Highlight;
 using ElasticSearchLite.NetCore.Models;
 using System;
 using System.Collections.Generic;
@@ -8,29 +9,30 @@ using System.Linq.Expressions;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
-    public class Bool
+    public class Highlight
     {
         private readonly string _indexName;
 
-        private Bool(string indexName)
+        private Highlight(string indexName)
         {
             if (string.IsNullOrWhiteSpace(indexName)) { throw new ArgumentException(nameof(indexName)); }
 
             _indexName = indexName;
         }
 
-        public static Bool QueryIn(string indexName)
+        public static Highlight QueryIn(string indexName)
         {
-            return new Bool(indexName);
+            return new Highlight(indexName);
         }
 
-        public IBoolQueryExecutable<TPoco> Returns<TPoco>() where TPoco : IElasticPoco
+        public IHighlightQueryUnconfigured<TPoco> Returns<TPoco>() where TPoco : IElasticPoco
         {
-            return new BoolQuery<TPoco>(_indexName);
+            return new HighlightQuery<TPoco>(_indexName);
         }
 
-        public abstract class BoolQuery : AbstractBaseQuery
+        public abstract class HighlightQuery : AbstractBaseQuery
         {
+            protected internal ElasticHighlight Highlight { get; } = new ElasticHighlight();
             protected internal int Size { get; set; } = 25;
             protected internal int From { get; set; } = 0;
             protected internal Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>> Conditions { get; } = new Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>>
@@ -41,39 +43,69 @@ namespace ElasticSearchLite.NetCore.Queries
                 { ElasticBoolQueryOccurrences.MustNot, new List<IElasticCondition>() }
             };
             protected internal List<ElasticSort> SortingFields { get; } = new List<ElasticSort>();
-            protected BoolQuery(string indexName) : base(indexName) { }
+
+            public HighlightQuery(string indexName) : base(indexName) { }
         }
 
-        public class BoolQuery<TPoco> :
-            BoolQuery,
-            IBoolQueryExecutable<TPoco>,
-            IBoolQueryShouldAdded<TPoco>,
-            IBoolQueryMustAdded<TPoco>,
-            IBoolQueryMustNotAdded<TPoco>,
-            IBoolQueryFilterAdded<TPoco>
+        public sealed class HighlightQuery<TPoco> :
+            HighlightQuery,
+            IHighlightQueryUnconfigured<TPoco>,
+            IHighlightQueryExecutable<TPoco>,
+            IHighlightQueryShouldAdded<TPoco>,
+            IHighlightQueryMustAdded<TPoco>,
+            IHighlightQueryMustNotAdded<TPoco>,
+            IHighlightQueryFilterAdded<TPoco>,
+            IHighlightQueryPreAdded<TPoco>,
+            IHighlightQueryPostAdded<TPoco>
             where TPoco : IElasticPoco
         {
             private string tempFieldName;
             private ElasticBoolQueryOccurrences tempOccurrence;
 
-            internal BoolQuery(string indexName) : base(indexName) { }
+            internal HighlightQuery(string indexName) : base(indexName) { }
 
-            public IBoolQueryMustAdded<TPoco> Must(Expression<Func<TPoco, object>> propertyExpression)
+            public IHighlightQueryPreAdded<TPoco> WithPre(string preTag)
+            {
+                if (string.IsNullOrWhiteSpace(preTag)) { throw new ArgumentException(nameof(preTag)); }
+                Highlight.PreTag = preTag;
+
+                return this;
+            }
+
+            public IHighlightQueryPostAdded<TPoco> WithPost(string postTag)
+            {
+
+                if (string.IsNullOrWhiteSpace(postTag)) { throw new ArgumentException(nameof(postTag)); }
+                Highlight.PostTag = postTag;
+
+                return this;
+            }
+
+            public IHighlightQueryExecutable<TPoco> AddFields(params Expression<Func<TPoco, object>>[] propertyExpressions)
+            {
+                var fields = propertyExpressions.Select(p => new ElasticField { Name = GetCorrectPropertyName(p) });
+                Highlight.HighlightedFields.AddRange(fields);
+
+                return this;
+            }
+
+            public IHighlightQueryShouldAdded<TPoco> Should(Expression<Func<TPoco, object>> propertyExpression)
+            {
+                tempFieldName = GetCorrectPropertyName(propertyExpression);
+                tempOccurrence = ElasticBoolQueryOccurrences.Should;
+
+                return this;
+            }
+
+            public IHighlightQueryMustAdded<TPoco> Must(Expression<Func<TPoco, object>> propertyExpression)
             {
                 tempFieldName = GetCorrectPropertyName(propertyExpression);
                 tempOccurrence = ElasticBoolQueryOccurrences.Must;
 
                 return this;
             }
-            public IBoolQueryFilterAdded<TPoco> Filter(Expression<Func<TPoco, object>> propertyExpression)
-            {
-                tempFieldName = GetCorrectPropertyName(propertyExpression);
-                tempOccurrence = ElasticBoolQueryOccurrences.Filter;
 
-                return this;
-            }
-
-            public IBoolQueryMustNotAdded<TPoco> MustNot(Expression<Func<TPoco, object>> propertyExpression)
+            public IHighlightQueryMustNotAdded<TPoco> MustNot(Expression<Func<TPoco, object>> propertyExpression)
             {
                 tempFieldName = GetCorrectPropertyName(propertyExpression);
                 tempOccurrence = ElasticBoolQueryOccurrences.MustNot;
@@ -81,14 +113,15 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
 
-            public IBoolQueryShouldAdded<TPoco> Should(Expression<Func<TPoco, object>> propertyExpression)
+            public IHighlightQueryFilterAdded<TPoco> Filter(Expression<Func<TPoco, object>> propertyExpression)
             {
                 tempFieldName = GetCorrectPropertyName(propertyExpression);
-                tempOccurrence = ElasticBoolQueryOccurrences.Should;
+                tempOccurrence = ElasticBoolQueryOccurrences.Filter;
 
                 return this;
             }
-            public IBoolQueryExecutable<TPoco> Match(object value)
+
+            public IHighlightQueryExecutable<TPoco> Match(object value)
             {
                 var condition = new ElasticMatchCodition
                 {
@@ -102,7 +135,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
 
-            public IBoolQueryExecutable<TPoco> MatchPhrase(object value)
+            public IHighlightQueryExecutable<TPoco> MatchPhrase(object value)
             {
                 var condition = new ElasticMatchPhraseCondition
                 {
@@ -115,7 +148,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
 
-            public IBoolQueryExecutable<TPoco> MatchPhrasePrefix(object value)
+            public IHighlightQueryExecutable<TPoco> MatchPhrasePrefix(object value)
             {
                 var condition = new ElasticMatchPhrasePrefixCondition
                 {
@@ -128,7 +161,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
 
-            public IBoolQueryExecutable<TPoco> Range(ElasticRangeOperations op, object value)
+            public IHighlightQueryExecutable<TPoco> Range(ElasticRangeOperations op, object value)
             {
                 var condition = new ElasticRangeCondition
                 {
@@ -142,7 +175,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
 
-            public IBoolQueryExecutable<TPoco> Take(int take)
+            public IHighlightQueryExecutable<TPoco> Take(int take)
             {
                 if (take < 0 || take > 10000)
                 {
@@ -154,7 +187,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
 
-            public IBoolQueryExecutable<TPoco> Skip(int skip)
+            public IHighlightQueryExecutable<TPoco> Skip(int skip)
             {
                 if (skip < 0 || skip > 10000)
                 {

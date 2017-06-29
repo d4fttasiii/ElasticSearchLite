@@ -1,6 +1,8 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Interfaces.Bool;
+using ElasticSearchLite.NetCore.Interfaces.Highlight;
 using ElasticSearchLite.NetCore.Interfaces.Search;
+using ElasticSearchLite.NetCore.Models;
 using ElasticSearchLite.NetCore.Queries;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -70,6 +72,15 @@ namespace ElasticSearchLite.NetCore
         /// <summary>
         /// 
         /// </summary>
+        /// <typeparam name="TPoco"></typeparam>
+        /// <param name="highlightQuery"></param>
+        /// <param name="client"></param>
+        /// <returns></returns>
+        public static IEnumerable<ElasticHighlightResponse> ExecuteWith<TPoco>(this IHighlightQueryExecutable<TPoco> highlightQuery, ElasticLiteClient client)
+            where TPoco : IElasticPoco => client.ExecuteHighLight(highlightQuery);
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="update"></param>
         /// <param name="client"></param>
         public static async void ExecuteAsyncWith(this Update update, ElasticLiteClient client) => await client.ExecuteUpdateAsync(update);
@@ -114,6 +125,15 @@ namespace ElasticSearchLite.NetCore
         /// <returns></returns>
         public static async Task<IEnumerable<TPoco>> ExecuteAsyncWith<TPoco>(this IBoolQueryExecutable<TPoco> boolQuery, ElasticLiteClient client)
             where TPoco : IElasticPoco => await client.ExecuteBoolAsync(boolQuery);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TPoco"></typeparam>
+        /// <param name="boolQuery"></param>
+        /// <param name="client"></param>
+        /// <returns></returns>
+        public static async Task<IEnumerable<ElasticHighlightResponse>> ExecuteAsyncWith<TPoco>(this IHighlightQueryExecutable<TPoco> highlightQuery, ElasticLiteClient client)
+            where TPoco : IElasticPoco => await client.ExecuteHighLightAsync(highlightQuery);
         /// <summary>
         /// 
         /// </summary>

@@ -1,13 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using ElasticSearchLite.NetCore.Models;
 using ElasticSearchLite.NetCore.Queries;
-using System;
 using ElasticSearchLite.Tests.Pocos;
-using ElasticSearchLite.NetCore.Models;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace ElasticSearchLite.Tests.Unit
 {
     [TestClass]
-    public class BoolQueryTests : AbstractQueryTest
+    public class HighlightQuery : AbstractQueryTest
     {
         [TestMethod]
         public void BoolQuery_ExceptionTest_Index()
@@ -19,8 +19,11 @@ namespace ElasticSearchLite.Tests.Unit
         public void BoolQuery_Building_Fluently()
         {
             // Arrange
-            var query = Bool.QueryIn("mypocoindex")
+            var query = Highlight.QueryIn("mypocoindex")
                 .Returns<Poco>()
+                .WithPre("<b>")
+                .WithPost("</b>")
+                .AddFields(t => t.TestText, t => t.TestText)
                 .Should(t => t.TestText)
                     .Match("something")
                 .Should(t => t.TestText)

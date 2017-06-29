@@ -3,6 +3,7 @@ using ElasticSearchLite.NetCore.Exceptions;
 using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Interfaces.Bool;
 using ElasticSearchLite.NetCore.Interfaces.Search;
+using ElasticSearchLite.NetCore.Interfaces.Highlight;
 using ElasticSearchLite.NetCore.Models;
 using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.NetCore.Queries.Generator;
@@ -16,6 +17,7 @@ using static ElasticSearchLite.NetCore.Queries.Bool;
 using static ElasticSearchLite.NetCore.Queries.Delete;
 using static ElasticSearchLite.NetCore.Queries.Get;
 using static ElasticSearchLite.NetCore.Queries.Search;
+using static ElasticSearchLite.NetCore.Queries.Highlight;
 
 namespace ElasticSearchLite.NetCore
 {
@@ -146,10 +148,10 @@ namespace ElasticSearchLite.NetCore
         public IEnumerable<TPoco> ExecuteBool<TPoco>(IBoolQueryExecutable<TPoco> boolQuery) where TPoco : IElasticPoco
         {
             var query = boolQuery as BoolQuery<TPoco>;
+            var response = LowLevelClient.Search<string>(query.IndexName, Generator.Generate(query));
 
-            return ProcessSeachResponse<TPoco>(LowLevelClient.Search<string>(query.IndexName, Generator.Generate(query)));
+            return ProcessSeachResponse<TPoco>(response);
         }
-
         /// <summary>
         /// A query that matches documents matching boolean combinations of other queries. The bool query maps to Lucene BooleanQuery. 
         /// It is built using one or more boolean clauses, each clause with a typed occurrence.
@@ -160,15 +162,37 @@ namespace ElasticSearchLite.NetCore
         public async Task<IEnumerable<TPoco>> ExecuteBoolAsync<TPoco>(IBoolQueryExecutable<TPoco> boolQuery) where TPoco : IElasticPoco
         {
             var query = boolQuery as BoolQuery<TPoco>;
-            var statement = Generator.Generate(query);
-            var response = await LowLevelClient.SearchAsync<string>(query.IndexName);
-
-            if (response.Success)
-            {
-                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
-            }
+            var response = await LowLevelClient.SearchAsync<string>(query.IndexName, Generator.Generate(query));
 
             return ProcessSeachResponse<TPoco>(response);
+        }
+        /// <summary>
+        /// A query that matches documents matching boolean combinations of other queries. The bool query maps to Lucene BooleanQuery. 
+        /// It is built using one or more boolean clauses, each clause with a typed occurrence.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/search-request-highlighting.html#_highlight_query
+        /// </summary>
+        /// <param name="boolQuery"></param>
+        /// <returns>IEnumerable<TPoco></returns>
+        public IEnumerable<ElasticHighlightResponse> ExecuteHighLight<TPoco>(IHighlightQueryExecutable<TPoco> highlightQuery) where TPoco : IElasticPoco
+        {
+            var query = highlightQuery as HighlightQuery<TPoco>;
+            var response = LowLevelClient.Search<string>(query.IndexName, Generator.Generate(query));
+
+            return ProcessHighLightResponse<TPoco>(response);
+        }
+        /// <summary>
+        /// A query that matches documents matching boolean combinations of other queries. The bool query maps to Lucene BooleanQuery. 
+        /// It is built using one or more boolean clauses, each clause with a typed occurrence.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/search-request-highlighting.html#_highlight_query
+        /// </summary>
+        /// <param name="boolQuery"></param>
+        /// <returns>IEnumerable<TPoco></returns>
+        public async Task<IEnumerable<ElasticHighlightResponse>> ExecuteHighLightAsync<TPoco>(IHighlightQueryExecutable<TPoco> highlightQuery) where TPoco : IElasticPoco
+        {
+            var query = highlightQuery as HighlightQuery<TPoco>;
+            var response = await LowLevelClient.SearchAsync<string>(query.IndexName, Generator.Generate(query));
+
+            return ProcessHighLightResponse<TPoco>(response);
         }
         /// <summary>
         /// Executes an IndexQuery using the Index API which creates a new document in the index.
@@ -346,6 +370,33 @@ namespace ElasticSearchLite.NetCore
             {
                 throw new IndexNotAvailableException($"{indexName} index doesn't exist");
             }
+        }
+
+        private static IEnumerable<ElasticHighlightResponse> ProcessHighLightResponse<TPoco>(ElasticsearchResponse<string> response) where TPoco : IElasticPoco
+        {
+            if (!response.Success)
+            {
+                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+            }
+
+            var data = JObject.Parse(response.Body);
+            var hits = new List<ElasticHighlightResponse>();
+
+            foreach (var jToken in data[ElasticFields.Hits.Name][ElasticFields.Hits.Name])
+            {
+                var hit = new ElasticHighlightResponse
+                {
+                    Id = jToken[ElasticFields.Id.Name].ToString(),
+                    Index = jToken[ElasticFields.Index.Name].ToString(),
+                    Type = jToken[ElasticFields.Type.Name].ToString(),
+                    Score = jToken[ElasticFields.Score.Name].ToObject<double?>(),
+                    Highlight = jToken[ElasticFields.Highlight.Name].ToObject<Dictionary<string, string[]>>()
+                };
+
+                hits.Add(hit);
+            }
+
+            return hits;
         }
 
         private static IEnumerable<TPoco> ProcessSeachResponse<TPoco>(ElasticsearchResponse<string> response) where TPoco : IElasticPoco

@@ -8,22 +8,25 @@ using System.Linq;
 
 namespace ElasticSearchLite.Tests.Integration
 {
-    [TestClass, TestCategory("Integration")]
-    public class BoolScenarios : AbstractIntegrationScenario
+    [TestClass]
+    public class HighlightTestScenario : AbstractIntegrationScenario
     {
         [TestMethod]
-        public void BoolScenario_Search_For_MatchPhrasePrefix()
+        public void Highlight_Search_For_MatchPhrasePrefix()
         {
-            var texts = Bool.QueryIn("textindex")
+            var highlights = Highlight.QueryIn("textindex")
                 .Returns<Poco>()
+                .WithPre("<b>")
+                .WithPost("</b>")
+                .AddFields(p => p.TestText)
                 .Should(p => p.TestText)
                     .MatchPhrasePrefix("1")
                 .Take(100)
                 .Skip(0)
                 .ExecuteWith(_client);
 
-            texts.Should().NotBeNull();
-            texts.Count().Should().Equals(20);
+            highlights.Should().NotBeNull();
+            highlights.Count().Should().Equals(20);
         }
 
         [TestInitialize]

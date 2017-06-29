@@ -10,6 +10,7 @@ using System.Text;
 using static ElasticSearchLite.NetCore.Queries.Bool;
 using static ElasticSearchLite.NetCore.Queries.Create;
 using static ElasticSearchLite.NetCore.Queries.Delete;
+using static ElasticSearchLite.NetCore.Queries.Highlight;
 using static ElasticSearchLite.NetCore.Queries.Search;
 
 namespace ElasticSearchLite.NetCore.Queries.Generator
@@ -38,6 +39,8 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     return GenerateBulkQuery(bulkQuery);
                 case CreateQuery createQuery:
                     return GenerateCreateQuery(createQuery);
+                case HighlightQuery highlightQuery:
+                    return GenerateHighlightQuery(highlightQuery);
                 case BoolQuery boolQuery:
                     return GenerateBoolQuery(boolQuery);
                 default:
@@ -60,8 +63,30 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
         private string GenerateBoolQuery(BoolQuery boolQuery)
         {
-            return $@"{{ ""query"": {{ ""bool"": {{ {GenerateBoolQueryConditions(boolQuery.Conditions)} }} }}, {GenerateSize(boolQuery.Size)}, {GenerateFrom(boolQuery.From)} }}";
+            var parts = new List<string>
+            {
+                $@"""query"": {{ ""bool"": {{ {GenerateBoolQueryConditions(boolQuery.Conditions)} }} }}",
+                GenerateSize(boolQuery.Size),
+                GenerateFrom(boolQuery.From)
+            };
+
+            return $@"{{ {string.Join(",", parts)} }}";
         }
+
+        private string GenerateHighlightQuery(HighlightQuery highlightQuery)
+        {
+            var parts = new List<string>
+            {
+                $@"""_source"": false",
+                $@"""query"": {{ ""bool"": {{ {GenerateBoolQueryConditions(highlightQuery.Conditions)} }} }}",
+                GenerateHighlight(highlightQuery.Highlight),
+                GenerateSize(highlightQuery.Size),
+                GenerateFrom(highlightQuery.From)
+            };
+
+            return $@"{{ {string.Join(",", parts)} }}";
+        }
+
         private string GenerateDeleteQuery(DeleteQuery deleteQuery)
         {
             return $"{{ {GenerateQuery(deleteQuery)} }}";
@@ -230,6 +255,12 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             }
 
             return $@"""sort"": [""_doc""]";
+        }
+        private string GenerateHighlight(ElasticHighlight highlight)
+        {
+            var fields = highlight.HighlightedFields.Select(f => $@" ""{GetName(f.Name)}"": {{}} ");
+
+            return $@" ""highlight"": {{ ""pre_tags"": [ ""{highlight.PreTag}"" ], ""post_tags"": [ ""{highlight.PostTag}"" ], ""fields"": {{ {string.Join(",", fields)} }} }} ";
         }
     }
 }
