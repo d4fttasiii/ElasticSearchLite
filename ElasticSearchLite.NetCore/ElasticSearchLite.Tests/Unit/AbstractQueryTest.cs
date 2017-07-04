@@ -62,7 +62,7 @@ namespace ElasticSearchLite.Tests.Unit
             // Act
             var queryStatement = StatementFactory.Generate(query);
 
-            statement.ShouldBeEquivalentTo(statement);
+            queryStatement.ShouldBeEquivalentTo(statement);
         }
 
         protected void TestExceptions(Type exception, Action action, string becauseMessage)

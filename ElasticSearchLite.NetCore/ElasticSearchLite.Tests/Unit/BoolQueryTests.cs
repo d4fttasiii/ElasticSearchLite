@@ -30,5 +30,17 @@ namespace ElasticSearchLite.Tests.Unit
 
             TestQueryString("", query);
         }
+
+        [TestMethod]
+        public void BoolQuery_Building_With_ComplexPoco_Fluently()
+        {
+            // Arrange
+            var query = Bool.QueryIn("mypocoindex")
+                .Returns<ComplexPoco>()
+                .Should(t => t.Position.X)
+                    .Match(1);
+
+            TestQueryString("", query, true);
+        }
     }
 }

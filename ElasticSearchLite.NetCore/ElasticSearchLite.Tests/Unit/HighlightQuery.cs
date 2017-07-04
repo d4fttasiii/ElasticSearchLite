@@ -16,7 +16,7 @@ namespace ElasticSearchLite.Tests.Unit
         }
 
         [TestMethod]
-        public void BoolQuery_Building_Fluently()
+        public void Highlight_Query_Fluently()
         {
             // Arrange
             var query = Highlight.QueryIn("mypocoindex")

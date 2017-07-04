@@ -34,6 +34,12 @@ namespace ElasticSearchLite.Tests.Unit
         }
 
         [TestMethod]
+        public void DeleteQuery_ExceptionTest_From()
+        {
+            TestExceptions(typeof(ArgumentNullException), () => Delete.From(""), "Indexname should not be empty");
+        }
+
+        [TestMethod]
         public void DeleteQuery_ExceptionTest_PocoId()
         {
             InitPoco();

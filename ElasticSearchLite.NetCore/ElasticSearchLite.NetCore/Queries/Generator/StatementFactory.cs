@@ -230,20 +230,25 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             return string.Empty;
         }
 
-        private string GetName(string name) => NamingStrategy.GetPropertyName(name, false);
+        private string GetName(string name)
+        {
+            var parts = name.Split('.');
+
+            return string.Join(".", parts.Select(p => NamingStrategy.GetPropertyName(p, false)));
+        }
         private string EscapeValue(object value) => JsonConvert.SerializeObject(value);
-        private string GenerateMatch(ElasticMatchCodition condition) => $@"""match"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {{ ""query"": {EscapeValue(condition.Value)}, ""operator"": ""{condition.Operation.Name}"" }} }}";
-        private string GenerateMatchPhrase(ElasticMatchPhraseCondition condition) => $@"""match_phrase"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {{ ""query"": {EscapeValue(condition.Value)}, ""slop"": {condition.Slop} }} }}";
-        private string GenerateMatchPhrasePrefixPhrase(ElasticMatchPhrasePrefixCondition condition) => $@"""match_phrase_prefix"": {{ ""{NamingStrategy.GetPropertyName(condition.Field.Name, false)}"" : {EscapeValue(condition.Value)} }}";
-        private string GenerateMultiMatch(ElasticMultiMatchCondition condition) => $@"""multi_match"": {{ ""query"": {EscapeValue(condition.Value)}, ""fields"": [{string.Join(",", condition.Fields.Select(cf => $@"""{NamingStrategy.GetPropertyName(cf.Name, false)}"""))}] }}";
+        private string GenerateMatch(ElasticMatchCodition condition) => $@"""match"": {{ ""{GetName(condition.Field.Name)}"" : {{ ""query"": {EscapeValue(condition.Value)}, ""operator"": ""{condition.Operation.Name}"" }} }}";
+        private string GenerateMatchPhrase(ElasticMatchPhraseCondition condition) => $@"""match_phrase"": {{ ""{GetName(condition.Field.Name)}"" : {{ ""query"": {EscapeValue(condition.Value)}, ""slop"": {condition.Slop} }} }}";
+        private string GenerateMatchPhrasePrefixPhrase(ElasticMatchPhrasePrefixCondition condition) => $@"""match_phrase_prefix"": {{ ""{GetName(condition.Field.Name)}"" : {EscapeValue(condition.Value)} }}";
+        private string GenerateMultiMatch(ElasticMultiMatchCondition condition) => $@"""multi_match"": {{ ""query"": {EscapeValue(condition.Value)}, ""fields"": [{string.Join(",", condition.Fields.Select(cf => $@"""{GetName(cf.Name)}"""))}] }}";
         private string GenerateTerms(ElasticTermCodition condition)
         {
-            var fieldName = string.Join(".", condition.Field.Name.Split('.').Select(name => NamingStrategy.GetPropertyName(name, false)));
+            var fieldName = string.Join(".", condition.Field.Name.Split('.').Select(name => GetName(name)));
             var escapedValues = EscapeValue(condition.Values);
 
             return $@"""terms"": {{ ""{fieldName}"" : {escapedValues} }}";
         }
-        private string GenerateRange(List<ElasticRangeCondition> conditions) => $@"""range"": {{""{NamingStrategy.GetPropertyName(conditions.First().Field.Name, false)}"": {{ {string.Join(",", conditions.Select(c => $@" ""{c.Operation.Name}"": {EscapeValue(c.Value)}"))} }} }}";
+        private string GenerateRange(List<ElasticRangeCondition> conditions) => $@"""range"": {{""{GetName(conditions.First().Field.Name)}"": {{ {string.Join(",", conditions.Select(c => $@" ""{c.Operation.Name}"": {EscapeValue(c.Value)}"))} }} }}";
         private string GenerateSize(int size) => $@"""size"": {size}";
         private string GenerateFrom(int from) => $@"""from"": {from}";
         // TODO: search_after implementation
@@ -251,7 +256,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         {
             if (sortingFields != null && sortingFields.Count > 0)
             {
-                return $@"""sort"": [{string.Join(",", sortingFields.Select(sf => $@"{{""{NamingStrategy.GetPropertyName(sf.Field.Name, false)}"": ""{sf.Order.Name}""}}"))}]";
+                return $@"""sort"": [{string.Join(",", sortingFields.Select(sf => $@"{{""{GetName(sf.Field.Name)}"": ""{sf.Order.Name}""}}"))}]";
             }
 
             return $@"""sort"": [""_doc""]";
