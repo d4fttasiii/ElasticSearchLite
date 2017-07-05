@@ -3,7 +3,6 @@ using ElasticSearchLite.NetCore.Interfaces.Bool;
 using ElasticSearchLite.NetCore.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace ElasticSearchLite.NetCore.Queries
@@ -33,6 +32,7 @@ namespace ElasticSearchLite.NetCore.Queries
         {
             protected internal int Size { get; set; } = 25;
             protected internal int From { get; set; } = 0;
+            protected internal int MinimumNumberShouldMatch { get; set; } = 1;
             protected internal Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>> Conditions { get; } = new Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>>
             {
                 { ElasticBoolQueryOccurrences.Should, new List<IElasticCondition>() },
@@ -162,6 +162,18 @@ namespace ElasticSearchLite.NetCore.Queries
                 }
 
                 From = skip;
+
+                return this;
+            }
+
+            public IBoolQueryExecutable<TPoco> ShouldMatchAtLeast(int minimumNumber)
+            {
+                if (minimumNumber < 0)
+                {
+                    throw new ArgumentException(nameof(minimumNumber));
+                }
+
+                MinimumNumberShouldMatch = minimumNumber;
 
                 return this;
             }

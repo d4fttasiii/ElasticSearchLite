@@ -21,12 +21,13 @@ namespace ElasticSearchLite.Tests.Integration
                 .AddFields(p => p.TestText)
                 .Should(p => p.TestText)
                     .MatchPhrasePrefix("1")
-                .Take(100)
+                .Take(10)
                 .Skip(0)
                 .ExecuteWith(_client);
 
             highlights.Should().NotBeNull();
-            highlights.Count().Should().Equals(20);
+            highlights.Count().Should().Be(10);
+            highlights.First().Total.Should().Be(20);
         }
 
         [TestInitialize]

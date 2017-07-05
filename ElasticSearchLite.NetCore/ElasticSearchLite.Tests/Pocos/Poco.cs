@@ -9,6 +9,7 @@ namespace ElasticSearchLite.Tests.Pocos
         public string Type { get; set; }
         public string Index { get; set; }
         public double? Score { get; set; }
+        public long Total { get; set; }
         public string TestText { get; set; }
         public int TestInteger { get; set; }
         public double TestDouble { get; set; }

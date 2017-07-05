@@ -381,6 +381,7 @@ namespace ElasticSearchLite.NetCore
 
             var data = JObject.Parse(response.Body);
             var hits = new List<ElasticHighlightResponse>();
+            var total = data[ElasticFields.Hits.Name][ElasticFields.Total.Name].ToObject<long>();
 
             foreach (var jToken in data[ElasticFields.Hits.Name][ElasticFields.Hits.Name])
             {
@@ -390,7 +391,8 @@ namespace ElasticSearchLite.NetCore
                     Index = jToken[ElasticFields.Index.Name].ToString(),
                     Type = jToken[ElasticFields.Type.Name].ToString(),
                     Score = jToken[ElasticFields.Score.Name].ToObject<double?>(),
-                    Highlight = jToken[ElasticFields.Highlight.Name].ToObject<Dictionary<string, string[]>>()
+                    Total = total,
+                    Highlight = jToken[ElasticFields.Highlight.Name].ToObject<Dictionary<string, string[]>>(),
                 };
 
                 hits.Add(hit);
@@ -408,9 +410,13 @@ namespace ElasticSearchLite.NetCore
 
             var data = JObject.Parse(response.Body);
             var hits = new List<TPoco>();
+            var total = data[ElasticFields.Hits.Name][ElasticFields.Total.Name].ToObject<long>();
+
             foreach (var jToken in data[ElasticFields.Hits.Name][ElasticFields.Hits.Name])
             {
-                hits.Add(MapResponseToPoco<TPoco>(jToken));
+                var hit = MapResponseToPoco<TPoco>(jToken);
+                hit.Total = total;
+                hits.Add(hit);
             }
 
             return hits;

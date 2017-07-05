@@ -65,7 +65,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         {
             var parts = new List<string>
             {
-                $@"""query"": {{ ""bool"": {{ {GenerateBoolQueryConditions(boolQuery.Conditions)} }} }}",
+                $@"""query"": {{ ""bool"": {{ {GenerateBoolQueryConditions(boolQuery.Conditions, boolQuery.MinimumNumberShouldMatch)} }} }}",
                 GenerateSize(boolQuery.Size),
                 GenerateFrom(boolQuery.From)
             };
@@ -78,8 +78,8 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             var parts = new List<string>
             {
                 $@"""_source"": false",
-                $@"""query"": {{ ""bool"": {{ {GenerateBoolQueryConditions(highlightQuery.Conditions)} }} }}",
-                GenerateHighlight(highlightQuery.Highlight),
+                $@"""query"": {{ ""bool"": {{ {GenerateBoolQueryConditions(highlightQuery.Conditions, highlightQuery.MinimumNumberShouldMatch)} }} }}",
+                GenerateHighlight(highlightQuery.Highlight, highlightQuery.NumberOfFragements, highlightQuery.FragmentSize),
                 GenerateSize(highlightQuery.Size),
                 GenerateFrom(highlightQuery.From)
             };
@@ -115,7 +115,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             return $"{{ {string.Join(",", statementParts)} }}";
         }
 
-        private string GenerateBoolQueryConditions(Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>> conditions)
+        private string GenerateBoolQueryConditions(Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>> conditions, int minimumShouldMatch)
         {
             var builder = new List<string>();
 
@@ -125,6 +125,8 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
                 builder.Add($@" ""{condition.Key.Name}"": [{string.Join(",", queryConditions)}] ");
             }
+
+            builder.Add($@" ""minimum_should_match"": {minimumShouldMatch} ");
 
             return string.Join(",", builder);
         }
@@ -261,9 +263,9 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return $@"""sort"": [""_doc""]";
         }
-        private string GenerateHighlight(ElasticHighlight highlight)
+        private string GenerateHighlight(ElasticHighlight highlight, int numberOfFragments, int fragmentSize)
         {
-            var fields = highlight.HighlightedFields.Select(f => $@" ""{GetName(f.Name)}"": {{}} ");
+            var fields = highlight.HighlightedFields.Select(f => $@" ""{GetName(f.Name)}"": {{ ""number_of_fragments"": {numberOfFragments}, ""fragment_size"": {fragmentSize}}} ");
 
             return $@" ""highlight"": {{ ""pre_tags"": [ ""{highlight.PreTag}"" ], ""post_tags"": [ ""{highlight.PostTag}"" ], ""fields"": {{ {string.Join(",", fields)} }} }} ";
         }

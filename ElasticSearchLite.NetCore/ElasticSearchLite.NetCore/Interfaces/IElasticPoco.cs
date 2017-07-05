@@ -21,5 +21,9 @@
         /// A value which describes the document's relevance for a certain search.
         /// </summary>
         double? Score { get; set; }
+        /// <summary>
+        /// Number of total documents found
+        /// </summary>
+        long Total { get; set; }
     }
 }

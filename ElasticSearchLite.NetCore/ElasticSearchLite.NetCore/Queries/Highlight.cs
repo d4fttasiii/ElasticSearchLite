@@ -1,5 +1,4 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
-using ElasticSearchLite.NetCore.Interfaces.Bool;
 using ElasticSearchLite.NetCore.Interfaces.Highlight;
 using ElasticSearchLite.NetCore.Models;
 using System;
@@ -35,6 +34,9 @@ namespace ElasticSearchLite.NetCore.Queries
             protected internal ElasticHighlight Highlight { get; } = new ElasticHighlight();
             protected internal int Size { get; set; } = 25;
             protected internal int From { get; set; } = 0;
+            protected internal int MinimumNumberShouldMatch { get; set; } = 0;
+            protected internal int FragmentSize { get; set; } = 150;
+            protected internal int NumberOfFragements { get; set; } = 3;
             protected internal Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>> Conditions { get; } = new Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>>
             {
                 { ElasticBoolQueryOccurrences.Should, new List<IElasticCondition>() },
@@ -197,6 +199,41 @@ namespace ElasticSearchLite.NetCore.Queries
                 From = skip;
 
                 return this;
+            }
+
+            public IHighlightQueryExecutable<TPoco> ShouldMatchAtLeast(int minimumNumber)
+            {
+                CheckParameterBiggerThanNull(minimumNumber);
+
+                MinimumNumberShouldMatch = minimumNumber;
+
+                return this;
+            }
+
+            public IHighlightQueryExecutable<TPoco> LimitFragmentSizeTo(int fragmentSize)
+            {
+                CheckParameterBiggerThanNull(fragmentSize);
+
+                FragmentSize = fragmentSize;
+
+                return this;
+            }
+
+            public IHighlightQueryExecutable<TPoco> LimitFragmentsTo(int numberOfFragments)
+            {
+                CheckParameterBiggerThanNull(numberOfFragments);
+
+                NumberOfFragements = numberOfFragments;
+
+                return this;
+            }
+
+            private void CheckParameterBiggerThanNull(int parameter)
+            {
+                if (parameter < 0)
+                {
+                    throw new ArgumentException($"{nameof(parameter)} should be bigger than 0");
+                }
             }
         }
     }

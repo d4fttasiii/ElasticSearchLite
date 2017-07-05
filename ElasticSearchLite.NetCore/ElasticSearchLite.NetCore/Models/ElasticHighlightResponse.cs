@@ -9,6 +9,7 @@ namespace ElasticSearchLite.NetCore.Models
         public string Type { get; set; }
         public string Index { get; set; }
         public double? Score { get; set; }
+        public long Total { get; set; }
         public Dictionary<string, string[]> Highlight { get; set; } = new Dictionary<string, string[]>();
     }
 }
