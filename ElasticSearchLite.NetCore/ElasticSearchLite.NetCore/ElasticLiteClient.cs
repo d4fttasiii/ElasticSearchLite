@@ -83,7 +83,7 @@ namespace ElasticSearchLite.NetCore
             {
                 throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
             }
-            var data = JObject.Parse(response.Body)?.First;
+            var data = JObject.Parse(response.Body);
 
             return MapResponseToPoco<TPoco>(data);
         }
@@ -271,7 +271,7 @@ namespace ElasticSearchLite.NetCore
             }
 
             var statement = Generator.Generate(query);
-            var response = !string.IsNullOrEmpty(query?.Poco.Id) ?
+            var response = query.Poco != null && !string.IsNullOrWhiteSpace(query.Poco.Id) ?
                 LowLevelClient.Delete<string>(query.IndexName, query.TypeName, query.Poco.Id) :
                 LowLevelClient.DeleteByQuery<string>(query.IndexName, statement);
 
@@ -428,7 +428,7 @@ namespace ElasticSearchLite.NetCore
             document.Id = jToken[ElasticFields.Id.Name].ToString();
             document.Index = jToken[ElasticFields.Index.Name].ToString();
             document.Type = jToken[ElasticFields.Type.Name].ToString();
-            document.Score = jToken[ElasticFields.Score.Name].ToObject<double?>();
+            document.Score = jToken[ElasticFields.Score.Name]?.ToObject<double?>();
 
             return document;
         }

@@ -24,11 +24,11 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <typeparam name="TPoco"></typeparam>
         /// <returns></returns>
-        public GetQuery<TPoco> Return<TPoco>() where TPoco : IElasticPoco => new GetQuery<TPoco>(IndexName);       
+        public GetQuery<TPoco> Return<TPoco>(string typeName) where TPoco : IElasticPoco => new GetQuery<TPoco>(IndexName, typeName);       
 
         public sealed class GetQuery<TPoco> : AbstractBaseQuery where TPoco : IElasticPoco
         {
-            internal GetQuery(string indexName) : base(indexName) { }
+            internal GetQuery(string indexName, string typeName) : base(indexName, typeName) { }
 
             internal object Id { get; set; }
             /// <summary>
