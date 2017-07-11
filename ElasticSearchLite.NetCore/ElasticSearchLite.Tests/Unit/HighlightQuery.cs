@@ -25,9 +25,7 @@ namespace ElasticSearchLite.Tests.Unit
                 .WithPost("</b>")
                 .AddFields(t => t.TestText, t => t.TestText)
                 .Should(t => t.TestText)
-                    .Match("something")
-                .Should(t => t.TestText)
-                    .Match("other thingy")
+                    .Match("something bla")
                 .MustNot(t => t.TestDateTime)
                     .Range(ElasticRangeOperations.Lt, DateTime.Now);
 

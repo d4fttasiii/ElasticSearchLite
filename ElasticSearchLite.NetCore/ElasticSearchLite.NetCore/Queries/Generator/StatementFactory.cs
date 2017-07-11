@@ -66,6 +66,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             var parts = new List<string>
             {
                 $@"""query"": {{ ""bool"": {{ {GenerateBoolQueryConditions(boolQuery.Conditions, boolQuery.MinimumNumberShouldMatch)} }} }}",
+                GenerateSort(boolQuery.SortingFields),
                 GenerateSize(boolQuery.Size),
                 GenerateFrom(boolQuery.From)
             };

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using ElasticSearchLite.NetCore.Models;
 
 namespace ElasticSearchLite.NetCore.Interfaces.Bool
 {
@@ -54,5 +55,11 @@ namespace ElasticSearchLite.NetCore.Interfaces.Bool
         /// <param name="skip">Number of documents to skip (Offset).</param>
         /// <returns></returns>
         IBoolQueryExecutable<TPoco> Skip(int skip);
+        /// <summary>
+        /// Sorting the document by the given field.
+        /// </summary>
+        /// <param name="propertyExpression">Column selected for sort.</param>
+        /// <returns></returns>
+        IBoolQueryExecutable<TPoco> Sort(Expression<Func<TPoco, object>> propertyExpression, ElasticSortOrders order);
     }
 }

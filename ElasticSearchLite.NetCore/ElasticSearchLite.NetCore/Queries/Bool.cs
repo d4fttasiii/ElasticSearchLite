@@ -41,7 +41,14 @@ namespace ElasticSearchLite.NetCore.Queries
                 { ElasticBoolQueryOccurrences.MustNot, new List<IElasticCondition>() }
             };
             protected internal List<ElasticSort> SortingFields { get; } = new List<ElasticSort>();
-            protected BoolQuery(string indexName) : base(indexName) { }
+            protected BoolQuery(string indexName) : base(indexName)
+            {
+                SortingFields.Add(new ElasticSort
+                {
+                    Field = new ElasticField { Name = ElasticFields.Score.Name },
+                    Order = ElasticSortOrders.Descending
+                });
+            }
         }
 
         public class BoolQuery<TPoco> :
@@ -162,6 +169,21 @@ namespace ElasticSearchLite.NetCore.Queries
                 }
 
                 From = skip;
+
+                return this;
+            }
+
+            public IBoolQueryExecutable<TPoco> Sort(Expression<Func<TPoco, object>> propertyExpression, ElasticSortOrders order)
+            {
+                SortingFields.Clear();
+                SortingFields.Add(new ElasticSort
+                {
+                    Field = new ElasticField
+                    {
+                        Name = GetCorrectPropertyName(propertyExpression)
+                    },
+                    Order = order
+                });
 
                 return this;
             }

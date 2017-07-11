@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
+using ElasticSearchLite.NetCore.Models;
 
 namespace ElasticSearchLite.Tests.Integration
 {
@@ -20,6 +21,7 @@ namespace ElasticSearchLite.Tests.Integration
                     .MatchPhrasePrefix("1")
                 .Take(100)
                 .Skip(0)
+                .Sort(p => p.TestInteger, ElasticSortOrders.Ascending)
                 .ExecuteWith(_client);
 
             texts.Should().NotBeNull();
