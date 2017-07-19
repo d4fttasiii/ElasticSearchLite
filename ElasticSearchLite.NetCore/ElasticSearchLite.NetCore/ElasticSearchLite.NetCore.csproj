@@ -3,12 +3,13 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp1.1;net461;net462</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <AssemblyVersion>0.9.9.0</AssemblyVersion>
-    <FileVersion>0.9.9.0</FileVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
     <PackageTags>Elastic, ElasticSearch</PackageTags>
     <NeutralLanguage>en-GB</NeutralLanguage>
-    <PackageReleaseNotes>- Bool queries extended with sort functionality.</PackageReleaseNotes>
-    <Version>0.9.9</Version>
+    <PackageReleaseNotes>- Nested object property casing fixed
+- Ignoring id, type, total, score and index field while indexing or updating using POCO-s</PackageReleaseNotes>
+    <Version>1.0.0</Version>
     <PackageLicenseUrl>https://github.com/petertasner/ElasticSearchLite/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/petertasner/ElasticSearchLite</PackageProjectUrl>
     <Company />
