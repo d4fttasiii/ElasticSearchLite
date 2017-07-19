@@ -11,13 +11,14 @@ using static ElasticSearchLite.NetCore.Queries.Create;
 using static ElasticSearchLite.NetCore.Queries.Delete;
 using static ElasticSearchLite.NetCore.Queries.Highlight;
 using static ElasticSearchLite.NetCore.Queries.Search;
+using ElasticSearchLite.NetCore.Queries.Serialization;
 
 namespace ElasticSearchLite.NetCore.Queries.Generator
 {
     public class StatementFactory : IStatementFactory
     {
         public NamingStrategy NamingStrategy { get; set; } = new DefaultNamingStrategy();
-        public DefaultContractResolver ContractResolver { get; set; } = new DefaultContractResolver();
+        public DefaultContractResolver ContractResolver { get; set; } = new JsonElasticPropertyResolver();
 
         public string Generate(IQuery query)
         {

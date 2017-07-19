@@ -28,6 +28,11 @@ namespace ElasticSearchLite.NetCore
         private IStatementFactory Generator { get; } = new StatementFactory();
         public ElasticLowLevelClient LowLevelClient { get; private set; }
         public NamingStrategy NameingStrategy { get { return Generator.NamingStrategy; } set { Generator.NamingStrategy = value; } }
+        /// <summary>
+        /// Please not that the default Contract Resolver ignores the default Elastic fields like 
+        /// id, type, score, index and total while indexing and updating documents and uses CamelCasing naming strategy.
+        /// Change it on your own risk!
+        /// </summary>
         public DefaultContractResolver ContractResolver { get { return Generator.ContractResolver; } set { Generator.ContractResolver = value; } }
 
         /// <summary>
