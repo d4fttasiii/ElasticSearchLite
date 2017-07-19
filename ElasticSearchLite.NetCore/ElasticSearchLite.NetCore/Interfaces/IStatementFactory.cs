@@ -6,5 +6,6 @@ namespace ElasticSearchLite.NetCore.Interfaces
     {
         string Generate(IQuery query);
         NamingStrategy NamingStrategy { get; set; }
+        DefaultContractResolver ContractResolver { get; set; }
     }
 }

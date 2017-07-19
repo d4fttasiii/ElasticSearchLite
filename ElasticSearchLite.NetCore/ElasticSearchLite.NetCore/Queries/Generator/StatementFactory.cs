@@ -5,7 +5,6 @@ using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using static ElasticSearchLite.NetCore.Queries.Bool;
 using static ElasticSearchLite.NetCore.Queries.Create;
@@ -17,9 +16,8 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 {
     public class StatementFactory : IStatementFactory
     {
-        private static List<string> ExcludedProperties { get; } = new List<string> { "Index", "Id", "Type", "Score" };
-        private IEnumerable<PropertyInfo> UpdatetableProperties(IElasticPoco poco) => poco.GetType().GetProperties().Where(p => !ExcludedProperties.Contains(p.Name));
         public NamingStrategy NamingStrategy { get; set; } = new DefaultNamingStrategy();
+        public DefaultContractResolver ContractResolver { get; set; } = new DefaultContractResolver();
 
         public string Generate(IQuery query)
         {
@@ -47,7 +45,6 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     throw new Exception("Unknown query type");
             }
         }
-
         private string GenerateSearchQuery(SearchQuery searchQuery)
         {
             var statementParts = new List<string>();
@@ -60,7 +57,6 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return $"{{ {string.Join(",", statementParts)} }}";
         }
-
         private string GenerateBoolQuery(BoolQuery boolQuery)
         {
             var parts = new List<string>
@@ -73,7 +69,6 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return $@"{{ {string.Join(",", parts)} }}";
         }
-
         private string GenerateHighlightQuery(HighlightQuery highlightQuery)
         {
             var parts = new List<string>
@@ -87,24 +82,15 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return $@"{{ {string.Join(",", parts)} }}";
         }
-
         private string GenerateDeleteQuery(DeleteQuery deleteQuery)
         {
             return $"{{ {GenerateQuery(deleteQuery)} }}";
         }
-
-        private string GenerateInsertQuery(Index indexQuery)
-        {
-            var properties = UpdatetableProperties(indexQuery.Poco);
-
-            return $"{{ {GenerateFieldMapping(properties, indexQuery.Poco)} }}";
-        }
-
+        private string GenerateInsertQuery(Index indexQuery) => $"{GenerateFieldMapping(indexQuery.Poco)}";
         private string GenerateUpdateQuery(Update updateQuery)
         {
             return $"{{ {GenerateDocument(updateQuery.Poco)} }}";
         }
-
         private string GenerateUpsertQuery(Upsert upsertQuery)
         {
             var statementParts = new List<string>
@@ -115,7 +101,6 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return $"{{ {string.Join(",", statementParts)} }}";
         }
-
         private string GenerateBoolQueryConditions(Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>> conditions, int minimumShouldMatch)
         {
             var builder = new List<string>();
@@ -131,7 +116,6 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return string.Join(",", builder);
         }
-
         private string GenerateCondition(IElasticCondition condition)
         {
             switch (condition)
@@ -148,7 +132,6 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     throw new Exception("Unknown condition type");
             }
         }
-
         private string GenerateBulkQuery(Bulk bulkQuery)
         {
             var statement = new StringBuilder();
@@ -160,7 +143,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                 switch (method.Name)
                 {
                     case "index":
-                        statement.AppendLine($"{{ {GenerateFieldMapping(UpdatetableProperties(poco), poco)} }}");
+                        statement.AppendLine($"{GenerateFieldMapping(poco)}");
                         break;
                     case "update":
                         statement.AppendLine($"{{ {GenerateDocument(poco)} }}");
@@ -170,7 +153,6 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return statement.ToString();
         }
-
         private string GenerateCreateQuery(CreateQuery createQuery)
         {
             return $@"{{ ""settings"": {{ 
@@ -181,23 +163,8 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     ""type"": ""{m.FieldDataType.Name}"" 
                     {(m.Analyzer != null ? $@",""analyzer"": ""{m.Analyzer.Name}""" : "")} }}"))} }} }} }}";
         }
-
-        private string GenerateDocument(IElasticPoco poco)
-        {
-            var properties = UpdatetableProperties(poco);
-
-            return $@"""doc"": {{ {GenerateFieldMapping(properties, poco)} }}";
-        }
-
-        private string GenerateFieldMapping(IEnumerable<PropertyInfo> properties, IElasticPoco poco)
-        {
-            var propertiesAsJson = properties
-                .Where(p => p.GetValue(poco) != null)
-                .Select(p => $@"""{GetName(p.Name)}"": {EscapeValue(p.GetValue(poco))}");
-
-            return string.Join(",", propertiesAsJson);
-        }
-
+        private string GenerateDocument(IElasticPoco poco) => $@"""doc"": {GenerateFieldMapping(poco)}";
+        private string GenerateFieldMapping(IElasticPoco poco) => JsonConvert.SerializeObject(poco, new JsonSerializerSettings { ContractResolver = ContractResolver });
         private string GenerateQuery(AbstractConditionalQuery query)
         {
             if (query.MatchCondition != null)
@@ -232,7 +199,6 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return string.Empty;
         }
-
         private string GetName(string name)
         {
             var parts = name.Split('.');

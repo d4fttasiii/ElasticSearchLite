@@ -15,6 +15,7 @@ namespace ElasticSearchLite.Tests.Pocos
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime LastModified { get; set; }
+        public string[] TagNames { get; set; }
     }
 
     public class Tag

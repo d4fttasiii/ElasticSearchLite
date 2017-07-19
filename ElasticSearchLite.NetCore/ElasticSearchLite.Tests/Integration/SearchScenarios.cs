@@ -39,7 +39,8 @@ namespace ElasticSearchLite.Tests.Integration
                     {
                         Name = $"Tag-{i}",
                         Summary = $"Summary-{i}"
-                    }
+                    },
+                    TagNames = new string[] { $"ohh - {i}", $"bla - {i}" }
                 });
             }
         }
