@@ -16,5 +16,7 @@
             }
             set { _name = value; }
         }
+
+        public bool UseKeywordField { get; set; } = false;
     }
 }

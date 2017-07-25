@@ -5,7 +5,6 @@ using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
-using ElasticSearchLite.NetCore.Models;
 
 namespace ElasticSearchLite.Tests.Integration
 {
@@ -21,11 +20,30 @@ namespace ElasticSearchLite.Tests.Integration
                     .MatchPhrasePrefix("1")
                 .Take(100)
                 .Skip(0)
-                .Sort(p => p.TestInteger, ElasticSortOrders.Ascending)
+                .Sort(p => p.TestInteger)
+                    .Ascending()
+                    .WithoutKeyword()
                 .ExecuteWith(_client);
 
             texts.Should().NotBeNull();
-            texts.Count().Should().Equals(20);
+            texts.Count().Should().Be(20);
+        }
+
+        [TestMethod]
+        public void BoolScenario_Search_Using_Keyword_Sorting()
+        {
+            var texts = Bool.QueryIn("textindex")
+                .Returns<Poco>()
+                .Take(20)
+                .Skip(0)
+                .Sort(p => p.TestText)
+                    .Descending()
+                    .WithKeyword()
+                .ExecuteWith(_client);
+
+            texts.Should().NotBeNull();
+            texts.Count().Should().Be(20);
+            texts.First().TestText.Should().BeEquivalentTo("9801");
         }
 
         [TestInitialize]

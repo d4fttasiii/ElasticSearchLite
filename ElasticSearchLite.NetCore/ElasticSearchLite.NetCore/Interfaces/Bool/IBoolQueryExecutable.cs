@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq.Expressions;
-using ElasticSearchLite.NetCore.Models;
 
 namespace ElasticSearchLite.NetCore.Interfaces.Bool
 {
@@ -60,6 +59,6 @@ namespace ElasticSearchLite.NetCore.Interfaces.Bool
         /// </summary>
         /// <param name="propertyExpression">Column selected for sort.</param>
         /// <returns></returns>
-        IBoolQueryExecutable<TPoco> Sort(Expression<Func<TPoco, object>> propertyExpression, ElasticSortOrders order);
+        IBoolQuerySortAdded<TPoco> Sort(Expression<Func<TPoco, object>> propertyExpression);
     }
 }

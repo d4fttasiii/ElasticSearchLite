@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace ElasticSearchLite.NetCore.Interfaces
+﻿namespace ElasticSearchLite.NetCore.Interfaces
 {
     public interface IElasticPoco
     {

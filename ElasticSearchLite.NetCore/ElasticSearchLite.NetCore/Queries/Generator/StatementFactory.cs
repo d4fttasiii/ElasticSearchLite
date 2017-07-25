@@ -200,11 +200,15 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return string.Empty;
         }
-        private string GetName(string name)
+        private string GetName(string name, bool useKeywordField = false)
         {
-            var parts = name.Split('.');
+            var elasticFieldName = string.Join(".", name.Split('.').Select(p => NamingStrategy.GetPropertyName(p, false)));
+            if (useKeywordField)
+            {
+                elasticFieldName = $"{elasticFieldName}.keyword";
+            }
 
-            return string.Join(".", parts.Select(p => NamingStrategy.GetPropertyName(p, false)));
+            return elasticFieldName;
         }
         private string EscapeValue(object value) => JsonConvert.SerializeObject(value);
         private string GenerateMatch(ElasticMatchCodition condition) => $@"""match"": {{ ""{GetName(condition.Field.Name)}"" : {{ ""query"": {EscapeValue(condition.Value)}, ""operator"": ""{condition.Operation.Name}"" }} }}";
@@ -226,7 +230,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         {
             if (sortingFields != null && sortingFields.Count > 0)
             {
-                return $@"""sort"": [{string.Join(",", sortingFields.Select(sf => $@"{{""{GetName(sf.Field.Name)}"": ""{sf.Order.Name}""}}"))}]";
+                return $@"""sort"": [{string.Join(",", sortingFields.Select(sf => $@"{{""{GetName(sf.Field.Name, sf.Field.UseKeywordField)}"": ""{sf.Order.Name}""}}"))}]";
             }
 
             return $@"""sort"": [""_doc""]";

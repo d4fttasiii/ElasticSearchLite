@@ -8,9 +8,6 @@ using System.Linq.Expressions;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
-    /// <summary>
-    /// TODOS: match, match_phrase, bool_query, handling sources
-    /// </summary>
     public class Search
     {
         private string IndexName { get; }

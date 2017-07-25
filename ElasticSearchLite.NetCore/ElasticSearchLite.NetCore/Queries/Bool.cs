@@ -4,6 +4,7 @@ using ElasticSearchLite.NetCore.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Linq;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
@@ -57,7 +58,9 @@ namespace ElasticSearchLite.NetCore.Queries
             IBoolQueryShouldAdded<TPoco>,
             IBoolQueryMustAdded<TPoco>,
             IBoolQueryMustNotAdded<TPoco>,
-            IBoolQueryFilterAdded<TPoco>
+            IBoolQueryFilterAdded<TPoco>,
+            IBoolQuerySortAdded<TPoco>,
+            IBoolQuerySortOrderDefined<TPoco>
             where TPoco : IElasticPoco
         {
             private string tempFieldName;
@@ -173,7 +176,7 @@ namespace ElasticSearchLite.NetCore.Queries
                 return this;
             }
 
-            public IBoolQueryExecutable<TPoco> Sort(Expression<Func<TPoco, object>> propertyExpression, ElasticSortOrders order)
+            public IBoolQuerySortAdded<TPoco> Sort(Expression<Func<TPoco, object>> propertyExpression)
             {
                 SortingFields.Clear();
                 SortingFields.Add(new ElasticSort
@@ -181,9 +184,39 @@ namespace ElasticSearchLite.NetCore.Queries
                     Field = new ElasticField
                     {
                         Name = GetCorrectPropertyName(propertyExpression)
-                    },
-                    Order = order
+                    }
                 });
+
+                return this;
+            }
+            public IBoolQuerySortOrderDefined<TPoco> Ascending()
+            {
+                var sortField = SortingFields.FirstOrDefault();
+                sortField.Order = ElasticSortOrders.Ascending;
+
+                return this;
+            }
+
+            public IBoolQuerySortOrderDefined<TPoco> Descending()
+            {
+                var sortField = SortingFields.FirstOrDefault();
+                sortField.Order = ElasticSortOrders.Descending;
+
+                return this; ;
+            }
+
+            public IBoolQueryExecutable<TPoco> WithKeyword()
+            {
+                var sortField = SortingFields.FirstOrDefault();
+                sortField.Field.UseKeywordField = true;
+
+                return this;
+            }
+
+            public IBoolQueryExecutable<TPoco> WithoutKeyword()
+            {
+                var sortField = SortingFields.FirstOrDefault();
+                sortField.Field.UseKeywordField = false;
 
                 return this;
             }

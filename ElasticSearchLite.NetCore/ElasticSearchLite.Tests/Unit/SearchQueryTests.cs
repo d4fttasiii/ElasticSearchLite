@@ -133,7 +133,7 @@ namespace ElasticSearchLite.Tests.Unit
             // Arrange
             var query = Search.In("mypocoindex")
                 .Return<Poco>()
-                .Range(p => p.Id, ElasticRangeOperations.Gt, 1)
+                .Range(p => p.TestDateTime, ElasticRangeOperations.Gt, 1)
                     .And(ElasticRangeOperations.Lt, 10)
                 .Take(20);
             var statementObject = new
@@ -142,7 +142,7 @@ namespace ElasticSearchLite.Tests.Unit
                 {
                     range = new
                     {
-                        _id = new
+                        testDateTime = new
                         {
                             gt = 1,
                             lt = 10
