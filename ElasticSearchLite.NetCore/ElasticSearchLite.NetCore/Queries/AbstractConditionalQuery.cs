@@ -1,6 +1,6 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
-using ElasticSearchLite.NetCore.Models;
 using System.Collections.Generic;
+using ElasticSearchLite.NetCore.Models.Conditions;
 
 namespace ElasticSearchLite.NetCore.Queries
 {

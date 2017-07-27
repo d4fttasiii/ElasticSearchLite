@@ -3,6 +3,8 @@ using ElasticSearchLite.NetCore.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using ElasticSearchLite.NetCore.Models.Conditions;
+using ElasticSearchLite.NetCore.Models.Enums;
 
 namespace ElasticSearchLite.NetCore.Queries
 {

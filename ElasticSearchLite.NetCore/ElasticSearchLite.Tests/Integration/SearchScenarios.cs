@@ -1,6 +1,6 @@
 ﻿using ElasticSearchLite.NetCore;
 using ElasticSearchLite.NetCore.Exceptions;
-using ElasticSearchLite.NetCore.Models;
+using ElasticSearchLite.NetCore.Models.Enums;
 using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.Tests.Pocos;
 using FluentAssertions;

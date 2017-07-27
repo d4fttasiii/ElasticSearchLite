@@ -18,6 +18,7 @@ using static ElasticSearchLite.NetCore.Queries.Delete;
 using static ElasticSearchLite.NetCore.Queries.Get;
 using static ElasticSearchLite.NetCore.Queries.Search;
 using static ElasticSearchLite.NetCore.Queries.Highlight;
+using ElasticSearchLite.NetCore.Models.Enums;
 
 namespace ElasticSearchLite.NetCore
 {

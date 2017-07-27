@@ -1,9 +1,9 @@
-﻿using ElasticSearchLite.NetCore.Models;
-using ElasticSearchLite.NetCore.Queries;
+﻿using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.Tests.Pocos;
 using FakeItEasy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using ElasticSearchLite.NetCore.Models.Enums;
 
 namespace ElasticSearchLite.Tests.Unit
 {

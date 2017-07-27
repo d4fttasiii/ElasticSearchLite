@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using ElasticSearchLite.NetCore.Models;
+using ElasticSearchLite.NetCore.Models.Enums;
 using Newtonsoft.Json.Serialization;
 
 namespace ElasticSearchLite.NetCore.Queries.Serialization

@@ -1,4 +1,5 @@
 ﻿using ElasticSearchLite.NetCore.Models;
+using ElasticSearchLite.NetCore.Models.Enums;
 using ElasticSearchLite.NetCore.Queries;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

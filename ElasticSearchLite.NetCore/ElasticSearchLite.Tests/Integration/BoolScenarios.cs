@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
+using System.Threading;
 
 namespace ElasticSearchLite.Tests.Integration
 {
@@ -46,6 +47,21 @@ namespace ElasticSearchLite.Tests.Integration
             texts.First().TestText.Should().BeEquivalentTo("9801");
         }
 
+
+
+        [TestMethod]
+        public void BoolScenario_Search_Terms()
+        {
+            var texts = Bool.QueryIn("textindex")
+                .Returns<Poco>()
+                .Should(p => p.TestText)
+                    .Term("9801")
+                .ExecuteWith(_client);
+
+            texts.Should().NotBeNull();
+            texts.First().TestText.Should().BeEquivalentTo("9801");
+        }
+
         [TestInitialize]
         public void Init()
         {
@@ -60,6 +76,7 @@ namespace ElasticSearchLite.Tests.Integration
                     TestInteger = i
                 }).ExecuteWith(_client);
             }
+            Thread.Sleep(1000);
         }
 
         [TestCleanup]

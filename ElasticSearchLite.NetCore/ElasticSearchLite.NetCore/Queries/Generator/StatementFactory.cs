@@ -12,6 +12,8 @@ using static ElasticSearchLite.NetCore.Queries.Delete;
 using static ElasticSearchLite.NetCore.Queries.Highlight;
 using static ElasticSearchLite.NetCore.Queries.Search;
 using ElasticSearchLite.NetCore.Queries.Serialization;
+using ElasticSearchLite.NetCore.Models.Conditions;
+using ElasticSearchLite.NetCore.Models.Enums;
 
 namespace ElasticSearchLite.NetCore.Queries.Generator
 {
@@ -129,6 +131,8 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     return GenerateMatchPhrasePrefixPhrase(matchPhrasePrefixCondition);
                 case ElasticRangeCondition rangeCondition:
                     return GenerateRange(new List<ElasticRangeCondition> { rangeCondition });
+                case ElasticTermCodition termCondition:
+                    return GenerateTerms(termCondition);
                 default:
                     throw new Exception("Unknown condition type");
             }

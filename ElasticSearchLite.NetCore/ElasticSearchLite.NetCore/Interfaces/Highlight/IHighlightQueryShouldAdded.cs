@@ -1,9 +1,10 @@
-﻿using ElasticSearchLite.NetCore.Models;
+﻿using ElasticSearchLite.NetCore.Models.Enums;
 
 namespace ElasticSearchLite.NetCore.Interfaces.Highlight
 {
     public interface IHighlightQueryShouldAdded<TPoco> where TPoco : IElasticPoco
     {
+        IHighlightQueryExecutable<TPoco> Term(params object[] values);
         IHighlightQueryExecutable<TPoco> Match(object value);
         IHighlightQueryExecutable<TPoco> MatchPhrase(object value);
         IHighlightQueryExecutable<TPoco> MatchPhrasePrefix(object value);

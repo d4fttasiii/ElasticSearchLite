@@ -20,12 +20,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Models\Enums\**" />
-    <EmbeddedResource Remove="Models\Enums\**" />
-    <None Remove="Models\Enums\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Elasticsearch.Net" Version="5.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="System.ValueTuple" Version="4.3.1" />

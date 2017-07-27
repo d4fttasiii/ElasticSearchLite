@@ -1,4 +1,4 @@
-﻿namespace ElasticSearchLite.NetCore.Models
+﻿namespace ElasticSearchLite.NetCore.Models.Enums
 {
     public class ElasticMethods
     {

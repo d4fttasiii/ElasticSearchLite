@@ -1,6 +1,6 @@
-﻿using ElasticSearchLite.NetCore.Models;
-using System;
+﻿using System;
 using System.Linq.Expressions;
+using ElasticSearchLite.NetCore.Models.Enums;
 
 namespace ElasticSearchLite.NetCore.Interfaces.Search
 {

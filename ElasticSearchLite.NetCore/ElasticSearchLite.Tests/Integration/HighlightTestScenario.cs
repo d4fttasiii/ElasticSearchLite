@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
+using System.Threading;
 
 namespace ElasticSearchLite.Tests.Integration
 {
@@ -44,6 +45,7 @@ namespace ElasticSearchLite.Tests.Integration
                     TestInteger = i
                 }).ExecuteWith(_client);
             }
+            Thread.Sleep(1000);
         }
 
         [TestCleanup]

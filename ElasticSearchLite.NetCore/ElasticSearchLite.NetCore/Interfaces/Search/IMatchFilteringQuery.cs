@@ -1,4 +1,4 @@
-﻿using ElasticSearchLite.NetCore.Models;
+﻿using ElasticSearchLite.NetCore.Models.Enums;
 
 namespace ElasticSearchLite.NetCore.Interfaces.Search
 {

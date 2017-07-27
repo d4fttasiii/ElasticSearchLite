@@ -1,6 +1,7 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
+using ElasticSearchLite.NetCore.Models.Enums;
 
-namespace ElasticSearchLite.NetCore.Models
+namespace ElasticSearchLite.NetCore.Models.Conditions
 {
     public class ElasticMatchPhrasePrefixCondition : IElasticCondition {
         public ElasticField Field { get; set; }

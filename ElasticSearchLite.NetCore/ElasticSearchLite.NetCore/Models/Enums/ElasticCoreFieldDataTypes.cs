@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ElasticSearchLite.NetCore.Models
+namespace ElasticSearchLite.NetCore.Models.Enums
 {
     public sealed class ElasticCoreFieldDataTypes
     {

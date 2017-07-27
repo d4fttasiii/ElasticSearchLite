@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Linq;
+using ElasticSearchLite.NetCore.Models.Conditions;
+using ElasticSearchLite.NetCore.Models.Enums;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
@@ -145,6 +147,18 @@ namespace ElasticSearchLite.NetCore.Queries
                     Field = new ElasticField { Name = tempFieldName },
                     Operation = op,
                     Value = value
+                };
+
+                Conditions[tempOccurrence].Add(condition);
+
+                return this;
+            }
+            public IBoolQueryExecutable<TPoco> Term(params object[] values)
+            {
+                var condition = new ElasticTermCodition
+                {
+                    Field = new ElasticField { Name = tempFieldName },
+                    Values = values?.ToList()
                 };
 
                 Conditions[tempOccurrence].Add(condition);

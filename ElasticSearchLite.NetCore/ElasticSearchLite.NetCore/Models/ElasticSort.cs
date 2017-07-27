@@ -1,4 +1,6 @@
-﻿namespace ElasticSearchLite.NetCore.Models
+﻿using ElasticSearchLite.NetCore.Models.Enums;
+
+namespace ElasticSearchLite.NetCore.Models
 {
     public class ElasticSort
     {
