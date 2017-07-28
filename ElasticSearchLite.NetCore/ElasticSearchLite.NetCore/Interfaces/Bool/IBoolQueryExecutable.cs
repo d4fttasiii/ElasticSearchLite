@@ -6,6 +6,12 @@ namespace ElasticSearchLite.NetCore.Interfaces.Bool
     public interface IBoolQueryExecutable<TPoco> : IQuery where TPoco : IElasticPoco
     {
         /// <summary>
+        /// Defining _sources 
+        /// </summary>
+        /// <param name="propertyExpression"></param>
+        /// <returns></returns>
+        IBoolQueryExecutable<TPoco> Sources(params Expression<Func<TPoco, object>>[] propertyExpressions);
+        /// <summary>
         /// The clause (query) should appear in the matching document.
         /// If the bool query is in a query context and has a must or filter clause then a document will match the bool query even if none of the should queries match. 
         /// In this case these clauses are only used to influence the score. 

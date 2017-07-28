@@ -36,6 +36,7 @@ namespace ElasticSearchLite.NetCore.Queries
             protected internal int Size { get; set; } = 25;
             protected internal int From { get; set; } = 0;
             protected internal int MinimumNumberShouldMatch { get; set; } = 1;
+            protected internal List<ElasticField> SourceFields { get; set; } = new List<ElasticField>();
             protected internal Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>> Conditions { get; } = new Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>>
             {
                 { ElasticBoolQueryOccurrences.Should, new List<IElasticCondition>() },
@@ -69,6 +70,20 @@ namespace ElasticSearchLite.NetCore.Queries
             private ElasticBoolQueryOccurrences tempOccurrence;
 
             internal BoolQuery(string indexName) : base(indexName) { }
+
+            public IBoolQueryExecutable<TPoco> Sources(params Expression<Func<TPoco, object>>[] propertyExpressions)
+            {
+                foreach (var p in propertyExpressions)
+                {
+                    SourceFields.Add(new ElasticField
+                    {
+                        Name = GetCorrectPropertyName(p),
+                        UseKeywordField = false
+                    });
+                }
+
+                return this;
+            }
 
             public IBoolQueryMustAdded<TPoco> Must(Expression<Func<TPoco, object>> propertyExpression)
             {

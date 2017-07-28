@@ -62,8 +62,10 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         }
         private string GenerateBoolQuery(BoolQuery boolQuery)
         {
+            var fieldNames = string.Join(", ",boolQuery.SourceFields.Select(f => $@"""{GetName(f.Name)}"""));
             var parts = new List<string>
             {
+                $@"""_source"": [{(fieldNames.Any() ? fieldNames : @"""*""")}]",
                 $@"""query"": {{ ""bool"": {{ {GenerateBoolQueryConditions(boolQuery.Conditions, boolQuery.MinimumNumberShouldMatch)} }} }}",
                 GenerateSort(boolQuery.SortingFields),
                 GenerateSize(boolQuery.Size),

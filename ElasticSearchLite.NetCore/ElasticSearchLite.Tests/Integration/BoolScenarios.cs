@@ -17,6 +17,7 @@ namespace ElasticSearchLite.Tests.Integration
         {
             var texts = Bool.QueryIn("textindex")
                 .Returns<Poco>()
+                .Sources(p => p.TestText, p => p.TestInteger)
                 .Should(p => p.TestText)
                     .MatchPhrasePrefix("1")
                 .Take(100)
