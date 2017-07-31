@@ -399,7 +399,7 @@ namespace ElasticSearchLite.NetCore
                     Type = jToken[ElasticFields.Type.Name].ToString(),
                     Score = jToken[ElasticFields.Score.Name].ToObject<double?>(),
                     Total = total,
-                    Highlight = jToken[ElasticFields.Highlight.Name].ToObject<Dictionary<string, string[]>>(),
+                    Highlight = jToken[ElasticFields.Highlight.Name]?.ToObject<Dictionary<string, string[]>>() ?? new Dictionary<string, string[]>(),
                 };
 
                 hits.Add(hit);
