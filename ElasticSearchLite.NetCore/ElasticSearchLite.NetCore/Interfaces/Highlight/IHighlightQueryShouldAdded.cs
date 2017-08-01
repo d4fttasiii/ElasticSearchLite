@@ -1,13 +1,8 @@
-﻿using ElasticSearchLite.NetCore.Models.Enums;
+﻿using ElasticSearchLite.NetCore.Interfaces.BoolHighlight;
 
 namespace ElasticSearchLite.NetCore.Interfaces.Highlight
 {
-    public interface IHighlightQueryShouldAdded<TPoco> where TPoco : IElasticPoco
-    {
-        IHighlightQueryExecutable<TPoco> Term(params object[] values);
-        IHighlightQueryExecutable<TPoco> Match(object value);
-        IHighlightQueryExecutable<TPoco> MatchPhrase(object value);
-        IHighlightQueryExecutable<TPoco> MatchPhrasePrefix(object value);
-        IHighlightQueryExecutable<TPoco> Range(ElasticRangeOperations op, object value);
-    }
+    public interface IHighlightQueryShouldAdded<TPoco> : IBaseBoolHighlightQueryShouldAdded<TPoco, IHighlightQueryExecutable<TPoco>>
+        where TPoco : IElasticPoco
+    { }
 }
