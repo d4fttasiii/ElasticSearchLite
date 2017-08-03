@@ -2,7 +2,7 @@
 
 namespace ElasticSearchLite.NetCore.Interfaces.BoolHighlight
 {
-    public interface IBaseBoolHighlightQueryShouldAdded<TPoco, TResult>
+    public interface IBaseBoolHighlightQueryShouldAdded<TPoco, TResult> : IQuery
         where TPoco : IElasticPoco
     {
         TResult Term(params object[] values);

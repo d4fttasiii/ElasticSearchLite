@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace ElasticSearchLite.NetCore.Interfaces.BoolHighlight
 {
-    public interface IBaseBoolHighlightQueryExecutable<TPoco, TReturnShould, TReturnMust, TReturnMustNot, TReturnFilter>
+    public interface IBaseBoolHighlightQueryExecutable<TPoco, TReturnShould, TReturnMust, TReturnMustNot, TReturnFilter> : IQuery
         where TPoco : IElasticPoco
     {
         /// <summary>

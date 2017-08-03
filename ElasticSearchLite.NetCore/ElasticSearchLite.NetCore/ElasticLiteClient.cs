@@ -82,7 +82,7 @@ namespace ElasticSearchLite.NetCore
         /// <param name="getQuery"></param>
         /// <returns></returns>
         public TPoco ExecuteGet<TPoco>(GetQuery<TPoco> getQuery)
-            where TPoco : IElasticPoco
+            where TPoco : class, IElasticPoco
         {
             IndexExists(getQuery.IndexName);
             var response = LowLevelClient.Get<string>(getQuery.IndexName, getQuery.TypeName, getQuery.Id.ToString());
@@ -90,9 +90,12 @@ namespace ElasticSearchLite.NetCore
             {
                 throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
             }
-            var data = JObject.Parse(response.Body);
+            if (response.HttpStatusCode == 404)
+            {
+                return null;
+            }
 
-            return MapResponseToPoco<TPoco>(data);
+            return MapResponseToPoco<TPoco>(JObject.Parse(response.Body));
         }
 
         /// <summary>
@@ -103,7 +106,7 @@ namespace ElasticSearchLite.NetCore
         /// <param name="getQuery"></param>
         /// <returns></returns>
         public async Task<TPoco> ExecuteGetAsync<TPoco>(GetQuery<TPoco> getQuery)
-            where TPoco : IElasticPoco
+            where TPoco : class, IElasticPoco
         {
             IndexExists(getQuery.IndexName);
             var response = await LowLevelClient.GetAsync<string>(getQuery.IndexName, getQuery.TypeName, getQuery.Id.ToString());
@@ -111,9 +114,12 @@ namespace ElasticSearchLite.NetCore
             {
                 throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
             }
-            var data = JObject.Parse(response.Body)?.First;
+            if (response.HttpStatusCode == 404)
+            {
+                return null;
+            }
 
-            return MapResponseToPoco<TPoco>(data);
+            return MapResponseToPoco<TPoco>(JObject.Parse(response.Body));
         }
         /// <summary>
         /// Executes a SearchQuery using the Search API and returns a list of generic pocos.

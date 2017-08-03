@@ -4,6 +4,7 @@ using ElasticSearchLite.Tests.Pocos;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using ElasticSearchLite.NetCore.Interfaces;
 
 namespace ElasticSearchLite.Tests.Integration
 {
@@ -40,6 +41,17 @@ namespace ElasticSearchLite.Tests.Integration
             doc.Should().NotBeNull();
 
             Delete.From(complexIndexName).Documents<ComplexPoco>().Term(c => c.Id, doc.Id).ExecuteWith(_client).Should().Be(1);
+        }
+
+        [TestMethod]
+        public void Get_By_Id()
+        {
+            string id = "AV2h1O69BRauToiLpt55";
+
+            Get.FromIndex("contentindex")
+                .Return<IElasticPoco>("content")
+                .ById(id)
+                .ExecuteWith(_client);
         }
     }
 }
