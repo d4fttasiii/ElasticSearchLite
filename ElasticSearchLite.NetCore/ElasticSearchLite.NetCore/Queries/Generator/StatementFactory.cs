@@ -1,5 +1,8 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Models;
+using ElasticSearchLite.NetCore.Models.Conditions;
+using ElasticSearchLite.NetCore.Models.Enums;
+using ElasticSearchLite.NetCore.Queries.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
@@ -11,15 +14,12 @@ using static ElasticSearchLite.NetCore.Queries.Create;
 using static ElasticSearchLite.NetCore.Queries.Delete;
 using static ElasticSearchLite.NetCore.Queries.Highlight;
 using static ElasticSearchLite.NetCore.Queries.Search;
-using ElasticSearchLite.NetCore.Queries.Serialization;
-using ElasticSearchLite.NetCore.Models.Conditions;
-using ElasticSearchLite.NetCore.Models.Enums;
 
 namespace ElasticSearchLite.NetCore.Queries.Generator
 {
     public class StatementFactory : IStatementFactory
     {
-        public NamingStrategy NamingStrategy { get; set; } = new DefaultNamingStrategy();
+        public NamingStrategy NamingStrategy { get; set; } = new CamelCaseNamingStrategy();
         public DefaultContractResolver ContractResolver { get; set; } = new JsonElasticPropertyResolver();
 
         public string Generate(IQuery query)
@@ -56,6 +56,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             if (!string.IsNullOrEmpty(query)) { statementParts.Add(query); }
             if (searchQuery.Size != 0) { statementParts.Add(GenerateSize(searchQuery.Size)); }
             if (searchQuery.From != 0) { statementParts.Add(GenerateFrom(searchQuery.From)); }
+            statementParts.Add($@"""version"": true");
             statementParts.Add(GenerateSort(searchQuery.SortingFields));
 
             return $"{{ {string.Join(",", statementParts)} }}";
@@ -66,6 +67,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             var parts = new List<string>
             {
                 $@"""_source"": [{(fieldNames.Any() ? fieldNames : @"""*""")}]",
+                $@"""version"": true",
                 $@"""query"": {{ ""bool"": {{ {GenerateBoolQueryConditions(boolQuery.Conditions, boolQuery.MinimumNumberShouldMatch)} }} }}",
                 GenerateSort(boolQuery.SortingFields),
                 GenerateSize(boolQuery.Size),

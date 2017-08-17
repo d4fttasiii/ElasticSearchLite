@@ -50,7 +50,7 @@ namespace ElasticSearchLite.NetCore
         /// <param name="getQuery"></param>
         /// <param name="client"></param>
         public static TPoco ExecuteWith<TPoco>(this GetQuery<TPoco> getQuery, ElasticLiteClient client)
-            where TPoco : IElasticPoco => client.ExecuteGet(getQuery);
+            where TPoco : class, IElasticPoco => client.ExecuteGet(getQuery);
        /// <summary>
        /// 
        /// </summary>
@@ -142,6 +142,6 @@ namespace ElasticSearchLite.NetCore
         /// <param name="client"></param>
         /// <returns></returns>
         public static Task<TPoco> ExecuteAsyncWith<TPoco>(this GetQuery<TPoco> getQuery, ElasticLiteClient client)
-            where TPoco : IElasticPoco => client.ExecuteGetAsync(getQuery);
+            where TPoco : class, IElasticPoco => client.ExecuteGetAsync(getQuery);
     }
 }

@@ -6,6 +6,7 @@
         public static ElasticFields Index { get; } = new ElasticFields("_index");
         public static ElasticFields Type { get; } = new ElasticFields("_type");
         public static ElasticFields Score { get; } = new ElasticFields("_score");
+        public static ElasticFields Version { get; } = new ElasticFields("_version");
         public static ElasticFields Source { get; } = new ElasticFields("_source");
         public static ElasticFields Shards { get; } = new ElasticFields("_shards");
         public static ElasticFields Hits { get; } = new ElasticFields("hits");

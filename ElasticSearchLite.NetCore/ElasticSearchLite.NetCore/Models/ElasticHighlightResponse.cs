@@ -11,5 +11,6 @@ namespace ElasticSearchLite.NetCore.Models
         public double? Score { get; set; }
         public long Total { get; set; }
         public Dictionary<string, string[]> Highlight { get; set; } = new Dictionary<string, string[]>();
+        public int? Version { get; set; }
     }
 }

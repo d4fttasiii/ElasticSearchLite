@@ -2,9 +2,10 @@
 using ElasticSearchLite.NetCore.Exceptions;
 using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Interfaces.Bool;
-using ElasticSearchLite.NetCore.Interfaces.Search;
 using ElasticSearchLite.NetCore.Interfaces.Highlight;
+using ElasticSearchLite.NetCore.Interfaces.Search;
 using ElasticSearchLite.NetCore.Models;
+using ElasticSearchLite.NetCore.Models.Enums;
 using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.NetCore.Queries.Generator;
 using Newtonsoft.Json.Linq;
@@ -16,9 +17,8 @@ using System.Threading.Tasks;
 using static ElasticSearchLite.NetCore.Queries.Bool;
 using static ElasticSearchLite.NetCore.Queries.Delete;
 using static ElasticSearchLite.NetCore.Queries.Get;
-using static ElasticSearchLite.NetCore.Queries.Search;
 using static ElasticSearchLite.NetCore.Queries.Highlight;
-using ElasticSearchLite.NetCore.Models.Enums;
+using static ElasticSearchLite.NetCore.Queries.Search;
 
 namespace ElasticSearchLite.NetCore
 {
@@ -441,6 +441,7 @@ namespace ElasticSearchLite.NetCore
             document.Id = jToken[ElasticFields.Id.Name].ToString();
             document.Index = jToken[ElasticFields.Index.Name].ToString();
             document.Type = jToken[ElasticFields.Type.Name].ToString();
+            document.Version = jToken[ElasticFields.Version.Name]?.ToObject<int?>();
             document.Score = jToken[ElasticFields.Score.Name]?.ToObject<double?>();
 
             return document;

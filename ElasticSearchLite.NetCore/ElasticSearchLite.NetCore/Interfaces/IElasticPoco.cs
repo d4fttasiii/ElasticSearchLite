@@ -25,5 +25,12 @@
         /// Number of total documents found
         /// </summary>
         long Total { get; set; }
+        /// <summary>
+        /// Each indexed document is given a version number. 
+        /// The associated version number is returned as part of the response to the index API request. 
+        /// The index API optionally allows for optimistic concurrency control when the version parameter is specified.
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.5/docs-index_.html#index-versioning
+        /// </summary>
+        int? Version { get; set; }
     }
 }

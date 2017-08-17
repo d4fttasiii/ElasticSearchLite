@@ -9,7 +9,7 @@ namespace ElasticSearchLite.Tests.Integration
     {
         protected static readonly string _indexName = "exampleindex";
         protected static readonly string _typeName = "example";
-        protected static readonly ElasticLiteClient _client = new ElasticLiteClient("http://bsv-dev-web001:9200/")
+        protected static readonly ElasticLiteClient _client = new ElasticLiteClient("http://localhost:9200/")
         {
             NameingStrategy = new Newtonsoft.Json.Serialization.CamelCaseNamingStrategy()
         };

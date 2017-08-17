@@ -1,8 +1,8 @@
+using ElasticSearchLite.NetCore.Models.Enums;
 using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.Tests.Pocos;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using ElasticSearchLite.NetCore.Models.Enums;
 
 namespace ElasticSearchLite.Tests.Unit
 {
@@ -54,7 +54,7 @@ namespace ElasticSearchLite.Tests.Unit
                 .Skip(10);
            
             // Act and Assert
-            TestQueryString($@"{{ ""query"": {{ ""match"": {{ ""TestText"" : {{ ""query"": ""ABCD EFGH"", ""operator"": ""and"" }} }} }},""size"": 10,""from"": 10,""sort"": [""_doc""] }}", query);
+            TestQueryString($@"{{ ""query"": {{ ""match"": {{ ""TestText"" : {{ ""query"": ""ABCD EFGH"", ""operator"": ""and"" }} }} }},""size"": 10,""from"": 10,""version"": true,""sort"": [""_doc""] }}", query);
         }
 
         [TestMethod]
@@ -68,7 +68,7 @@ namespace ElasticSearchLite.Tests.Unit
                 .Skip(10);           
 
             // Act and Assert
-            TestQueryString($@"{{ ""query"": {{ ""match_phrase"": {{ ""TestText"" : {{ ""query"": ""ABCD EFGH"", ""slop"": 0 }} }} }},""size"": 10,""from"": 10,""sort"": [""_doc""] }}", query);
+            TestQueryString($@"{{ ""query"": {{ ""match_phrase"": {{ ""TestText"" : {{ ""query"": ""ABCD EFGH"", ""slop"": 0 }} }} }},""size"": 10,""from"": 10,""version"": true,""sort"": [""_doc""] }}", query);
         }
 
         [TestMethod]
@@ -88,6 +88,7 @@ namespace ElasticSearchLite.Tests.Unit
                 },
                 size = 10,
                 from = 10,
+                version = true,
                 sort = new[] { "_doc" }
             };
 
@@ -166,7 +167,7 @@ namespace ElasticSearchLite.Tests.Unit
                 .Term(p => p.Tag.Name, "TagName1")
                 .Take(20);
 
-            var statement = $@"{{ ""query"": {{ ""terms"": {{ ""Tag.Name"" : [""TagName1""] }} }},""size"": 20,""sort"": [""_doc""] }}";
+            var statement = $@"{{ ""query"": {{ ""terms"": {{ ""Tag.Name"" : [""TagName1""] }} }},""size"": 20,""version"": true,""sort"": [""_doc""] }}";
 
             TestQueryString(statement, query);
         }

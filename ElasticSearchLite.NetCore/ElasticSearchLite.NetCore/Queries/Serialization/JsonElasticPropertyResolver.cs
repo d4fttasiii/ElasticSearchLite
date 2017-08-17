@@ -1,9 +1,9 @@
-﻿using System;
+﻿using ElasticSearchLite.NetCore.Interfaces;
+using Newtonsoft.Json.Serialization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using ElasticSearchLite.NetCore.Models.Enums;
-using Newtonsoft.Json.Serialization;
 
 namespace ElasticSearchLite.NetCore.Queries.Serialization
 {
@@ -11,11 +11,18 @@ namespace ElasticSearchLite.NetCore.Queries.Serialization
     {
         private readonly List<string> _elasticProperties = new List<string>
         {
-            ElasticFields.Id.Name,
-            ElasticFields.Index.Name,
-            ElasticFields.Score.Name,
-            ElasticFields.Type.Name,
-            ElasticFields.Total.Name
+            nameof(IElasticPoco.Id),
+            nameof(IElasticPoco.Id).ToLower(),
+            nameof(IElasticPoco.Index),
+            nameof(IElasticPoco.Index).ToLower(),
+            nameof(IElasticPoco.Type),
+            nameof(IElasticPoco.Type).ToLower(),
+            nameof(IElasticPoco.Total),
+            nameof(IElasticPoco.Total).ToLower(),
+            nameof(IElasticPoco.Version),
+            nameof(IElasticPoco.Version).ToLower(),
+            nameof(IElasticPoco.Score),
+            nameof(IElasticPoco.Score).ToLower()
         };
 
         protected override List<MemberInfo> GetSerializableMembers(Type objectType)
