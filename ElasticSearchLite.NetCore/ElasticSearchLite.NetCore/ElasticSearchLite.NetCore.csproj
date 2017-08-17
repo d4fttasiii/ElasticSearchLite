@@ -3,12 +3,15 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp1.1;net461;net462</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.5.1</AssemblyVersion>
-    <FileVersion>1.0.5.1</FileVersion>
+    <AssemblyVersion>1.0.6.0</AssemblyVersion>
+    <FileVersion>1.0.6.0</FileVersion>
     <PackageTags>Elastic, ElasticSearch</PackageTags>
     <NeutralLanguage>en-GB</NeutralLanguage>
-    <PackageReleaseNotes>- Defined a common interface for IBoolQueryExecutable and IHighlightQueryExecutable</PackageReleaseNotes>
-    <Version>1.0.5.1</Version>
+    <PackageReleaseNotes>!! Added version field to IElasticPoco
+Bool, Search and Get Queries now support versioning from now on.
+Also fixed the problem regarding the serialization of mapped elatic meta
+fields.</PackageReleaseNotes>
+    <Version>1.0.6</Version>
     <PackageLicenseUrl>https://github.com/petertasner/ElasticSearchLite/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/petertasner/ElasticSearchLite</PackageProjectUrl>
     <Company />
