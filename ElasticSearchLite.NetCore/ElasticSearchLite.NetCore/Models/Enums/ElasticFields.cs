@@ -9,6 +9,8 @@
         public static ElasticFields Version { get; } = new ElasticFields("_version");
         public static ElasticFields Source { get; } = new ElasticFields("_source");
         public static ElasticFields Shards { get; } = new ElasticFields("_shards");
+        public static ElasticFields Docs { get; } = new ElasticFields("docs");
+        public static ElasticFields Found { get; } = new ElasticFields("found");
         public static ElasticFields Hits { get; } = new ElasticFields("hits");
         public static ElasticFields Highlight { get; } = new ElasticFields("highlight");
         public static ElasticFields Total { get; } = new ElasticFields("total");

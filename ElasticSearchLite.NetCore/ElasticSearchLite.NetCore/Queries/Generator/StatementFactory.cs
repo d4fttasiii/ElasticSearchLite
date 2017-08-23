@@ -13,6 +13,7 @@ using static ElasticSearchLite.NetCore.Queries.Bool;
 using static ElasticSearchLite.NetCore.Queries.Create;
 using static ElasticSearchLite.NetCore.Queries.Delete;
 using static ElasticSearchLite.NetCore.Queries.Highlight;
+using static ElasticSearchLite.NetCore.Queries.MGet;
 using static ElasticSearchLite.NetCore.Queries.Search;
 
 namespace ElasticSearchLite.NetCore.Queries.Generator
@@ -44,10 +45,13 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     return GenerateHighlightQuery(highlightQuery);
                 case BoolQuery boolQuery:
                     return GenerateBoolQuery(boolQuery);
-                default:
+                case MultiGetQuery multiGetQuery:
+                    return GenerateMultiGetQuery(multiGetQuery);
+                default: 
                     throw new Exception("Unknown query type");
             }
         }
+
         private string GenerateSearchQuery(SearchQuery searchQuery)
         {
             var statementParts = new List<string>();
@@ -122,6 +126,12 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             builder.Add($@" ""minimum_should_match"": {minimumShouldMatch} ");
 
             return string.Join(",", builder);
+        }
+        private string GenerateMultiGetQuery(MultiGetQuery multiGetQuery)
+        {
+            var docIds = multiGetQuery.Ids.Select(id => $@"{{ ""{ElasticFields.Id.Name}"": {EscapeValue(id)} }}");
+
+            return $@"{{ ""docs"": [ {string.Join(",", docIds)} ] }}";
         }
         private string GenerateCondition(IElasticCondition condition)
         {
