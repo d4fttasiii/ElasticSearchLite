@@ -1,5 +1,6 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using System;
+using System.Collections.Generic;
 
 namespace ElasticSearchLite.Tests.Pocos
 {
@@ -17,6 +18,7 @@ namespace ElasticSearchLite.Tests.Pocos
         public string Description { get; set; }
         public DateTime LastModified { get; set; }
         public string[] TagNames { get; set; }
+        public List<Poco> Pocos { get; set; }
     }
 
     public class Tag
