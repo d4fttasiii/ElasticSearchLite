@@ -27,8 +27,13 @@ namespace ElasticSearchLite.NetCore.Queries.Serialization
 
         protected override List<MemberInfo> GetSerializableMembers(Type objectType)
         {
-            return objectType.GetProperties()
-                .Where(pi => !_elasticProperties.Contains(pi.Name))
+            var properties = objectType.GetProperties();
+
+            return properties
+                .Where(pi =>
+                {
+                    return !objectType.GetTypeInfo().ImplementedInterfaces.Contains(typeof(IElasticPoco)) || !_elasticProperties.Contains(pi.Name);
+                })
                 .ToList<MemberInfo>();
         }
     }
