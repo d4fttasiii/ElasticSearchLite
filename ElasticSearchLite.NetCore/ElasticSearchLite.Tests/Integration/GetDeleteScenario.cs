@@ -36,10 +36,14 @@ namespace ElasticSearchLite.Tests.Integration
         {
             Index.Document(_complexPoco).ExecuteWith(_client);
 
-            var doc = Get.FromIndex(complexIndexName).Return<ComplexPoco>("complexpoco").ById(_complexPoco.Id).ExecuteWith(_client);
-            doc.Should().NotBeNull();
+            var document = Get.FromIndex(complexIndexName)
+                .Return<ComplexPoco>("complexpoco")
+                .ById(_complexPoco.Id)
+                .ExecuteWith(_client);
 
-            Delete.From(complexIndexName).Documents<ComplexPoco>().Term(c => c.Id, doc.Id).ExecuteWith(_client).Should().Be(1);
+            document.Should().NotBeNull();
+
+            Delete.From(complexIndexName).Documents<ComplexPoco>().Term(c => c.Id, document.Id).ExecuteWith(_client).Should().Be(1);
         }        
     }
 }
