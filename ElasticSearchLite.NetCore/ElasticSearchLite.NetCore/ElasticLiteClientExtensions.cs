@@ -1,6 +1,5 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Interfaces.Bool;
-using ElasticSearchLite.NetCore.Interfaces.Highlight;
 using ElasticSearchLite.NetCore.Interfaces.Search;
 using ElasticSearchLite.NetCore.Models;
 using ElasticSearchLite.NetCore.Queries;
@@ -75,16 +74,7 @@ namespace ElasticSearchLite.NetCore
         /// <param name="boolQuery"></param>
         /// <param name="client"></param>
         /// <returns></returns>
-        public static IEnumerable<TPoco> ExecuteWith<TPoco>(this IBoolQueryExecutable<TPoco> boolQuery, ElasticLiteClient client)
-            where TPoco : IElasticPoco => client.ExecuteBool(boolQuery);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TPoco"></typeparam>
-        /// <param name="highlightQuery"></param>
-        /// <param name="client"></param>
-        /// <returns></returns>
-        public static IEnumerable<ElasticHighlightResponse> ExecuteWith<TPoco>(this IHighlightQueryExecutable<TPoco> highlightQuery, ElasticLiteClient client)
-            where TPoco : IElasticPoco => client.ExecuteHighLight(highlightQuery);
+        public static IEnumerable<ElasticBoolResponse<TPoco>> ExecuteWith<TPoco>(this IBoolQueryExecutable<TPoco> boolQuery, ElasticLiteClient client)
+            where TPoco : IElasticPoco => client.ExecuteBool(boolQuery);       
     }
 }
