@@ -45,7 +45,8 @@ namespace ElasticSearchLite.Tests.Integration
 
             texts.Should().NotBeNull();
             texts.Count().Should().Be(20);
-            texts.First().TestText.Should().BeEquivalentTo("9801");
+            texts.First().Poco.Id.Should().NotBeNullOrWhiteSpace();
+            texts.First().Poco.TestText.Should().BeEquivalentTo("9801");
         }
 
 
@@ -60,7 +61,8 @@ namespace ElasticSearchLite.Tests.Integration
                 .ExecuteWith(_client);
 
             texts.Should().NotBeNull();
-            texts.First().TestText.Should().BeEquivalentTo("9801");
+            texts.First().Poco.Id.Should().NotBeNullOrWhiteSpace();
+            texts.First().Poco.TestText.Should().BeEquivalentTo("9801");
         }
 
         [TestInitialize]
