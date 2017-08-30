@@ -11,7 +11,7 @@ namespace ElasticSearchLite.Tests.Pocos
         public string Index { get; set; }
         public double? Score { get; set; }
         public long Total { get; set; }
-        public int? Version { get; set; }
+        public long Version { get; set; }
         public Tag Tag { get; set; }
         public Position Position { get; set; }
         public string Name { get; set; }
