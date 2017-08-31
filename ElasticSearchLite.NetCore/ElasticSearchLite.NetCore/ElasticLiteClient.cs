@@ -68,7 +68,7 @@ namespace ElasticSearchLite.NetCore
                 var response = LowLevelClient.Ping<string>();
                 if (!response.Success)
                 {
-                    throw new Exception(response.DebugInformation);
+                    throw new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
                 }
 
                 return true;
@@ -164,21 +164,13 @@ namespace ElasticSearchLite.NetCore
             where TPoco : IElasticPoco
         {
             var query = boolQuery as BoolQuery<TPoco>;
-            try
+            var response = LowLevelClient.Search<string>(query.IndexName, Generator.Generate(query));
+            if (!response.Success)
             {
-                var response = LowLevelClient.Search<string>(query.IndexName, Generator.Generate(query));
-                if (!response.Success)
-                {
-                    new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
-                }
-
-                return ProcessBoolResponse<TPoco>(response, query.HighlightingEnabled);
-            }
-            catch (Exception)
-            {
-                throw;
+                new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
             }
 
+            return ProcessBoolResponse<TPoco>(response, query.HighlightingEnabled);
         }
         /// <summary>
         /// Executes an IndexQuery using the Index API which creates a new document in the index.
@@ -188,22 +180,15 @@ namespace ElasticSearchLite.NetCore
         public void ExecuteIndex(Index query)
         {
             var statement = Generator.Generate(query);
-            try
-            {
-                var response = !string.IsNullOrEmpty(query.Poco.Id) ?
-                    LowLevelClient.Index<string>(query.IndexName, query.TypeName, query.Poco.Id, statement) :
-                    LowLevelClient.Index<string>(query.IndexName, query.TypeName, statement);
+            var response = !string.IsNullOrEmpty(query.Poco.Id) ?
+                LowLevelClient.Index<string>(query.IndexName, query.TypeName, query.Poco.Id, statement) :
+                LowLevelClient.Index<string>(query.IndexName, query.TypeName, statement);
 
-                if (!response.Success)
-                {
-                    throw new Exception(response.DebugInformation);
-                }
-                ProcessIndexResponse(query, response);
-            }
-            catch (Exception)
+            if (!response.Success)
             {
-                throw;
+                throw new Exception(response.DebugInformation);
             }
+            ProcessIndexResponse(query, response);
         }
         /// <summary>
         /// Executes an UpdateQuery using the Update API and updates a document identified by the Id.
@@ -219,10 +204,10 @@ namespace ElasticSearchLite.NetCore
                 var response = LowLevelClient.Update<string>(query.IndexName, query.TypeName, query.Poco.Id, statement, (u) => u.Version(query.Poco.Version));
                 if (!response.Success)
                 {
-                    throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+                    throw new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
                 }
             }
-            catch (Elasticsearch.Net.ElasticsearchClientException ex)
+            catch (ElasticsearchClientException ex)
             {
                 if (ex.DebugInformation.Contains("version_conflict_engine_exception"))
                 {
@@ -300,7 +285,7 @@ namespace ElasticSearchLite.NetCore
         {
             if (!response.Success)
             {
-                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+                throw new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
             }
 
             var data = JObject.Parse(response.Body);
@@ -377,7 +362,7 @@ namespace ElasticSearchLite.NetCore
         {
             if (!response.Success)
             {
-                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+                throw new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
             }
 
             var data = JObject.Parse(response.Body);
@@ -388,7 +373,7 @@ namespace ElasticSearchLite.NetCore
         {
             if (!response.Success)
             {
-                throw response.OriginalException ?? new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+                throw new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
             }
 
             if (response.HttpMethod == HttpMethod.DELETE)
