@@ -47,6 +47,21 @@ namespace ElasticSearchLite.NetCore
             var uriObjects = uris.Select(u => new Uri(u));
             BuildUpLowLevelConnection(uriObjects);
         }
+        /// <summary>
+        /// Creates ElasticSearchLite Client which uses the low level elastic client uses basic authentication
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <param name="uris"></param>
+        public ElasticLiteClient(string username, string password, params string[] uris)
+        {
+            if (uris == null)
+            {
+                throw new ArgumentNullException(nameof(uris));
+            }
+            var uriObjects = uris.Select(u => new Uri(u));
+            BuildUpLowLevelConnection(uriObjects);
+        }
 
         /// <summary>
         /// Creates ElasticSearchLite Client which uses the low level elastic client  
@@ -79,15 +94,18 @@ namespace ElasticSearchLite.NetCore
             }
         }
 
-        private void BuildUpLowLevelConnection(IEnumerable<Uri> uris)
+        private void BuildUpLowLevelConnection(IEnumerable<Uri> uris, string username = "", string password = "")
         {
             if (!uris.Any())
             {
                 return;
             }
-
             var connectionPool = new StickyConnectionPool(uris);
             var settings = new ConnectionConfiguration(connectionPool).ThrowExceptions().DisableDirectStreaming();
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                settings.BasicAuthentication(username, password);
+            }
             LowLevelClient = new ElasticLowLevelClient(settings);
         }
         /// <summary>
