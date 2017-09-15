@@ -44,7 +44,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     return GenerateBoolQuery(boolQuery);
                 case MultiGetQuery multiGetQuery:
                     return GenerateMultiGetQuery(multiGetQuery);
-                default: 
+                default:
                     throw new Exception("Unknown query type");
             }
         }
@@ -64,7 +64,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         }
         private string GenerateBoolQuery(BoolQuery boolQuery)
         {
-            var fieldNames = string.Join(", ",boolQuery.SourceFields.Select(f => $@"""{GetName(f.Name)}"""));
+            var fieldNames = string.Join(", ", boolQuery.SourceFields.Select(f => $@"""{GetName(f.Name)}"""));
             var parts = new List<string>
             {
                 $@"""_source"": [{(fieldNames.Any() ? fieldNames : @"""*""")}]",
@@ -80,7 +80,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             }
 
             return $@"{{ {string.Join(",", parts)} }}";
-        }       
+        }
         private string GenerateDeleteQuery(DeleteQuery deleteQuery)
         {
             return $"{{ {GenerateQuery(deleteQuery)} }}";
@@ -117,7 +117,13 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         }
         private string GenerateMultiGetQuery(MultiGetQuery multiGetQuery)
         {
-            var docIds = multiGetQuery.Ids.Select(id => $@"{{ ""{ElasticFields.Id.Name}"": {EscapeValue(id)} }}");
+            var sourceSelection = $@" ""{ElasticFields.Source.Name}"": ""*"" ";
+            if (multiGetQuery.SourceFields.Any())
+            {
+                var fieldNames = multiGetQuery.SourceFields.Select(sf => $@"""{GetName(sf.Name)}""");
+                sourceSelection = $@" ""{ElasticFields.Source.Name}"": [{string.Join(",", fieldNames)}] ";
+            }
+            var docIds = multiGetQuery.Ids.Select(id => $@"{{ ""{ElasticFields.Id.Name}"": {EscapeValue(id)}, {sourceSelection} }}");
 
             return $@"{{ ""docs"": [ {string.Join(",", docIds)} ] }}";
         }

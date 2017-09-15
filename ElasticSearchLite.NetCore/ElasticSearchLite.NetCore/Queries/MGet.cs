@@ -1,5 +1,8 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using System;
+using ElasticSearchLite.NetCore.Models;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
@@ -29,6 +32,7 @@ namespace ElasticSearchLite.NetCore.Queries
         public abstract class MultiGetQuery : AbstractBaseQuery
         {
             protected internal object[] Ids { get; set; }
+            protected internal List<ElasticField> SourceFields = new List<ElasticField>();
 
             protected MultiGetQuery(string indexName) : base(indexName) { }
         }
@@ -41,10 +45,25 @@ namespace ElasticSearchLite.NetCore.Queries
             /// </summary>
             /// <param name="ids">Document Ids</param>
             /// <returns></returns>
-            public MultiGetQuery<TPoco> ByIds<T>(params T[] ids)
-                where T : class
+            public MultiGetQuery<TPoco> ByIds(params object[] ids)
             {
                 Ids = ids;
+
+                return this;
+            }
+            /// <summary>
+            /// Allows to control how the _source field is returned with every hit.
+            /// Every field will be returned by default.
+            /// </summary>
+            /// <param name="propertyExpression"></param>
+            /// <returns></returns>
+            public MultiGetQuery<TPoco> SelectField(Expression<Func<TPoco, object>> propertyExpression)
+            {
+                SourceFields.Add(new ElasticField
+                {
+                    UseKeywordField = false,
+                    Name = GetCorrectPropertyName(propertyExpression)
+                });
 
                 return this;
             }
