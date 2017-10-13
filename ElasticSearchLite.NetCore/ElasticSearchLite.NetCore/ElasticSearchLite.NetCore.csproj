@@ -3,19 +3,19 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.0;netcoreapp1.1;net47;net461;net462</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <AssemblyVersion>1.1.2.0</AssemblyVersion>
-    <FileVersion>1.1.2.0</FileVersion>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
     <PackageTags>Elastic, ElasticSearch</PackageTags>
     <NeutralLanguage>en-GB</NeutralLanguage>
-    <PackageReleaseNotes>- MGet extended with _source filtering.</PackageReleaseNotes>
-    <Version>1.1.2</Version>
+    <PackageReleaseNotes>- Support for .NET Core 2.0 and .NET 4.7</PackageReleaseNotes>
+    <Version>1.2.0</Version>
     <PackageLicenseUrl>https://github.com/petertasner/ElasticSearchLite/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/petertasner/ElasticSearchLite</PackageProjectUrl>
     <Company />
     <Authors>Peter Tasner</Authors>
     <RepositoryUrl>https://github.com/petertasner/ElasticSearchLite</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
-    <Description>A simple .NET Core and .NET 4.6 wrapper for ElasticSearch.Net</Description>
+    <Description>A simple .NET wrapper for ElasticSearch.Net</Description>
     <Product>ElasticSearchLite.Net</Product>
   </PropertyGroup>
 
