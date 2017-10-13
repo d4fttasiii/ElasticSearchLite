@@ -10,16 +10,19 @@ using System.Threading;
 namespace ElasticSearchLite.Tests.Integration
 {
     [TestClass]
-    public class HighlightTestScenario : AbstractIntegrationScenario
+    public class BoolHighlightTestScenario : AbstractIntegrationScenario
     {
         [TestMethod]
-        public void Highlight_Search_For_MatchPhrasePrefix()
+        public void BoolQuery_Highlight_Search_For_MatchPhrasePrefix()
         {
-            var highlights = Highlight.QueryIn("textindex")
+            var highlights = Bool.QueryIn("textindex")
                 .Returns<Poco>()
-                .WithPre("<b>")
-                .WithPost("</b>")
-                .AddFields(p => p.TestText)
+                .EnableHighlighting()
+                    .AddField(p => p.TestText)
+                    .SetPreTagTo("<b>")
+                    .SetPostTagTo("</b>")
+                    .LimitTheNumberOfFragmentsTo(3)
+                    .LimitFragmentSizeTo(100)
                 .Should(p => p.TestText)
                     .MatchPhrasePrefix("1")
                 .Take(10)
@@ -28,7 +31,18 @@ namespace ElasticSearchLite.Tests.Integration
 
             highlights.Should().NotBeNull();
             highlights.Count().Should().Be(10);
-            highlights.First().Total.Should().Be(20);
+            highlights.First().Poco.Total.Should().Be(20);
+            highlights.SelectMany(h =>
+                h.Highlight
+                .Values
+                .SelectMany(v => v))
+                .ToList()
+                .ForEach(h =>
+                {
+                    h.Contains("1")
+                        .Should()
+                        .BeTrue();
+                });
         }
 
         [TestInitialize]

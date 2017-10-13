@@ -1,12 +1,12 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using ElasticSearchLite.NetCore.Interfaces.Bool;
 using ElasticSearchLite.NetCore.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Linq;
 using ElasticSearchLite.NetCore.Models.Conditions;
 using ElasticSearchLite.NetCore.Models.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace ElasticSearchLite.NetCore.Queries
 {
@@ -33,10 +33,12 @@ namespace ElasticSearchLite.NetCore.Queries
 
         public abstract class BoolQuery : AbstractBaseQuery
         {
-            protected internal int Size { get; set; } = 25;
-            protected internal int From { get; set; } = 0;
-            protected internal int MinimumNumberShouldMatch { get; set; } = 1;
-            protected internal List<ElasticField> SourceFields { get; set; } = new List<ElasticField>();
+            protected internal bool HighlightingEnabled { get; set; } = false;
+            protected internal ElasticHighlight Highlight = new ElasticHighlight();
+            protected internal int Size = 25;
+            protected internal int From = 0;
+            protected internal int MinimumNumberShouldMatch = 1;
+            protected internal List<ElasticField> SourceFields = new List<ElasticField>();
             protected internal Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>> Conditions { get; } = new Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>>
             {
                 { ElasticBoolQueryOccurrences.Should, new List<IElasticCondition>() },
@@ -63,7 +65,11 @@ namespace ElasticSearchLite.NetCore.Queries
             IBoolQueryMustNotAdded<TPoco>,
             IBoolQueryFilterAdded<TPoco>,
             IBoolQuerySortAdded<TPoco>,
-            IBoolQuerySortOrderDefined<TPoco>
+            IBoolQuerySortOrderDefined<TPoco>,
+            IBoolQueryHighlightingEnabled<TPoco>,
+            IBoolQueryPreAdded<TPoco>,
+            IBoolQueryPostAdded<TPoco>,
+            IBoolQueryFragmentsLimited<TPoco>
             where TPoco : IElasticPoco
         {
             private string tempFieldName;
@@ -258,6 +264,66 @@ namespace ElasticSearchLite.NetCore.Queries
                 }
 
                 MinimumNumberShouldMatch = minimumNumber;
+
+                return this;
+            }
+
+            public IBoolQueryHighlightingEnabled<TPoco> EnableHighlighting()
+            {
+                HighlightingEnabled = true;
+
+                return this;
+            }
+
+            public IBoolQueryHighlightingEnabled<TPoco> AddField(Expression<Func<TPoco, object>> propertyExpression)
+            {
+                CheckParameter(propertyExpression);
+                Highlight.HighlightedFields.Add(new ElasticField
+                {
+                    Name = GetCorrectPropertyName(propertyExpression)
+                });
+
+                return this;
+            }
+
+            public IBoolQueryHighlightingEnabled<TPoco> AddFields(IEnumerable<Expression<Func<TPoco, object>>> propertyExpressions)
+            {
+                CheckParameters(propertyExpressions);
+                Highlight.HighlightedFields.AddRange(propertyExpressions
+                    .Select(pe => new ElasticField
+                    {
+                        Name = GetCorrectPropertyName(pe)
+                    }));
+
+                return this;
+            }
+
+            public IBoolQueryPreAdded<TPoco> SetPreTagTo(string preTag)
+            {
+                Highlight.PreTag = preTag;
+
+                return this;
+            }
+
+            public IBoolQueryPostAdded<TPoco> SetPostTagTo(string postTag)
+            {
+                Highlight.PostTag = postTag;
+
+                return this;
+            }
+
+            public IBoolQueryFragmentsLimited<TPoco> LimitTheNumberOfFragmentsTo(int numberOfFragments)
+            {
+                CheckParameterBiggerThanNull(numberOfFragments);
+                Highlight.NumberOfFragments = numberOfFragments;
+
+                return this;
+            }
+
+            public IBoolQueryExecutable<TPoco> LimitFragmentSizeTo(int fragmentSize)
+            {
+                CheckParameterBiggerThanNull(fragmentSize);
+                Highlight.FragmentSize = fragmentSize;
 
                 return this;
             }

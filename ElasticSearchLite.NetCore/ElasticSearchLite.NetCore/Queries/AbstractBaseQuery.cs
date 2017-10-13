@@ -1,5 +1,6 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -40,10 +41,18 @@ namespace ElasticSearchLite.NetCore.Queries
             return parameter;
         }
 
-        protected void CheckParameters<PT>(PT[] parameters)
+        protected void CheckParameters<PT>(IEnumerable<PT> parameters)
         {
             if (parameters == null) { throw new ArgumentNullException(nameof(parameters)); }
             if (!parameters.Any()) { throw new ArgumentException(nameof(parameters)); }
+        }
+
+        protected void CheckParameterBiggerThanNull(int parameter)
+        {
+            if (parameter < 0)
+            {
+                throw new ArgumentException($"{nameof(parameter)} should be bigger than 0");
+            }
         }
 
         protected string GetCorrectPropertyName<T>(Expression<Func<T, Object>> expression) => GetPropertyPath(expression);

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using ElasticSearchLite.NetCore.Interfaces;
+﻿using ElasticSearchLite.NetCore.Interfaces;
+using System.Collections.Generic;
 
 namespace ElasticSearchLite.Tests.Pocos
 {
@@ -10,7 +10,7 @@ namespace ElasticSearchLite.Tests.Pocos
         public string Index { get; set; }
         public double? Score { get; set; }
         public long Total { get; set; }
-        public int? Version { get; set; }
+        public long Version { get; set; }
 
         public List<Hero> Heroes { get; set; }
     }

@@ -12,7 +12,6 @@ using System.Text;
 using static ElasticSearchLite.NetCore.Queries.Bool;
 using static ElasticSearchLite.NetCore.Queries.Create;
 using static ElasticSearchLite.NetCore.Queries.Delete;
-using static ElasticSearchLite.NetCore.Queries.Highlight;
 using static ElasticSearchLite.NetCore.Queries.MGet;
 using static ElasticSearchLite.NetCore.Queries.Search;
 
@@ -41,13 +40,11 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     return GenerateBulkQuery(bulkQuery);
                 case CreateQuery createQuery:
                     return GenerateCreateQuery(createQuery);
-                case HighlightQuery highlightQuery:
-                    return GenerateHighlightQuery(highlightQuery);
                 case BoolQuery boolQuery:
                     return GenerateBoolQuery(boolQuery);
                 case MultiGetQuery multiGetQuery:
                     return GenerateMultiGetQuery(multiGetQuery);
-                default: 
+                default:
                     throw new Exception("Unknown query type");
             }
         }
@@ -67,7 +64,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         }
         private string GenerateBoolQuery(BoolQuery boolQuery)
         {
-            var fieldNames = string.Join(", ",boolQuery.SourceFields.Select(f => $@"""{GetName(f.Name)}"""));
+            var fieldNames = string.Join(", ", boolQuery.SourceFields.Select(f => $@"""{GetName(f.Name)}"""));
             var parts = new List<string>
             {
                 $@"""_source"": [{(fieldNames.Any() ? fieldNames : @"""*""")}]",
@@ -77,19 +74,10 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                 GenerateSize(boolQuery.Size),
                 GenerateFrom(boolQuery.From)
             };
-
-            return $@"{{ {string.Join(",", parts)} }}";
-        }
-        private string GenerateHighlightQuery(HighlightQuery highlightQuery)
-        {
-            var parts = new List<string>
+            if (boolQuery.HighlightingEnabled)
             {
-                $@"""_source"": false",
-                $@"""query"": {{ ""bool"": {{ {GenerateBoolQueryConditions(highlightQuery.Conditions, highlightQuery.MinimumNumberShouldMatch)} }} }}",
-                GenerateHighlight(highlightQuery.Highlight, highlightQuery.NumberOfFragements, highlightQuery.FragmentSize),
-                GenerateSize(highlightQuery.Size),
-                GenerateFrom(highlightQuery.From)
-            };
+                parts.Add(GenerateHighlight(boolQuery.Highlight));
+            }
 
             return $@"{{ {string.Join(",", parts)} }}";
         }
@@ -129,7 +117,13 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         }
         private string GenerateMultiGetQuery(MultiGetQuery multiGetQuery)
         {
-            var docIds = multiGetQuery.Ids.Select(id => $@"{{ ""{ElasticFields.Id.Name}"": {EscapeValue(id)} }}");
+            var sourceSelection = $@" ""{ElasticFields.Source.Name}"": ""*"" ";
+            if (multiGetQuery.SourceFields.Any())
+            {
+                var fieldNames = multiGetQuery.SourceFields.Select(sf => $@"""{GetName(sf.Name)}""");
+                sourceSelection = $@" ""{ElasticFields.Source.Name}"": [{string.Join(",", fieldNames)}] ";
+            }
+            var docIds = multiGetQuery.Ids.Select(id => $@"{{ ""{ElasticFields.Id.Name}"": {EscapeValue(id)}, {sourceSelection} }}");
 
             return $@"{{ ""docs"": [ {string.Join(",", docIds)} ] }}";
         }
@@ -253,9 +247,9 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return $@"""sort"": [""_doc""]";
         }
-        private string GenerateHighlight(ElasticHighlight highlight, int numberOfFragments, int fragmentSize)
+        private string GenerateHighlight(ElasticHighlight highlight)
         {
-            var fields = highlight.HighlightedFields.Select(f => $@" ""{GetName(f.Name)}"": {{ ""number_of_fragments"": {numberOfFragments}, ""fragment_size"": {fragmentSize}}} ");
+            var fields = highlight.HighlightedFields.Select(f => $@" ""{GetName(f.Name)}"": {{ ""number_of_fragments"": {highlight.NumberOfFragments}, ""fragment_size"": {highlight.FragmentSize}}} ");
 
             return $@" ""highlight"": {{ ""pre_tags"": [ ""{highlight.PreTag}"" ], ""post_tags"": [ ""{highlight.PostTag}"" ], ""fields"": {{ {string.Join(",", fields)} }} }} ";
         }
