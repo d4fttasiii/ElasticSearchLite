@@ -8,7 +8,7 @@ namespace ElasticSearchLite.NetCore.Queries
 {
     public abstract class Bulk : IQuery
     {
-        public string IndexName { get; }
+        internal string IndexName { get; }
         internal List<(ElasticMethods Method, IElasticPoco Poco)> PocosAndMethods { get; }
 
         protected Bulk(string indexName)
@@ -16,20 +16,21 @@ namespace ElasticSearchLite.NetCore.Queries
             IndexName = indexName ?? throw new ArgumentNullException(nameof(indexName));
             PocosAndMethods = new List<(ElasticMethods Method, IElasticPoco Poco)>();
         }
-    }
-
-    public class Bulk<T> : Bulk where T : IElasticPoco
-    {
-        protected Bulk(string indexName) : base(indexName) { }
         /// <summary>
         /// 
         /// </summary>
         /// <param name="indexName"></param>
         /// <returns></returns>
-        public static Bulk<T> Create(string indexName)
+        public static Bulk<T> Create<T>(string indexName)
+            where T: IElasticPoco
         {
             return new Bulk<T>(indexName);
         }
+    }
+
+    public class Bulk<T> : Bulk where T : IElasticPoco
+    {
+        protected internal Bulk(string indexName) : base(indexName) { }        
         /// <summary>
         /// 
         /// </summary>

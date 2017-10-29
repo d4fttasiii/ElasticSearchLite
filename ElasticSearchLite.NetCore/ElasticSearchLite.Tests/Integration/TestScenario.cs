@@ -57,8 +57,8 @@ namespace ElasticSearchLite.Tests.Integration
         {
             poco.Id = "1337";
 
-            _client.ExecuteBulk(Bulk<Poco>
-                .Create(poco.Index)
+            _client.ExecuteBulk(Bulk
+                .Create<Poco>(poco.Index)
                 .Index(poco)
                 .Delete(poco));
 
