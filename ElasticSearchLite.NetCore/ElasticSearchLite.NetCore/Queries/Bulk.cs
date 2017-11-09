@@ -72,6 +72,7 @@ namespace ElasticSearchLite.NetCore.Queries
         {
             if (pocos == null) { throw new ArgumentNullException(nameof(pocos)); }
             if (!pocos.Any()) { throw new ArgumentException(nameof(pocos)); }
+            if (pocos.Any(p => string.IsNullOrEmpty(p.Id))) { throw new ArgumentNullException($"{nameof(IElasticPoco.Id)} should be set for every Poco"); }
         }
     }
 }
