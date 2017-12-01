@@ -224,6 +224,8 @@ namespace ElasticSearchLite.NetCore
                 {
                     throw new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
                 }
+                var data = JObject.Parse(response.Body);
+                query.Poco.Version = data[ElasticFields.Version.Name].ToObject<long>();
             }
             catch (ElasticsearchClientException ex)
             {
