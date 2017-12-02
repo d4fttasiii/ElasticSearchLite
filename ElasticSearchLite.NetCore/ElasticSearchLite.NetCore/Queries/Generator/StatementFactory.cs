@@ -177,7 +177,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     {(m.Analyzer != null ? $@",""analyzer"": ""{m.Analyzer.Name}""" : "")} }}"))} }} }} }}";
         }
         private string GenerateDocument(IElasticPoco poco) => $@"""doc"": {GenerateFieldMapping(poco)}";
-        private string GenerateFieldMapping(IElasticPoco poco) => JsonConvert.SerializeObject(poco, new JsonSerializerSettings { ContractResolver = ContractResolver });
+        private string GenerateFieldMapping(IElasticPoco poco) => JsonConvert.SerializeObject(poco, new JsonSerializerSettings { ContractResolver = ContractResolver, NullValueHandling = NullValueHandling.Ignore });
         private string GenerateQuery(AbstractConditionalQuery query)
         {
             if (query.MatchCondition != null)
