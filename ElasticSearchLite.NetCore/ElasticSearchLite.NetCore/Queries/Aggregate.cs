@@ -12,7 +12,10 @@ namespace ElasticSearchLite.NetCore.Queries
     public abstract class Aggregate : AbstractConditionalQuery
     {
         internal ElasticField AggregateField { get; set; }
-        internal ElasticMetricsAggregations ElasticMetricsAggregations { get; set; }
+        internal ElasticMetricsAggregations ElasticMetricsAggregation { get; set; }
+        internal ElasticPipelineAggregations ElasticPipelineAggregation { get; set; }
+        internal int Window { get; set; }
+        internal float Alpha { get; set; }
 
         protected Aggregate(IElasticPoco poco) : base(poco) { }
 
@@ -23,16 +26,17 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <typeparam name="TPoco"></typeparam>
         /// <returns></returns>
-        public static Interfaces.Aggregate.IFilterableAggregatedQuery<TPoco> In<TPoco>()
+        public static IFilterableAggregatedQuery<TPoco> In<TPoco>()
             where TPoco : IElasticPoco
                 => new Aggregate<TPoco>($"{typeof(TPoco).Name.ToLower()}index");
     }
 
     public sealed class Aggregate<TPoco> :
         Aggregate,
-        Interfaces.Aggregate.IFilterableAggregatedQuery<TPoco>,
-        Interfaces.Aggregate.IFilteredAggregatedQuery<TPoco>,
-        Interfaces.Aggregate.IExecutableAggregatedQuery<TPoco>
+        IFilterableAggregatedQuery<TPoco>,
+        IFilteredAggregatedQuery<TPoco>,
+        IMovingAverageAggregatedQuery<TPoco>,
+        IExecutableAggregatedQuery<TPoco>
         where TPoco : IElasticPoco
     {
         internal Aggregate(string indexName) : base(indexName)
@@ -52,7 +56,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="propertyExpression">Field name</param>
         /// <param name="value">Value which should equal the field content</param>
         /// <returns></returns>
-        public Interfaces.Aggregate.IFilteredAggregatedQuery<TPoco> Term(Expression<Func<TPoco, object>> propertyExpression, object value)
+        public IFilteredAggregatedQuery<TPoco> Term(Expression<Func<TPoco, object>> propertyExpression, object value)
         {
             TermCondition = new ElasticTermCodition()
             {
@@ -68,7 +72,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="propertyExpression">Field property</param>
         /// <param name="value">Value matching the field</param>
         /// <returns></returns>
-        public Interfaces.Aggregate.IFilteredAggregatedQuery<TPoco> Match(Expression<Func<TPoco, object>> propertyExpression, object value)
+        public IFilteredAggregatedQuery<TPoco> Match(Expression<Func<TPoco, object>> propertyExpression, object value)
         {
             MatchCondition = new ElasticMatchCodition
             {
@@ -85,7 +89,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="propertyExpression">Field property</param>
         /// <param name="value">Value matching the field</param>
         /// <returns></returns>
-        public Interfaces.Aggregate.IFilteredAggregatedQuery<TPoco> MatchPhrase(Expression<Func<TPoco, object>> propertyExpression, string value)
+        public IFilteredAggregatedQuery<TPoco> MatchPhrase(Expression<Func<TPoco, object>> propertyExpression, string value)
         {
             MatchPhraseCondition = new ElasticMatchPhraseCondition
             {
@@ -102,7 +106,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="propertyExpression">Field property</param>
         /// <param name="value">Value matching the field</param>
         /// <returns></returns>
-        public Interfaces.Aggregate.IFilteredAggregatedQuery<TPoco> MatchPhrasePrefix(Expression<Func<TPoco, object>> propertyExpression, string value)
+        public IFilteredAggregatedQuery<TPoco> MatchPhrasePrefix(Expression<Func<TPoco, object>> propertyExpression, string value)
         {
             MatchPhrasePrefixCondition = new ElasticMatchPhrasePrefixCondition
             {
@@ -119,7 +123,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <param name="op">Range operator</param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public Interfaces.Aggregate.IFilteredAggregatedQuery<TPoco> Range(Expression<Func<TPoco, object>> propertyExpression, ElasticRangeOperations rangeOperation, object value)
+        public IFilteredAggregatedQuery<TPoco> Range(Expression<Func<TPoco, object>> propertyExpression, ElasticRangeOperations rangeOperation, object value)
         {
             var condition = new ElasticRangeCondition
             {
@@ -137,10 +141,10 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="propertyExpression"></param>
         /// <returns></returns>
-        public Interfaces.Aggregate.IExecutableAggregatedQuery<TPoco> Average(Expression<Func<TPoco, object>> propertyExpression)
+        public IExecutableAggregatedQuery<TPoco> Average(Expression<Func<TPoco, object>> propertyExpression)
         {
             AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
-            ElasticMetricsAggregations = ElasticMetricsAggregations.Avg;
+            ElasticMetricsAggregation = ElasticMetricsAggregations.Avg;
 
             return this;
         }
@@ -150,10 +154,10 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="propertyExpression"></param>
         /// <returns></returns>
-        public Interfaces.Aggregate.IExecutableAggregatedQuery<TPoco> Cardinality(Expression<Func<TPoco, object>> propertyExpression)
+        public IExecutableAggregatedQuery<TPoco> Cardinality(Expression<Func<TPoco, object>> propertyExpression)
         {
             AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
-            ElasticMetricsAggregations = ElasticMetricsAggregations.Cardinality;
+            ElasticMetricsAggregation = ElasticMetricsAggregations.Cardinality;
 
             return this;
         }
@@ -163,10 +167,10 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="propertyExpression"></param>
         /// <returns></returns>
-        public Interfaces.Aggregate.IExecutableAggregatedQuery<TPoco> Max(Expression<Func<TPoco, object>> propertyExpression)
+        public IExecutableAggregatedQuery<TPoco> Max(Expression<Func<TPoco, object>> propertyExpression)
         {
             AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
-            ElasticMetricsAggregations = ElasticMetricsAggregations.Max;
+            ElasticMetricsAggregation = ElasticMetricsAggregations.Max;
 
             return this;
         }
@@ -176,10 +180,10 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="propertyExpression"></param>
         /// <returns></returns>
-        public Interfaces.Aggregate.IExecutableAggregatedQuery<TPoco> Min(Expression<Func<TPoco, object>> propertyExpression)
+        public IExecutableAggregatedQuery<TPoco> Min(Expression<Func<TPoco, object>> propertyExpression)
         {
             AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
-            ElasticMetricsAggregations = ElasticMetricsAggregations.Min;
+            ElasticMetricsAggregation = ElasticMetricsAggregations.Min;
 
             return this;
         }
@@ -189,10 +193,10 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="propertyExpression"></param>
         /// <returns></returns>
-        public Interfaces.Aggregate.IExecutableAggregatedQuery<TPoco> Sum(Expression<Func<TPoco, object>> propertyExpression)
+        public IExecutableAggregatedQuery<TPoco> Sum(Expression<Func<TPoco, object>> propertyExpression)
         {
             AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
-            ElasticMetricsAggregations = ElasticMetricsAggregations.Sum;
+            ElasticMetricsAggregation = ElasticMetricsAggregations.Sum;
 
             return this;
         }
@@ -204,10 +208,77 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="propertyExpression"></param>
         /// <returns></returns>
-        public Interfaces.Aggregate.IExecutableAggregatedQuery<TPoco> ValueCount(Expression<Func<TPoco, object>> propertyExpression)
+        public IExecutableAggregatedQuery<TPoco> ValueCount(Expression<Func<TPoco, object>> propertyExpression)
         {
             AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
-            ElasticMetricsAggregations = ElasticMetricsAggregations.ValueCount;
+            ElasticMetricsAggregation = ElasticMetricsAggregations.ValueCount;
+
+            return this;
+        }
+        /// <summary>
+        /// Given an ordered series of data, the Moving Average aggregation will slide a window across the data and emit the average value of that window.
+        /// </summary>
+        /// <param name="propertyExpression"></param>
+        /// <returns></returns>
+        public IMovingAverageAggregatedQuery<TPoco> SimpleMovingAverage(Expression<Func<TPoco, object>> propertyExpression)
+        {
+            AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
+            ElasticPipelineAggregation = ElasticPipelineAggregations.SimpleMovingAverage;
+
+            return this;
+        }
+        /// <summary>
+        /// The linear model assigns a linear weighting to points in the series, such that "older" datapoints (e.g. those at the beginning of the window) contribute a linearly less amount to the total average.
+        /// The linear weighting helps reduce the "lag" behind the data’s mean, since older points have less influence.
+        /// </summary>
+        /// <param name="propertyExpression"></param>
+        /// <returns></returns>
+        public IMovingAverageAggregatedQuery<TPoco> LinearMovingAverage(Expression<Func<TPoco, object>> propertyExpression)
+        {
+            AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
+            ElasticPipelineAggregation = ElasticPipelineAggregations.LinearMovingAverage;
+
+            return this;
+        }
+        /// <summary>
+        /// The ewma model (aka "single-exponential") is similar to the linear model, except older data-points become exponentially less important, rather than linearly less important. 
+        /// The speed at which the importance decays can be controlled with an alpha setting. 
+        /// Small values make the weight decay slowly, which provides greater smoothing and takes into account a larger portion of the window. 
+        /// Larger valuers make the weight decay quickly, which reduces the impact of older values on the moving average. 
+        /// This tends to make the moving average track the data more closely but with less smoothing.
+        /// </summary>
+        /// <param name="propertyExpression"></param>
+        /// <returns></returns>
+        public IMovingAverageAggregatedQuery<TPoco> EWMA(Expression<Func<TPoco, object>> propertyExpression)
+        {
+            AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
+            ElasticPipelineAggregation = ElasticPipelineAggregations.ExponentiallyWeightedMovingAverage;
+
+            return this;
+        }
+        /// <summary>
+        /// The size of window to "slide" across the histogram.
+        /// </summary>
+        /// <param name="windowSize"></param>
+        /// <returns></returns>
+        public IExecutableAggregatedQuery<TPoco> SetWindow(int windowSize)
+        {
+            Window = windowSize;
+
+            return this;
+        }
+        /// <summary>
+        /// The default value of alpha is 0.3, and the setting accepts any float from 0-1 inclusive.
+        /// </summary>
+        /// <param name="alpha"></param>
+        /// <returns></returns>
+        public IExecutableAggregatedQuery<TPoco> SetAlpha(float alpha)
+        {
+            if (alpha > 1 || alpha < 0)
+            {
+                throw new ArgumentException(nameof(alpha));
+            }
+            Alpha = alpha;
 
             return this;
         }

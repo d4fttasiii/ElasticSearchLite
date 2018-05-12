@@ -50,5 +50,28 @@ namespace ElasticSearchLite.NetCore.Interfaces.Aggregate
         /// <param name="propertyExpression"></param>
         /// <returns></returns>
         IExecutableAggregatedQuery<TPoco> ValueCount(Expression<Func<TPoco, object>> propertyExpression);
+        /// <summary>
+        /// Given an ordered series of data, the Moving Average aggregation will slide a window across the data and emit the average value of that window.
+        /// </summary>
+        /// <param name="propertyExpression"></param>
+        /// <returns></returns>
+        IMovingAverageAggregatedQuery<TPoco> SimpleMovingAverage(Expression<Func<TPoco, object>> propertyExpression);
+        /// <summary>
+        /// The linear model assigns a linear weighting to points in the series, such that "older" datapoints (e.g. those at the beginning of the window) contribute a linearly less amount to the total average.
+        /// The linear weighting helps reduce the "lag" behind the data’s mean, since older points have less influence.
+        /// </summary>
+        /// <param name="propertyExpression"></param>
+        /// <returns></returns>
+        IMovingAverageAggregatedQuery<TPoco> LinearMovingAverage(Expression<Func<TPoco, object>> propertyExpression);
+        /// <summary>
+        /// The ewma model (aka "single-exponential") is similar to the linear model, except older data-points become exponentially less important, rather than linearly less important. 
+        /// The speed at which the importance decays can be controlled with an alpha setting. 
+        /// Small values make the weight decay slowly, which provides greater smoothing and takes into account a larger portion of the window. 
+        /// Larger valuers make the weight decay quickly, which reduces the impact of older values on the moving average. 
+        /// This tends to make the moving average track the data more closely but with less smoothing.
+        /// </summary>
+        /// <param name="propertyExpression"></param>
+        /// <returns></returns>
+        IMovingAverageAggregatedQuery<TPoco> EWMA(Expression<Func<TPoco, object>> propertyExpression);
     }
 }

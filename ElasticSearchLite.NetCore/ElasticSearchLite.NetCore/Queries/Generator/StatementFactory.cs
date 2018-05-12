@@ -286,12 +286,34 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         }
         private string GenerateAggregation(Aggregate aggregatedQuery)
         {
-            if (aggregatedQuery.AggregateField == null || aggregatedQuery.ElasticMetricsAggregations == null)
+            if (aggregatedQuery.AggregateField == null)
             {
                 return string.Empty;
             }
+            if (aggregatedQuery.AggregateField != null && aggregatedQuery.ElasticMetricsAggregation != null)
+            {
+                return $@"""aggs"" : {{ ""{aggregatedQuery.ElasticMetricsAggregation.Name}_{aggregatedQuery.AggregateField.Name}"" : {{ ""{aggregatedQuery.ElasticMetricsAggregation.Name}"" : {{ ""field"" : ""{GetName(aggregatedQuery.AggregateField.Name)}"" }} }} }}";
+            }
+            if (aggregatedQuery.ElasticPipelineAggregation == ElasticPipelineAggregations.SimpleMovingAverage)
+            {
+                var avg = $"{aggregatedQuery.ElasticMetricsAggregation.Name}_{aggregatedQuery.AggregateField.Name}";
 
-            return $@"""aggs"" : {{ ""{aggregatedQuery.ElasticMetricsAggregations.Name}_{aggregatedQuery.AggregateField.Name}"" : {{ ""{aggregatedQuery.ElasticMetricsAggregations.Name}"" : {{ ""field"" : ""{GetName(aggregatedQuery.AggregateField.Name)}"" }} }} }}";
+                return $@"""aggs"" : {{ ""{avg}"" : {{ ""avg"" : {{ ""field"" : ""{GetName(aggregatedQuery.AggregateField.Name)}"" }} }}, ""the_movavg"": {{ ""moving_avg"": {{ ""buckets_path"": ""{avg}"", ""model"": ""simple"", ""window"": {aggregatedQuery.Window} }} }} }}";
+            }
+            if (aggregatedQuery.ElasticPipelineAggregation == ElasticPipelineAggregations.LinearMovingAverage)
+            {
+                var avg = $"{aggregatedQuery.ElasticMetricsAggregation.Name}_{aggregatedQuery.AggregateField.Name}";
+
+                return $@"""aggs"" : {{ ""{avg}"" : {{ ""avg"" : {{ ""field"" : ""{GetName(aggregatedQuery.AggregateField.Name)}"" }} }}, ""the_movavg"": {{ ""moving_avg"": {{ ""buckets_path"": ""{avg}"", ""model"": ""linear"", ""window"": {aggregatedQuery.Window} }} }} }}";
+            }
+            if (aggregatedQuery.ElasticPipelineAggregation == ElasticPipelineAggregations.ExponentiallyWeightedMovingAverage)
+            {
+                var avg = $"{aggregatedQuery.ElasticMetricsAggregation.Name}_{aggregatedQuery.AggregateField.Name}";
+
+                return $@"""aggs"" : {{ ""{avg}"" : {{ ""avg"" : {{ ""field"" : ""{GetName(aggregatedQuery.AggregateField.Name)}"" }} }}, ""the_movavg"": {{ ""moving_avg"": {{ ""buckets_path"": ""{avg}"", ""model"": ""ewma"", ""window"": {aggregatedQuery.Window}, ""settings"": {{ ""alpha"": {aggregatedQuery.Alpha} }} }} }} }}";
+            }
+
+            return string.Empty;
         }
     }
 }
