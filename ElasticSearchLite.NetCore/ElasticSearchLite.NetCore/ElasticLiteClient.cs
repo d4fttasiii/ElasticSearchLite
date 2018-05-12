@@ -111,7 +111,7 @@ namespace ElasticSearchLite.NetCore
         }
         /// <summary>
         /// Executes a  get API call to get a typed JSON document from the index based on its id.
-        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/docs-get.html
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-get.html
         /// </summary>
         /// <typeparam name="TPoco"></typeparam>
         /// <param name="getQuery"></param>
@@ -159,7 +159,7 @@ namespace ElasticSearchLite.NetCore
         }
         /// <summary>
         /// Executes a SearchQuery using the Search API and returns a list of generic pocos.
-        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/_the_search_api.html
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/current/_the_search_api.html
         /// </summary>
         /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="searchQuery">SearchQuery object.</param>
@@ -175,7 +175,7 @@ namespace ElasticSearchLite.NetCore
         /// <summary>
         /// A query that matches documents matching boolean combinations of other queries. The bool query maps to Lucene BooleanQuery. 
         /// It is built using one or more boolean clauses, each clause with a typed occurrence.
-        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/query-dsl-bool-query.html
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-bool-query.html
         /// </summary>
         /// <param name="boolQuery"></param>
         /// <returns>IEnumerable<TPoco></returns>
@@ -193,7 +193,7 @@ namespace ElasticSearchLite.NetCore
         }
         /// <summary>
         /// Executes an IndexQuery using the Index API which creates a new document in the index.
-        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/docs-index_.html
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html
         /// </summary>
         /// <param name="query">IndexQuery object</param>
         public void ExecuteIndex(Index query)
@@ -211,7 +211,7 @@ namespace ElasticSearchLite.NetCore
         }
         /// <summary>
         /// Executes an UpdateQuery using the Update API and updates a document identified by the Id.
-        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/docs-update.html
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html
         /// </summary>
         /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="query">UpdateQuery object</param>
@@ -240,7 +240,7 @@ namespace ElasticSearchLite.NetCore
         }
         /// <summary>
         /// Executes a DeleteQuery using the Delete API and removes a document from the associated index.
-        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/docs-delete.html
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete.html
         /// </summary>
         /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="query">DeleteQuery object</param>
@@ -263,7 +263,7 @@ namespace ElasticSearchLite.NetCore
         }
         /// <summary>
         /// Drops an index using the Delete Index API.
-        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/indices-delete-index.html
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-index.html
         /// </summary>
         /// <typeparam name="TPoco">Has to Implement the IElasticPoco interface</typeparam>
         /// <param name="query">DropQuery object</param>

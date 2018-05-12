@@ -29,7 +29,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <summary>
         /// This DeleteQuery will be executed using the Delete API and remove one document where the 
         /// Id is the given poco's Id.
-        /// https://www.elastic.co/guide/en/elasticsearch/reference/5.4/docs-delete.html
+        /// https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete.html
         /// </summary>
         /// <typeparam name="TPoco"></typeparam>
         /// <param name="poco"></param>
