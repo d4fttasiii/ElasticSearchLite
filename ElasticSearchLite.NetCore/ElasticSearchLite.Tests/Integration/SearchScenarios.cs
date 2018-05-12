@@ -61,7 +61,7 @@ namespace ElasticSearchLite.Tests.Integration
                 .Skip(0)
                 .ExecuteWith(_client);
 
-            complexPocosReturned.Count().ShouldBeEquivalentTo(Count);
+            complexPocosReturned.Count().Should().Be(Count);
 
             foreach (var poco in complexPocosReturned)
             {

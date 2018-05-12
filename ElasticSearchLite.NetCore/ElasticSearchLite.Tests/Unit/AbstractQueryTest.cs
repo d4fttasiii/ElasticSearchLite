@@ -44,7 +44,7 @@ namespace ElasticSearchLite.Tests.Unit
             var queryStatement = StatementFactory.Generate(query);
 
             // Assert
-            statementObject.ShouldBeEquivalentTo(JsonConvert.DeserializeAnonymousType(queryStatement, statementObject, settings));
+            statementObject.Should().BeEquivalentTo(JsonConvert.DeserializeAnonymousType(queryStatement, statementObject, settings));
         }
 
         protected void TestQueryString(string statement, IQuery query, bool camelCase = false)
@@ -62,7 +62,7 @@ namespace ElasticSearchLite.Tests.Unit
             // Act
             var queryStatement = StatementFactory.Generate(query);
 
-            queryStatement.ShouldBeEquivalentTo(statement);
+            queryStatement.Should().BeEquivalentTo(statement);
         }
 
         protected void TestExceptions(Type exception, Action action, string becauseMessage)
@@ -75,7 +75,7 @@ namespace ElasticSearchLite.Tests.Unit
             catch (Exception ex)
             {
                 // Assert
-                ex.GetType().ShouldBeEquivalentTo(exception, becauseMessage);
+                ex.GetType().Should().Be(exception, becauseMessage);
             }
         }
     }

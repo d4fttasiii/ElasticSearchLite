@@ -32,6 +32,7 @@ namespace ElasticSearchLite.Tests.Unit
                 {
                     terms = new { TestText = new[] { "ABCDEFG", "GFEDCBA" } }
                 },
+                version = true,
                 size = 15,
                 from = 15,
                 sort = new[] { "_doc" }

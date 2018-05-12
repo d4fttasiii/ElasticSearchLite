@@ -45,7 +45,7 @@ namespace ElasticSearchLite.Tests.Integration
             catch (Exception ex)
             {
                 // Assert
-                ex.GetType().ShouldBeEquivalentTo(exception, becauseMessage);
+                ex.GetType().Should().Be(exception, becauseMessage);
             }
         }
     }

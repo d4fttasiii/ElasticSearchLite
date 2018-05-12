@@ -26,14 +26,14 @@ namespace ElasticSearchLite.Tests.Integration
                 .ExecuteWith(_client)
                 .Single();
 
-            poco.Id.ShouldBeEquivalentTo(document.Id);
-            poco.Index.ShouldBeEquivalentTo(document.Index);
-            poco.Type.ShouldBeEquivalentTo(document.Type);
-            poco.TestBool.ShouldBeEquivalentTo(document.TestBool);
-            poco.TestDouble.ShouldBeEquivalentTo(document.TestDouble);
-            poco.TestInteger.ShouldBeEquivalentTo(document.TestInteger);
-            poco.TestText.ShouldBeEquivalentTo(document.TestText);
-            string.Join("", poco.TestStringArray).ShouldBeEquivalentTo(string.Join("", document.TestStringArray));
+            poco.Id.Should().Be(document.Id);
+            poco.Index.Should().Be(document.Index);
+            poco.Type.Should().Be(document.Type);
+            poco.TestBool.Should().Be(document.TestBool);
+            poco.TestDouble.Should().Be(document.TestDouble);
+            poco.TestInteger.Should().Be(document.TestInteger);
+            poco.TestText.Should().Be(document.TestText);
+            string.Join("", poco.TestStringArray).Should().Be(string.Join("", document.TestStringArray));
 
             poco.TestText = "ChangedText";
             Update.Document(poco).ExecuteWith(_client);
@@ -46,7 +46,7 @@ namespace ElasticSearchLite.Tests.Integration
                 .ExecuteWith(_client)
                 .Single()
                 .TestText
-                .ShouldBeEquivalentTo(poco.TestText);
+                .Should().Be(poco.TestText);
 
             Delete.Document(poco).ExecuteWith(_client).Should().BeGreaterThan(0);
             _client.ExecuteDrop(Drop.Index(poco.Index));
@@ -87,8 +87,8 @@ namespace ElasticSearchLite.Tests.Integration
                 .FirstOrDefault();
 
             laPoco.Should().NotBeNull();
-            laPoco.Name.ShouldBeEquivalentTo(enumPoco.Name);
-            laPoco.TagType.ShouldBeEquivalentTo(enumPoco.TagType);
+            laPoco.Name.Should().Be(enumPoco.Name);
+            laPoco.TagType.Should().Be(enumPoco.TagType);
 
 
             _client.ExecuteDrop(Drop.Index(enumPoco.Index));

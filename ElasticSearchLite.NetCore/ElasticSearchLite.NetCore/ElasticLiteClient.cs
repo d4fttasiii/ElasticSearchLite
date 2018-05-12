@@ -12,6 +12,7 @@ using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using static ElasticSearchLite.NetCore.Queries.Bool;
 using static ElasticSearchLite.NetCore.Queries.Delete;
 using static ElasticSearchLite.NetCore.Queries.Get;
@@ -80,7 +81,7 @@ namespace ElasticSearchLite.NetCore
         {
             try
             {
-                var response = LowLevelClient.Ping<string>();
+                var response = LowLevelClient.Ping<ElasticStringResponse>();
                 if (!response.Success)
                 {
                     throw new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
@@ -119,7 +120,7 @@ namespace ElasticSearchLite.NetCore
             where TPoco : class, IElasticPoco
         {
             IndexExists(getQuery.IndexName);
-            var response = LowLevelClient.Get<string>(getQuery.IndexName, getQuery.TypeName, getQuery.Id.ToString());
+            var response = LowLevelClient.Get<ElasticStringResponse>(getQuery.IndexName, getQuery.TypeName, getQuery.Id.ToString());
             if (!response.Success)
             {
                 new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
@@ -129,7 +130,7 @@ namespace ElasticSearchLite.NetCore
                 return null;
             }
 
-            return MapResponseToPoco<TPoco>(JObject.Parse(response.Body));
+            return MapResponseToPoco<TPoco>(JObject.Parse(response.Body ?? Encoding.Default.GetString(response.ResponseBodyInBytes)));
         }
 
         /// <summary>
@@ -144,7 +145,7 @@ namespace ElasticSearchLite.NetCore
         {
             IndexExists(mgetQuery.IndexName);
 
-            var response = LowLevelClient.Mget<string>(mgetQuery.IndexName, Generator.Generate(mgetQuery));
+            var response = LowLevelClient.Mget<ElasticStringResponse>(mgetQuery.IndexName, Generator.Generate(mgetQuery));
             if (!response.Success)
             {
                 new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
@@ -154,7 +155,7 @@ namespace ElasticSearchLite.NetCore
                 return null;
             }
 
-            return ProcessMultiGetResponse<TPoco>(response.Body);
+            return ProcessMultiGetResponse<TPoco>(response.Body ?? Encoding.Default.GetString(response.ResponseBodyInBytes));
         }
         /// <summary>
         /// Executes a SearchQuery using the Search API and returns a list of generic pocos.
@@ -169,7 +170,7 @@ namespace ElasticSearchLite.NetCore
             var query = searchQuery as SearchQuery<TPoco>;
             IndexExists(query.IndexName);
 
-            return ProcessSeachResponse<TPoco>(LowLevelClient.Search<string>(query.IndexName, Generator.Generate(query)));
+            return ProcessSeachResponse<TPoco>(LowLevelClient.Search<ElasticStringResponse>(query.IndexName, Generator.Generate(query)));
         }
         /// <summary>
         /// A query that matches documents matching boolean combinations of other queries. The bool query maps to Lucene BooleanQuery. 
@@ -182,7 +183,7 @@ namespace ElasticSearchLite.NetCore
             where TPoco : IElasticPoco
         {
             var query = boolQuery as BoolQuery<TPoco>;
-            var response = LowLevelClient.Search<string>(query.IndexName, Generator.Generate(query));
+            var response = LowLevelClient.Search<ElasticStringResponse>(query.IndexName, Generator.Generate(query));
             if (!response.Success)
             {
                 new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
@@ -199,8 +200,8 @@ namespace ElasticSearchLite.NetCore
         {
             var statement = Generator.Generate(query);
             var response = !string.IsNullOrEmpty(query.Poco.Id) ?
-                LowLevelClient.Index<string>(query.IndexName, query.TypeName, query.Poco.Id, statement) :
-                LowLevelClient.Index<string>(query.IndexName, query.TypeName, statement);
+                LowLevelClient.Index<ElasticStringResponse>(query.IndexName, query.TypeName, query.Poco.Id, statement) :
+                LowLevelClient.Index<ElasticStringResponse>(query.IndexName, query.TypeName, statement);
 
             if (!response.Success)
             {
@@ -219,12 +220,12 @@ namespace ElasticSearchLite.NetCore
             var statement = Generator.Generate(query);
             try
             {
-                var response = LowLevelClient.Update<string>(query.IndexName, query.TypeName, query.Poco.Id, statement, (u) => u.Version(query.Poco.Version));
+                var response = LowLevelClient.Update<ElasticStringResponse>(query.IndexName, query.TypeName, query.Poco.Id, statement, new UpdateRequestParameters { Version = query.Poco.Version });
                 if (!response.Success)
                 {
                     throw new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
                 }
-                var data = JObject.Parse(response.Body);
+                var data = JObject.Parse(response.Body ?? Encoding.Default.GetString(response.ResponseBodyInBytes));
                 query.Poco.Version = data[ElasticFields.Version.Name].ToObject<long>();
             }
             catch (ElasticsearchClientException ex)
@@ -255,8 +256,8 @@ namespace ElasticSearchLite.NetCore
 
             var statement = Generator.Generate(query);
             var response = query.Poco != null && !string.IsNullOrWhiteSpace(query.Poco.Id) ?
-                LowLevelClient.Delete<string>(query.IndexName, query.TypeName, query.Poco.Id) :
-                LowLevelClient.DeleteByQuery<string>(query.IndexName, statement);
+                LowLevelClient.Delete<ElasticStringResponse>(query.IndexName, query.TypeName, query.Poco.Id) :
+                LowLevelClient.DeleteByQuery<ElasticStringResponse>(query.IndexName, statement);
 
             return ProcessDeleteResponse(response);
         }
@@ -270,7 +271,7 @@ namespace ElasticSearchLite.NetCore
         {
             IndexExists(query.IndexName);
 
-            var response = LowLevelClient.IndicesDelete<string>(query.IndexName);
+            var response = LowLevelClient.IndicesDelete<ElasticStringResponse>(query.IndexName);
 
             if (!response.Success)
             {
@@ -286,7 +287,7 @@ namespace ElasticSearchLite.NetCore
         public void ExecuteBulk(Bulk bulkQuery)
         {
             var statement = Generator.Generate(bulkQuery);
-            var response = LowLevelClient.Bulk<string>(bulkQuery.IndexName, statement);
+            var response = LowLevelClient.Bulk<ElasticStringResponse>(bulkQuery.IndexName, statement);
 
             if (!response.Success)
             {
@@ -295,12 +296,12 @@ namespace ElasticSearchLite.NetCore
         }
         private void IndexExists(string indexName)
         {
-            if (LowLevelClient.IndicesExists<string>(indexName).HttpStatusCode == 404)
+            if (LowLevelClient.IndicesExists<ElasticStringResponse>(indexName).HttpStatusCode == 404)
             {
                 throw new IndexNotAvailableException($"{indexName} index doesn't exist");
             }
         }
-        private static IEnumerable<ElasticBoolResponse<TPoco>> ProcessBoolResponse<TPoco>(ElasticsearchResponse<string> response, bool highlightingEnabled)
+        private static IEnumerable<ElasticBoolResponse<TPoco>> ProcessBoolResponse<TPoco>(ElasticStringResponse response, bool highlightingEnabled)
             where TPoco : IElasticPoco
         {
             if (!response.Success)
@@ -308,7 +309,7 @@ namespace ElasticSearchLite.NetCore
                 throw new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
             }
 
-            var data = JObject.Parse(response.Body);
+            var data = JObject.Parse(response.Body ?? Encoding.Default.GetString(response.ResponseBodyInBytes));
             var hits = new List<ElasticBoolResponse<TPoco>>();
             var total = data[ElasticFields.Hits.Name][ElasticFields.Total.Name].ToObject<long>();
 
@@ -338,7 +339,7 @@ namespace ElasticSearchLite.NetCore
                 new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
             }
 
-            var data = JObject.Parse(response.Body);
+            var data = JObject.Parse(response.Body ?? Encoding.Default.GetString(response.ResponseBodyInBytes));
             var hits = new List<TPoco>();
             var total = data[ElasticFields.Hits.Name][ElasticFields.Total.Name].ToObject<long>();
 
@@ -385,7 +386,7 @@ namespace ElasticSearchLite.NetCore
                 throw new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
             }
 
-            var data = JObject.Parse(response.Body);
+            var data = JObject.Parse(response.Body ?? Encoding.Default.GetString(response.ResponseBodyInBytes));
             query.Poco.Id = data[ElasticFields.Id.Name].ToString();
             query.Poco.Version = data[ElasticFields.Version.Name].ToObject<long>();
         }
@@ -401,7 +402,7 @@ namespace ElasticSearchLite.NetCore
                 return 1;
             }
 
-            var data = JObject.Parse(response.Body);
+            var data = JObject.Parse(response.Body ?? Encoding.Default.GetString(response.ResponseBodyInBytes));
 
             return data[ElasticFields.Total.Name].ToObject<int>();
         }
