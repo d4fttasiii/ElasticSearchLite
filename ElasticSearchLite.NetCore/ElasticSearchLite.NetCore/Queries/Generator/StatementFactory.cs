@@ -28,6 +28,8 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             {
                 case SearchQuery searchQuery:
                     return GenerateSearchQuery(searchQuery);
+                case Aggregate aggregatedQuery:
+                    return GenerateAggregatedQuery(aggregatedQuery);
                 case DeleteQuery deleteQuery:
                     return GenerateDeleteQuery(deleteQuery);
                 case Index indexQuery:
@@ -54,7 +56,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             var statementParts = new List<string>();
             var query = GenerateQuery(searchQuery);
 
-            if (!string.IsNullOrEmpty(query)) { statementParts.Add(query); }
+            if (!string.IsNullOrWhiteSpace(query)) { statementParts.Add(query); }
             if (searchQuery.Size != 0) { statementParts.Add(GenerateSize(searchQuery.Size)); }
             if (searchQuery.From != 0) { statementParts.Add(GenerateFrom(searchQuery.From)); }
             statementParts.Add($@"""version"": true");
@@ -62,6 +64,21 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return $"{{ {string.Join(",", statementParts)} }}";
         }
+
+        private string GenerateAggregatedQuery(Aggregate aggregateQuery)
+        {
+            var statementParts = new List<string>();
+            var query = GenerateQuery(aggregateQuery);
+            var aggregation = GenerateAggregation(aggregateQuery);
+            var size = GenerateSize(0);
+
+            if (!string.IsNullOrWhiteSpace(query)) { statementParts.Add(query); }
+            if (!string.IsNullOrWhiteSpace(aggregation)) { statementParts.Add(aggregation); }
+            statementParts.Add(size);
+
+            return $"{{ {string.Join(",", statementParts)} }}";
+        }
+
         private string GenerateBoolQuery(BoolQuery boolQuery)
         {
             var fieldNames = string.Join(", ", boolQuery.SourceFields.Select(f => $@"""{GetName(f.Name)}"""));
@@ -81,15 +98,19 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return $@"{{ {string.Join(",", parts)} }}";
         }
+
         private string GenerateDeleteQuery(DeleteQuery deleteQuery)
         {
             return $"{{ {GenerateQuery(deleteQuery)} }}";
         }
+
         private string GenerateInsertQuery(Index indexQuery) => $"{GenerateFieldMapping(indexQuery.Poco)}";
+
         private string GenerateUpdateQuery(Update updateQuery)
         {
             return $"{{ {GenerateDocument(updateQuery.Poco)} }}";
         }
+
         private string GenerateUpsertQuery(Upsert upsertQuery)
         {
             var statementParts = new List<string>
@@ -100,6 +121,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return $"{{ {string.Join(",", statementParts)} }}";
         }
+
         private string GenerateBoolQueryConditions(Dictionary<ElasticBoolQueryOccurrences, List<IElasticCondition>> conditions, int minimumShouldMatch)
         {
             var builder = new List<string>();
@@ -115,6 +137,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return string.Join(",", builder);
         }
+
         private string GenerateMultiGetQuery(MultiGetQuery multiGetQuery)
         {
             var sourceSelection = $@" ""{ElasticFields.Source.Name}"": ""*"" ";
@@ -127,6 +150,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return $@"{{ ""docs"": [ {string.Join(",", docIds)} ] }}";
         }
+
         private string GenerateCondition(IElasticCondition condition)
         {
             switch (condition)
@@ -145,6 +169,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     throw new Exception("Unknown condition type");
             }
         }
+
         private string GenerateBulkQuery(Bulk bulkQuery)
         {
             var statement = new StringBuilder();
@@ -166,6 +191,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return statement.ToString();
         }
+
         private string GenerateCreateQuery(CreateQuery createQuery)
         {
             return $@"{{ ""settings"": {{ 
@@ -176,8 +202,11 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
                     ""type"": ""{m.FieldDataType.Name}"" 
                     {(m.Analyzer != null ? $@",""analyzer"": ""{m.Analyzer.Name}""" : "")} }}"))} }} }} }}";
         }
+
         private string GenerateDocument(IElasticPoco poco) => $@"""doc"": {GenerateFieldMapping(poco)}";
+
         private string GenerateFieldMapping(IElasticPoco poco) => JsonConvert.SerializeObject(poco, new JsonSerializerSettings { ContractResolver = ContractResolver, NullValueHandling = NullValueHandling.Ignore });
+
         private string GenerateQuery(AbstractConditionalQuery query)
         {
             if (query.MatchCondition != null)
@@ -212,6 +241,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return string.Empty;
         }
+
         private string GetName(string name, bool useKeywordField = false)
         {
             var elasticFieldName = string.Join(".", name.Split('.').Select(p => NamingStrategy.GetPropertyName(p, false)));
@@ -222,6 +252,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return elasticFieldName;
         }
+
         private string EscapeValue(object value) => JsonConvert.SerializeObject(value);
         private string GenerateMatch(ElasticMatchCodition condition) => $@"""match"": {{ ""{GetName(condition.Field.Name)}"" : {{ ""query"": {EscapeValue(condition.Value)}, ""operator"": ""{condition.Operation.Name}"" }} }}";
         private string GenerateMatchPhrase(ElasticMatchPhraseCondition condition) => $@"""match_phrase"": {{ ""{GetName(condition.Field.Name)}"" : {{ ""query"": {EscapeValue(condition.Value)}, ""slop"": {condition.Slop} }} }}";
@@ -251,7 +282,16 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
         {
             var fields = highlight.HighlightedFields.Select(f => $@" ""{GetName(f.Name)}"": {{ ""number_of_fragments"": {highlight.NumberOfFragments}, ""fragment_size"": {highlight.FragmentSize}}} ");
 
-            return $@" ""highlight"": {{ ""pre_tags"": [ ""{highlight.PreTag}"" ], ""post_tags"": [ ""{highlight.PostTag}"" ], ""fields"": {{ {string.Join(",", fields)} }} }} ";
+            return $@"""highlight"": {{ ""pre_tags"": [ ""{highlight.PreTag}"" ], ""post_tags"": [ ""{highlight.PostTag}"" ], ""fields"": {{ {string.Join(",", fields)} }} }} ";
+        }
+        private string GenerateAggregation(Aggregate aggregatedQuery)
+        {
+            if (aggregatedQuery.AggregateField == null || aggregatedQuery.ElasticMetricsAggregations == null)
+            {
+                return string.Empty;
+            }
+
+            return $@"""aggs"" : {{ ""{aggregatedQuery.ElasticMetricsAggregations.Name}_{aggregatedQuery.AggregateField.Name}"" : {{ ""{aggregatedQuery.ElasticMetricsAggregations.Name}"" : {{ ""field"" : ""{GetName(aggregatedQuery.AggregateField.Name)}"" }} }} }}";
         }
     }
 }
