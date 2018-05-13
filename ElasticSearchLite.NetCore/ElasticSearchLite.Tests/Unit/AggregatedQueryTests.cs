@@ -62,5 +62,37 @@ namespace ElasticSearchLite.Tests.Unit
 
             TestQueryObject(statementObject, query, true);
         }
+
+        [TestMethod]
+        public void AggregatedQuery_MovingAverage()
+        {
+            // Arrange
+            var query = Aggregate.In<Poco>()
+                .MatchAll()
+                .EWMA(p => p.TestDouble)
+                    .SetWindow(30)
+                    .SetAlpha(0.3f);
+
+            var statementObject = new
+            {
+                query = new
+                {
+                    terms = new { testText = new[] { "ABCDEFG" } }
+                },
+                aggs = new
+                {
+                    avg_TestDouble = new
+                    {
+                        avg = new
+                        {
+                            field = "testDouble"
+                        }
+                    }
+                },
+                size = 0
+            };
+
+            TestQueryObject(statementObject, query, true);
+        }
     }
 }

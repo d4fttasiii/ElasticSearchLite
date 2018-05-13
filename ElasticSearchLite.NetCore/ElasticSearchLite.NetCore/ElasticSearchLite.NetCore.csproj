@@ -3,12 +3,13 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.0;netstandard2.0</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <AssemblyVersion>1.2.2.0</AssemblyVersion>
-    <FileVersion>1.2.2.0</FileVersion>
+    <AssemblyVersion>1.3.0.0</AssemblyVersion>
+    <FileVersion>1.3.0.0</FileVersion>
     <PackageTags>Elastic, ElasticSearch</PackageTags>
     <NeutralLanguage>en-GB</NeutralLanguage>
-    <PackageReleaseNotes>- Ignoring null values when indexing</PackageReleaseNotes>
-    <Version>1.2.2</Version>
+    <PackageReleaseNotes>- Updating elasticsearch.net 6.1.0
+- Added aggregation functionality</PackageReleaseNotes>
+    <Version>1.3</Version>
     <PackageLicenseUrl>https://github.com/petertasner/ElasticSearchLite/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/petertasner/ElasticSearchLite</PackageProjectUrl>
     <Company />
