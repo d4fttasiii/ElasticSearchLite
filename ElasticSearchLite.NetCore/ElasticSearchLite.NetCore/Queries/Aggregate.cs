@@ -11,11 +11,13 @@ namespace ElasticSearchLite.NetCore.Queries
 {
     public abstract class Aggregate : AbstractConditionalQuery
     {
-        internal ElasticField AggregateField { get; set; }
+        internal ElasticField AggregatedField { get; set; }
+        internal ElasticField DateHistogramField { get; set; }
         internal ElasticMetricsAggregations ElasticMetricsAggregation { get; set; }
         internal ElasticPipelineAggregations ElasticPipelineAggregation { get; set; }
         internal int Window { get; set; }
         internal float Alpha { get; set; }
+        internal string Interval { get; set; }
 
         protected Aggregate(IElasticPoco poco) : base(poco) { }
 
@@ -35,7 +37,9 @@ namespace ElasticSearchLite.NetCore.Queries
         Aggregate,
         IFilterableAggregatedQuery<TPoco>,
         IFilteredAggregatedQuery<TPoco>,
-        IMovingAverageAggregatedQuery<TPoco>,
+        IMAAggregatedQuery<TPoco>,
+        IMADateHistogramAddedAggregatedQuery<TPoco>,
+        IMAIntervalSetAggregatedQuery<TPoco>,
         IExecutableAggregatedQuery<TPoco>
         where TPoco : IElasticPoco
     {
@@ -143,7 +147,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <returns></returns>
         public IExecutableAggregatedQuery<TPoco> Average(Expression<Func<TPoco, object>> propertyExpression)
         {
-            AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
+            AggregatedField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
             ElasticMetricsAggregation = ElasticMetricsAggregations.Avg;
 
             return this;
@@ -156,7 +160,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <returns></returns>
         public IExecutableAggregatedQuery<TPoco> Cardinality(Expression<Func<TPoco, object>> propertyExpression)
         {
-            AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
+            AggregatedField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
             ElasticMetricsAggregation = ElasticMetricsAggregations.Cardinality;
 
             return this;
@@ -169,7 +173,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <returns></returns>
         public IExecutableAggregatedQuery<TPoco> Max(Expression<Func<TPoco, object>> propertyExpression)
         {
-            AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
+            AggregatedField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
             ElasticMetricsAggregation = ElasticMetricsAggregations.Max;
 
             return this;
@@ -182,7 +186,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <returns></returns>
         public IExecutableAggregatedQuery<TPoco> Min(Expression<Func<TPoco, object>> propertyExpression)
         {
-            AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
+            AggregatedField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
             ElasticMetricsAggregation = ElasticMetricsAggregations.Min;
 
             return this;
@@ -195,7 +199,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <returns></returns>
         public IExecutableAggregatedQuery<TPoco> Sum(Expression<Func<TPoco, object>> propertyExpression)
         {
-            AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
+            AggregatedField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
             ElasticMetricsAggregation = ElasticMetricsAggregations.Sum;
 
             return this;
@@ -210,7 +214,7 @@ namespace ElasticSearchLite.NetCore.Queries
         /// <returns></returns>
         public IExecutableAggregatedQuery<TPoco> ValueCount(Expression<Func<TPoco, object>> propertyExpression)
         {
-            AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
+            AggregatedField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
             ElasticMetricsAggregation = ElasticMetricsAggregations.ValueCount;
 
             return this;
@@ -220,9 +224,9 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="propertyExpression"></param>
         /// <returns></returns>
-        public IMovingAverageAggregatedQuery<TPoco> SimpleMovingAverage(Expression<Func<TPoco, object>> propertyExpression)
+        public IMAAggregatedQuery<TPoco> SimpleMovingAverage(Expression<Func<TPoco, object>> propertyExpression)
         {
-            AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
+            AggregatedField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
             ElasticPipelineAggregation = ElasticPipelineAggregations.SimpleMovingAverage;
 
             return this;
@@ -233,9 +237,9 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="propertyExpression"></param>
         /// <returns></returns>
-        public IMovingAverageAggregatedQuery<TPoco> LinearMovingAverage(Expression<Func<TPoco, object>> propertyExpression)
+        public IMAAggregatedQuery<TPoco> LinearMovingAverage(Expression<Func<TPoco, object>> propertyExpression)
         {
-            AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
+            AggregatedField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
             ElasticPipelineAggregation = ElasticPipelineAggregations.LinearMovingAverage;
 
             return this;
@@ -249,9 +253,9 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <param name="propertyExpression"></param>
         /// <returns></returns>
-        public IMovingAverageAggregatedQuery<TPoco> EWMA(Expression<Func<TPoco, object>> propertyExpression)
+        public IMAAggregatedQuery<TPoco> EWMA(Expression<Func<TPoco, object>> propertyExpression)
         {
-            AggregateField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
+            AggregatedField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
             ElasticPipelineAggregation = ElasticPipelineAggregations.ExponentiallyWeightedMovingAverage;
 
             return this;
@@ -268,6 +272,17 @@ namespace ElasticSearchLite.NetCore.Queries
             return this;
         }
         /// <summary>
+        /// Setting the date histogram for the moving average
+        /// </summary>
+        /// <param name="propertyExpression"></param>
+        /// <returns></returns>
+        public IMADateHistogramAddedAggregatedQuery<TPoco> SetDateHistogramField(Expression<Func<TPoco, object>> propertyExpression)
+        {
+            DateHistogramField = new ElasticField { Name = GetCorrectPropertyName(propertyExpression) };
+
+            return this;
+        }
+        /// <summary>
         /// The default value of alpha is 0.3, and the setting accepts any float from 0-1 inclusive.
         /// </summary>
         /// <param name="alpha"></param>
@@ -279,6 +294,21 @@ namespace ElasticSearchLite.NetCore.Queries
                 throw new ArgumentException(nameof(alpha));
             }
             Alpha = alpha;
+
+            return this;
+        }
+        /// <summary>
+        /// The size of window to "slide" across the histogram.
+        /// </summary>
+        /// <param name="windowSize"></param>
+        /// <returns></returns>
+        public IMAIntervalSetAggregatedQuery<TPoco> SetDateHistogramInterval(string interval)
+        {
+            if (string.IsNullOrWhiteSpace(interval))
+            {
+                throw new ArgumentException(nameof(interval));
+            }
+            Interval = interval;
 
             return this;
         }

@@ -19,7 +19,7 @@ namespace ElasticSearchLite.Tests.Unit
             {
                 aggs = new
                 {
-                    avg_TestDouble = new
+                    aggregated_TestDouble = new
                     {
                         avg = new
                         {
@@ -49,7 +49,7 @@ namespace ElasticSearchLite.Tests.Unit
                 },
                 aggs = new
                 {
-                    avg_TestDouble = new
+                    aggregated_TestDouble = new
                     {
                         avg = new
                         {
@@ -70,8 +70,9 @@ namespace ElasticSearchLite.Tests.Unit
             var query = Aggregate.In<Poco>()
                 .MatchAll()
                 .EWMA(p => p.TestDouble)
-                    .SetWindow(30)
-                    .SetAlpha(0.3f);
+                    .SetDateHistogramField(p => p.TestDateTime)
+                    .SetDateHistogramInterval("30m")
+                    .SetWindow(30);
 
             var statementObject = new
             {
@@ -79,17 +80,37 @@ namespace ElasticSearchLite.Tests.Unit
                 {
                     terms = new { testText = new[] { "ABCDEFG" } }
                 },
+                size = 0,
                 aggs = new
                 {
-                    avg_TestDouble = new
+                    my_date_histo = new
                     {
-                        avg = new
+                        date_histogram = new
                         {
-                            field = "testDouble"
+                            field = "testDateTime",
+                            interval = "30m"
+                        },
+                        aggs = new
+                        {
+                            the_avg = new
+                            {
+                                avg = new
+                                {
+                                    field = "testDouble"
+                                }
+                            },
+                            the_movavg = new
+                            {
+                                moving_avg = new
+                                {
+                                    buckets_path = "the_avg",
+                                    model = "ewma",
+                                    window = 30
+                                }
+                            }
                         }
                     }
-                },
-                size = 0
+                }
             };
 
             TestQueryObject(statementObject, query, true);

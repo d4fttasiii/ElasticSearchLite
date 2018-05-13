@@ -55,14 +55,14 @@ namespace ElasticSearchLite.NetCore.Interfaces.Aggregate
         /// </summary>
         /// <param name="propertyExpression"></param>
         /// <returns></returns>
-        IMovingAverageAggregatedQuery<TPoco> SimpleMovingAverage(Expression<Func<TPoco, object>> propertyExpression);
+        IMAAggregatedQuery<TPoco> SimpleMovingAverage(Expression<Func<TPoco, object>> propertyExpression);
         /// <summary>
         /// The linear model assigns a linear weighting to points in the series, such that "older" datapoints (e.g. those at the beginning of the window) contribute a linearly less amount to the total average.
         /// The linear weighting helps reduce the "lag" behind the data’s mean, since older points have less influence.
         /// </summary>
         /// <param name="propertyExpression"></param>
         /// <returns></returns>
-        IMovingAverageAggregatedQuery<TPoco> LinearMovingAverage(Expression<Func<TPoco, object>> propertyExpression);
+        IMAAggregatedQuery<TPoco> LinearMovingAverage(Expression<Func<TPoco, object>> propertyExpression);
         /// <summary>
         /// The ewma model (aka "single-exponential") is similar to the linear model, except older data-points become exponentially less important, rather than linearly less important. 
         /// The speed at which the importance decays can be controlled with an alpha setting. 
@@ -72,6 +72,6 @@ namespace ElasticSearchLite.NetCore.Interfaces.Aggregate
         /// </summary>
         /// <param name="propertyExpression"></param>
         /// <returns></returns>
-        IMovingAverageAggregatedQuery<TPoco> EWMA(Expression<Func<TPoco, object>> propertyExpression);
+        IMAAggregatedQuery<TPoco> EWMA(Expression<Func<TPoco, object>> propertyExpression);
     }
 }

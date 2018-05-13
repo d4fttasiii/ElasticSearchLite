@@ -1,6 +1,6 @@
 ﻿namespace ElasticSearchLite.NetCore.Interfaces.Aggregate
 {
-    public interface IMovingAverageAggregatedQuery<TPoco>
+    public interface IMAIntervalSetAggregatedQuery<TPoco>
         where TPoco : IElasticPoco
     {
         /// <summary>

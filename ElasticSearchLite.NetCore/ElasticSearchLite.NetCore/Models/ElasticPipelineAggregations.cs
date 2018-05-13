@@ -9,8 +9,8 @@
             Name = name;
         }
 
-        public static ElasticPipelineAggregations SimpleMovingAverage => new ElasticPipelineAggregations("moving_avg");
-        public static ElasticPipelineAggregations LinearMovingAverage => new ElasticPipelineAggregations("moving_avg");
-        public static ElasticPipelineAggregations ExponentiallyWeightedMovingAverage => new ElasticPipelineAggregations("moving_avg");
+        public static ElasticPipelineAggregations SimpleMovingAverage => new ElasticPipelineAggregations("simple");
+        public static ElasticPipelineAggregations LinearMovingAverage => new ElasticPipelineAggregations("linear");
+        public static ElasticPipelineAggregations ExponentiallyWeightedMovingAverage => new ElasticPipelineAggregations("ewma");
     }
 }

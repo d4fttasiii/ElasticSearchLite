@@ -1,6 +1,7 @@
 ﻿using Elasticsearch.Net;
 using ElasticSearchLite.NetCore.Exceptions;
 using ElasticSearchLite.NetCore.Interfaces;
+using ElasticSearchLite.NetCore.Interfaces.Aggregate;
 using ElasticSearchLite.NetCore.Interfaces.Bool;
 using ElasticSearchLite.NetCore.Interfaces.Search;
 using ElasticSearchLite.NetCore.Models;
@@ -169,6 +170,30 @@ namespace ElasticSearchLite.NetCore
         {
             var query = searchQuery as SearchQuery<TPoco>;
             IndexExists(query.IndexName);
+
+            return ProcessSeachResponse<TPoco>(LowLevelClient.Search<ElasticStringResponse>(query.IndexName, Generator.Generate(query)));
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TPoco"></typeparam>
+        /// <param name="searchQuery"></param>
+        /// <returns></returns>
+        public IEnumerable<TPoco> ExecuteAggregation<TPoco>(IExecutableAggregatedQuery<TPoco> aggregationQuery)
+            where TPoco : IElasticPoco
+        {
+            var query = aggregationQuery as Aggregate<TPoco>;
+            IndexExists(query.IndexName);
+
+            if (query.ElasticMetricsAggregation != null)
+            {
+
+            }
+
+            if (query.ElasticPipelineAggregation != null)
+            {
+
+            }
 
             return ProcessSeachResponse<TPoco>(LowLevelClient.Search<ElasticStringResponse>(query.IndexName, Generator.Generate(query)));
         }
