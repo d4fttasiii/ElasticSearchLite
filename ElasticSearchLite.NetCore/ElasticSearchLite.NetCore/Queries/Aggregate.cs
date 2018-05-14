@@ -28,9 +28,9 @@ namespace ElasticSearchLite.NetCore.Queries
         /// </summary>
         /// <typeparam name="TPoco"></typeparam>
         /// <returns></returns>
-        public static IFilterableAggregatedQuery<TPoco> In<TPoco>()
+        public static IFilterableAggregatedQuery<TPoco> In<TPoco>(string index = null)
             where TPoco : IElasticPoco
-                => new Aggregate<TPoco>($"{typeof(TPoco).Name.ToLower()}index");
+                => new Aggregate<TPoco>(index ?? $"{typeof(TPoco).Name.ToLower()}index");
     }
 
     public sealed class Aggregate<TPoco> :

@@ -16,6 +16,11 @@
         public static ElasticFields Total { get; } = new ElasticFields("total");
         public static ElasticFields Items { get; } = new ElasticFields("items");
         public static ElasticFields Successful { get; } = new ElasticFields("successful");
+        public static ElasticFields Aggregations { get; } = new ElasticFields("aggregations");
+        public static ElasticFields Value { get; } = new ElasticFields("value");
+        public static ElasticFields MyDateHistogram { get; } = new ElasticFields("my_date_histo");
+        public static ElasticFields Buckets { get; } = new ElasticFields("buckets");
+        public static ElasticFields MovingAverage { get; } = new ElasticFields("the_movavg");
 
         public string Name { get; }
 

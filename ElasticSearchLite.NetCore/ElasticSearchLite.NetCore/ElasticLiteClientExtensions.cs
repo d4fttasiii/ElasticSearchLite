@@ -1,4 +1,5 @@
 ﻿using ElasticSearchLite.NetCore.Interfaces;
+using ElasticSearchLite.NetCore.Interfaces.Aggregate;
 using ElasticSearchLite.NetCore.Interfaces.Bool;
 using ElasticSearchLite.NetCore.Interfaces.Search;
 using ElasticSearchLite.NetCore.Models;
@@ -75,6 +76,15 @@ namespace ElasticSearchLite.NetCore
         /// <param name="client"></param>
         /// <returns></returns>
         public static IEnumerable<ElasticBoolResponse<TPoco>> ExecuteWith<TPoco>(this IBoolQueryExecutable<TPoco> boolQuery, ElasticLiteClient client)
-            where TPoco : IElasticPoco => client.ExecuteBool(boolQuery);       
+            where TPoco : IElasticPoco => client.ExecuteBool(boolQuery);
+        /// <summary>
+        /// Executes an aggregation search query
+        /// </summary>
+        /// <typeparam name="TPoco"></typeparam>
+        /// <param name="aggregatedQuery"></param>
+        /// <param name="client"></param>
+        /// <returns></returns>
+        public static IEnumerable<ElasticAggregationResponse> ExecuteWith<TPoco>(this IExecutableAggregatedQuery<TPoco> aggregatedQuery, ElasticLiteClient client)
+            where TPoco : IElasticPoco => client.ExecuteAggregation(aggregatedQuery);
     }
 }

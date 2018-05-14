@@ -177,25 +177,45 @@ namespace ElasticSearchLite.NetCore
         /// 
         /// </summary>
         /// <typeparam name="TPoco"></typeparam>
-        /// <param name="searchQuery"></param>
+        /// <param name="aggregationQuery"></param>
         /// <returns></returns>
-        public IEnumerable<TPoco> ExecuteAggregation<TPoco>(IExecutableAggregatedQuery<TPoco> aggregationQuery)
+        public IEnumerable<ElasticAggregationResponse> ExecuteAggregation<TPoco>(IExecutableAggregatedQuery<TPoco> aggregationQuery)
             where TPoco : IElasticPoco
         {
             var query = aggregationQuery as Aggregate<TPoco>;
             IndexExists(query.IndexName);
 
+            var response = LowLevelClient.Search<ElasticStringResponse>(query.IndexName, Generator.Generate(query));
+            if (!response.Success)
+            {
+                throw new Exception($"Unsuccessful Elastic Request: {response.DebugInformation}");
+            }
+            var data = JObject.Parse(response.Body ?? Encoding.Default.GetString(response.ResponseBodyInBytes));
+            var aggregations = new List<ElasticAggregationResponse>();
+
             if (query.ElasticMetricsAggregation != null)
             {
+                var value = data[ElasticFields.Aggregations.Name][$"aggregated_{query.AggregatedField.Name}"][ElasticFields.Value.Name].ToObject<double>();
+                aggregations.Add(new ElasticAggregationResponse { AggregatedValue = value });
 
+                return aggregations;
             }
-
             if (query.ElasticPipelineAggregation != null)
             {
-
+                var values = data[ElasticFields.Aggregations.Name][ElasticFields.MyDateHistogram.Name][ElasticFields.Buckets.Name];
+                foreach (JToken jToken in values)
+                {
+                    aggregations.Add(new ElasticAggregationResponse
+                    {
+                        KeyAsString = jToken["key_as_string"].ToString(),
+                        DocCount = jToken["doc_count"].ToObject<int>(),
+                        AggregatedValue = jToken[$"aggregated_{query.AggregatedField.Name}"][ElasticFields.Value.Name].ToObject<double>(),
+                        MovingAverage = jToken[ElasticFields.MovingAverage.Name]?[ElasticFields.Value.Name]?.ToObject<double>()
+                    });
+                }
             }
 
-            return ProcessSeachResponse<TPoco>(LowLevelClient.Search<ElasticStringResponse>(query.IndexName, Generator.Generate(query)));
+            return aggregations;
         }
         /// <summary>
         /// A query that matches documents matching boolean combinations of other queries. The bool query maps to Lucene BooleanQuery. 

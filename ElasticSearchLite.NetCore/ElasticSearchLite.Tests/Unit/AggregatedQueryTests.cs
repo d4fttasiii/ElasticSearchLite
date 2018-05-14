@@ -1,4 +1,5 @@
-﻿using ElasticSearchLite.NetCore.Queries;
+﻿using ElasticSearchLite.NetCore.Models;
+using ElasticSearchLite.NetCore.Queries;
 using ElasticSearchLite.Tests.Pocos;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -72,14 +73,11 @@ namespace ElasticSearchLite.Tests.Unit
                 .EWMA(p => p.TestDouble)
                     .SetDateHistogramField(p => p.TestDateTime)
                     .SetDateHistogramInterval("30m")
-                    .SetWindow(30);
-
+                    .SetWindow(30)
+                    .SetAlpha(0.3f);
+          
             var statementObject = new
             {
-                query = new
-                {
-                    terms = new { testText = new[] { "ABCDEFG" } }
-                },
                 size = 0,
                 aggs = new
                 {
@@ -92,7 +90,7 @@ namespace ElasticSearchLite.Tests.Unit
                         },
                         aggs = new
                         {
-                            the_avg = new
+                            aggregated_TestDouble = new
                             {
                                 avg = new
                                 {
@@ -103,9 +101,13 @@ namespace ElasticSearchLite.Tests.Unit
                             {
                                 moving_avg = new
                                 {
-                                    buckets_path = "the_avg",
-                                    model = "ewma",
-                                    window = 30
+                                    buckets_path = "aggregated_TestDouble",
+                                    model = ElasticPipelineAggregations.ExponentiallyWeightedMovingAverage.Name,
+                                    window = 30,
+                                    settings = new
+                                    {
+                                        alpha = 0.3
+                                    }
                                 }
                             }
                         }

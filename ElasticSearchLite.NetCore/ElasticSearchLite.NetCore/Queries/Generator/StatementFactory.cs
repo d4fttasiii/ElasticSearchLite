@@ -284,6 +284,7 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
 
             return $@"""highlight"": {{ ""pre_tags"": [ ""{highlight.PreTag}"" ], ""post_tags"": [ ""{highlight.PostTag}"" ], ""fields"": {{ {string.Join(",", fields)} }} }} ";
         }
+
         private string GenerateAggregation(Aggregate aggregatedQuery)
         {
             if (aggregatedQuery.AggregatedField == null)
@@ -297,9 +298,21 @@ namespace ElasticSearchLite.NetCore.Queries.Generator
             {
                 return $@"""aggs"" : {{ ""{avg}"" : {{ ""{aggregatedQuery.ElasticMetricsAggregation.Name}"" : {{ ""field"" : ""{GetName(aggregatedQuery.AggregatedField.Name)}"" }} }} }}";
             }
-            if (aggregatedQuery.AggregatedField != null &&  aggregatedQuery.ElasticPipelineAggregation != null)
+            if (aggregatedQuery.AggregatedField != null && aggregatedQuery.ElasticPipelineAggregation.Name == ElasticPipelineAggregations.SimpleMovingAverage.Name)
             {
-                var movingAvg = $@"""aggs"" : {{ ""{avg}"" : {{ ""avg"" : {{ ""field"" : ""{GetName(aggregatedQuery.AggregatedField.Name)}"" }} }}, ""the_movavg"": {{ ""moving_avg"": {{ ""buckets_path"": ""{avg}"", ""model"": ""{aggregatedQuery.ElasticPipelineAggregation.Name}"", ""window"": {aggregatedQuery.Window}, ""alpha"": {aggregatedQuery.Alpha} }} }} }}";
+                var movingAvg = $@"""aggs"" : {{ ""{avg}"" : {{ ""avg"" : {{ ""field"" : ""{GetName(aggregatedQuery.AggregatedField.Name)}"" }} }}, ""the_movavg"": {{ ""moving_avg"": {{ ""buckets_path"": ""{avg}"", ""model"": ""simple"", ""window"": {aggregatedQuery.Window} }} }} }}";
+
+                return $@"""aggs"": {{ ""my_date_histo"": {{ ""date_histogram"": {{ ""field"": ""{GetName(aggregatedQuery.DateHistogramField.Name)}"", ""interval"": ""{aggregatedQuery.Interval}"" }}, {movingAvg} }} }} ";
+            }
+            if (aggregatedQuery.AggregatedField != null && aggregatedQuery.ElasticPipelineAggregation.Name == ElasticPipelineAggregations.LinearMovingAverage.Name)
+            {
+                var movingAvg = $@"""aggs"" : {{ ""{avg}"" : {{ ""avg"" : {{ ""field"" : ""{GetName(aggregatedQuery.AggregatedField.Name)}"" }} }}, ""the_movavg"": {{ ""moving_avg"": {{ ""buckets_path"": ""{avg}"", ""model"": ""linear"", ""window"": {aggregatedQuery.Window} }} }} }}";
+
+                return $@"""aggs"": {{ ""my_date_histo"": {{ ""date_histogram"": {{ ""field"": ""{GetName(aggregatedQuery.DateHistogramField.Name)}"", ""interval"": ""{aggregatedQuery.Interval}"" }}, {movingAvg} }} }} ";
+            }
+            if (aggregatedQuery.AggregatedField != null && aggregatedQuery.ElasticPipelineAggregation.Name == ElasticPipelineAggregations.ExponentiallyWeightedMovingAverage.Name)
+            {
+                var movingAvg = $@"""aggs"" : {{ ""{avg}"" : {{ ""avg"" : {{ ""field"" : ""{GetName(aggregatedQuery.AggregatedField.Name)}"" }} }}, ""the_movavg"": {{ ""moving_avg"": {{ ""buckets_path"": ""{avg}"", ""model"": ""ewma"", ""window"": {aggregatedQuery.Window}, ""settings"": {{ ""alpha"": {aggregatedQuery.Alpha} }} }} }} }}";
 
                 return $@"""aggs"": {{ ""my_date_histo"": {{ ""date_histogram"": {{ ""field"": ""{GetName(aggregatedQuery.DateHistogramField.Name)}"", ""interval"": ""{aggregatedQuery.Interval}"" }}, {movingAvg} }} }} ";
             }
