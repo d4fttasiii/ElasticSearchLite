@@ -2,7 +2,7 @@
 using ElasticSearchLite.NetCore.Models;
 using ElasticSearchLite.NetCore.Models.Conditions;
 using ElasticSearchLite.NetCore.Models.Enums;
-using ElasticSearchLite.NetCore.Queries.Serialization;
+using ElasticSearchLite.NetCore.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;

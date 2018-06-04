@@ -1,11 +1,12 @@
-﻿using ElasticSearchLite.NetCore.Interfaces;
+﻿using ElasticSearchLite.NetCore.Attributes;
+using ElasticSearchLite.NetCore.Interfaces;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace ElasticSearchLite.NetCore.Queries.Serialization
+namespace ElasticSearchLite.NetCore.Serialization
 {
     public class JsonElasticPropertyResolver : CamelCasePropertyNamesContractResolver
     {
@@ -30,10 +31,7 @@ namespace ElasticSearchLite.NetCore.Queries.Serialization
             var properties = objectType.GetProperties();
 
             return properties
-                .Where(pi =>
-                {
-                    return !objectType.GetTypeInfo().ImplementedInterfaces.Contains(typeof(IElasticPoco)) || !_elasticProperties.Contains(pi.Name);
-                })
+                .Where(pi => !objectType.GetTypeInfo().ImplementedInterfaces.Contains(typeof(IElasticPoco)) || !_elasticProperties.Contains(pi.Name) || Attribute.IsDefined(pi, typeof(IgnoreAttribute)))
                 .ToList<MemberInfo>();
         }
     }
